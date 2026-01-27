@@ -1,6 +1,9 @@
-import { STORAGE_KEYS, DEFAULT_USER_ID } from '../utils/constants';
-import { normalizeUrl } from '../utils/urlUtils';
+import { STORAGE_KEYS } from '../utils/constants';
+import { validateAndNormalizeUrl } from '../utils/urlUtils';
 import { getStorageItem, setStorageItem, removeStorageItem } from '../utils/storageUtils';
+import { isValidStringArray } from '../utils/validationUtils';
+import { logWarning } from '../utils/errorUtils';
+import { normalizeUserId, generateStorageKey } from '../utils/serviceUtils';
 
 
 /**
@@ -26,14 +29,14 @@ export class FavoriteService {
    * @param userId - The user ID for storing user-specific favorites. Falls back to DEFAULT_USER_ID if not provided.
    */
   constructor(userId: string) {
-    this.userId = userId || DEFAULT_USER_ID;
+    this.userId = normalizeUserId(userId, 'FavoriteService');
   }
 
   /**
    * Get the storage key for the current user's favorites
    */
   private getStorageKey(): string {
-    return `${STORAGE_KEYS.FAVORITES_PREFIX}-${this.userId}`;
+    return generateStorageKey(STORAGE_KEYS.FAVORITES_PREFIX, this.userId);
   }
 
   /**
@@ -45,6 +48,10 @@ export class FavoriteService {
    * Handles errors from:
    * - localStorage.getItem() - may throw in restricted environments
    * - JSON.parse() - may throw if stored data is corrupted
+   * 
+   * Input validation:
+   * - Validates stored data is a valid string array
+   * - Filters out invalid entries (non-strings)
    * 
    * @returns Array of favorite site URLs (normalized, lowercase)
    * @throws Never throws - returns empty array on error (localStorage/JSON errors are caught and logged)
@@ -59,8 +66,14 @@ export class FavoriteService {
   public getFavorites(): string[] {
     const key = this.getStorageKey();
     const favorites = getStorageItem<string[]>(key);
-    // Ensure we return an array (handles corrupted data that parses but isn't an array)
-    return Array.isArray(favorites) ? favorites : [];
+    
+    // Validate stored data is a valid string array
+    if (!isValidStringArray(favorites)) {
+      return [];
+    }
+    
+    // Filter out any invalid entries (shouldn't happen, but defensive check)
+    return favorites.filter((url: string): boolean => typeof url === 'string' && url.length > 0);
   }
 
   /**
@@ -68,6 +81,10 @@ export class FavoriteService {
    * 
    * Adds the specified URL to the user's favorites list if it's not already present.
    * The URL is normalized before storage (lowercased, trailing slash removed).
+   * 
+   * Input validation:
+   * - Validates url is a non-empty string
+   * - Validates normalized URL is valid
    * 
    * @param url - The site URL to add to favorites
    * @throws Never throws - errors are logged but operation continues
@@ -79,12 +96,15 @@ export class FavoriteService {
    * ```
    */
   public addFavorite(url: string): void {
-    if (!url) {
+    const validationResult = validateAndNormalizeUrl(url);
+    
+    if (!validationResult.isValid) {
+      logWarning('FavoriteService', `Invalid URL provided to addFavorite: ${String(url)}`, 'addFavorite');
       return;
     }
 
     const favorites = this.getFavorites();
-    const normalizedUrl = normalizeUrl(url);
+    const normalizedUrl = validationResult.normalizedUrl;
     
     // Check if already favorited
     // Use indexOf for ES5 compatibility (SPFx targets ES5)
@@ -100,16 +120,24 @@ export class FavoriteService {
    * Removes the specified URL from the user's favorites list if it exists.
    * The URL is normalized before comparison.
    * 
+   * Input validation:
+   * - Validates url is a non-empty string
+   * 
    * @param url - The site URL to remove from favorites
+   * @throws Never throws - errors are logged but operation continues
    */
   public removeFavorite(url: string): void {
-    if (!url) {
+    const validationResult = validateAndNormalizeUrl(url);
+    
+    if (!validationResult.isValid) {
+      logWarning('FavoriteService', `Invalid URL provided to removeFavorite: ${String(url)}`, 'removeFavorite');
       return;
     }
 
     const favorites = this.getFavorites();
-    const normalizedUrl = normalizeUrl(url);
-    const filtered = favorites.filter(fav => fav !== normalizedUrl);
+    const normalizedUrl = validationResult.normalizedUrl;
+    
+    const filtered = favorites.filter((fav: string): boolean => fav !== normalizedUrl);
     
     if (filtered.length !== favorites.length) {
       this.saveFavorites(filtered);
@@ -124,7 +152,7 @@ export class FavoriteService {
    * 
    * @param url - The site URL to toggle favorite status for
    * @returns true if the site was added to favorites, false if it was removed or on error
-   * @throws Never throws - returns false on error
+   * @throws Never throws - returns false on error (errors are logged but operation continues)
    * 
    * @example
    * ```typescript
@@ -134,11 +162,13 @@ export class FavoriteService {
    * ```
    */
   public toggleFavorite(url: string): boolean {
-    if (!url) {
+    const validationResult = validateAndNormalizeUrl(url);
+    
+    if (!validationResult.isValid) {
       return false;
     }
 
-    const normalizedUrl = normalizeUrl(url);
+    const normalizedUrl = validationResult.normalizedUrl;
     const isCurrentlyFavorite = this.isFavorite(normalizedUrl);
     
     if (isCurrentlyFavorite) {
@@ -160,12 +190,14 @@ export class FavoriteService {
    * @returns true if the site is favorited, false otherwise
    */
   public isFavorite(url: string): boolean {
-    if (!url) {
+    const validationResult = validateAndNormalizeUrl(url);
+    
+    if (!validationResult.isValid) {
       return false;
     }
 
     const favorites = this.getFavorites();
-    const normalizedUrl = normalizeUrl(url);
+    const normalizedUrl = validationResult.normalizedUrl;
     // Use indexOf for ES5 compatibility (SPFx targets ES5)
     return favorites.indexOf(normalizedUrl) !== -1;
   }
@@ -185,10 +217,19 @@ export class FavoriteService {
    * 
    * Uses the shared storage utility for consistent error handling.
    * 
+   * Input validation:
+   * - Validates favorites is a valid string array
+   * 
    * @param favorites - Array of favorite URLs to save
    * @throws Never throws - errors are caught and logged by storage utility
    */
   private saveFavorites(favorites: string[]): void {
+    // Validate input
+    if (!isValidStringArray(favorites)) {
+      logWarning('FavoriteService', 'Invalid favorites array provided to saveFavorites', 'saveFavorites');
+      return;
+    }
+
     const key = this.getStorageKey();
     setStorageItem(key, favorites);
   }

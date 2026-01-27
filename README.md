@@ -1,6 +1,11 @@
 # Helvety SPO Explorer
 
-SharePoint Framework TypeScript React License
+![Node.js](https://img.shields.io/badge/Node.js-22.14.0-green)
+![SPFx](https://img.shields.io/badge/SPFx-1.22.1-blue)
+![React](https://img.shields.io/badge/React-17.0.1-blue)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.8.0-blue)
+![Fluent UI](https://img.shields.io/badge/Fluent%20UI-8.125.0-purple)
+![Heft](https://img.shields.io/badge/Heft-1.1.2-orange)
 
 A SharePoint Framework (SPFx) application customizer that provides a navigation bar for exploring and accessing SharePoint sites. The extension displays a "Sites you have access to" button in the top placeholder, which opens a panel with a searchable list of all SharePoint sites the current user can access.
 
@@ -70,7 +75,9 @@ helvety-spo-explorer/
 │       ├── styles/         # Style definitions
 │       ├── componentUtils.ts
 │       ├── errorUtils.ts
+│       ├── errorHandlingUtils.ts
 │       ├── navigationUtils.ts
+│       ├── serviceUtils.ts
 │       ├── siteUtils.ts
 │       ├── storageUtils.ts
 │       ├── urlUtils.ts
@@ -93,12 +100,13 @@ This application is built with performance and code quality in mind:
 * **Service Layer Architecture** - Separated business logic into services for maintainability
 * **Custom Hooks** - Reusable React hooks for common patterns (sites, favorites, settings)
 * **Type Safety** - Comprehensive TypeScript types with explicit return types throughout
-* **Error Handling** - Centralized error handling with detailed context and user-friendly messages
+* **Error Handling** - Centralized error handling with unified patterns, error categorization, and user-friendly messages
 * **Performance Optimizations** - React.memo with custom comparison functions, useCallback, and useMemo
 * **Caching Strategy** - 5-minute in-memory cache for site data to reduce API calls
 * **Dual API Fallback** - Automatic fallback from Search API to WebInfos API for reliability
-* **Code Organization** - Modular architecture with extracted utilities and reusable components
+* **Code Organization** - Modular architecture with extracted utilities, shared service patterns, and reusable components
 * **Accessibility** - Full keyboard navigation, ARIA labels, and screen reader support
+* **Code Quality** - Reduced duplication, simplified complex functions, improved type safety, and consistent patterns
 
 ## Prerequisites
 
@@ -192,7 +200,7 @@ This repository is public for transparency purposes only—all code is open for 
 
 | Version | Date             | Comments                    |
 | ------- | ---------------- | --------------------------- |
-| 0.0.1   | January 27, 2026 | Initial release with code quality improvements |
+| 0.0.1   | January 27, 2026 | Initial release with comprehensive code quality improvements: reduced duplication, simplified complex functions, improved type safety, unified error handling, and optimized performance |
 
 ## Disclaimer
 

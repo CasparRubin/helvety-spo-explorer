@@ -48,7 +48,10 @@ export interface ISiteSearchResultRow {
 }
 
 /**
- * SharePoint search result for sites (legacy interface for reference)
+ * SharePoint search result for sites
+ * 
+ * Note: This interface is not currently used in the codebase.
+ * The Search API returns results in ISiteSearchResultRow format instead.
  */
 export interface ISiteSearchResult {
   /** Site title */

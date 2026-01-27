@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { ISite } from '../types/Site';
+import { highlightMarkStyle } from './styles';
 
 /**
  * Component utility functions for common patterns
@@ -14,9 +15,15 @@ import { ISite } from '../types/Site';
  * Compares two objects by checking if all their properties are equal using strict equality (===).
  * This is useful for React state updates to prevent unnecessary re-renders.
  * 
+ * Input validation:
+ * - Validates both inputs are objects
+ * - Handles null/undefined values
+ * - Handles arrays (arrays are objects but compared differently)
+ * 
  * @param obj1 - First object to compare
  * @param obj2 - Second object to compare
  * @returns true if objects are shallowly equal, false otherwise
+ * @throws Never throws - returns false on invalid input
  * 
  * @example
  * ```typescript
@@ -29,14 +36,26 @@ import { ISite } from '../types/Site';
  * shallowEqual(prev2, next2); // Returns: false
  * ```
  */
-export function shallowEqual<T extends object>(obj1: T, obj2: T): boolean {
+export function shallowEqual<T extends object>(
+  obj1: T, 
+  obj2: T
+): boolean {
   // Fast path: same reference means equal
   if (obj1 === obj2) {
     return true;
   }
   
-  // Validate inputs are objects
-  if (!obj1 || !obj2 || typeof obj1 !== 'object' || typeof obj2 !== 'object') {
+  // Validate inputs are objects (not null, not undefined, not primitives)
+  if (obj1 === null || obj2 === null || obj1 === undefined || obj2 === undefined) {
+    return false;
+  }
+  
+  if (typeof obj1 !== 'object' || typeof obj2 !== 'object') {
+    return false;
+  }
+  
+  // Arrays should not be compared with shallowEqual (use array comparison instead)
+  if (Array.isArray(obj1) || Array.isArray(obj2)) {
     return false;
   }
   
@@ -85,9 +104,15 @@ export function useSiteUrlLower(siteUrl: string): string {
  * Performs a case-insensitive search across the site's title, description, and URL.
  * Returns true if any of these fields contain the search text.
  * 
+ * Input validation:
+ * - Validates site is a valid object
+ * - Validates searchText is a string
+ * - Handles null/undefined values safely
+ * 
  * @param site - The site to check
  * @param searchText - The search text (will be lowercased internally)
  * @returns true if the site matches the search criteria, false otherwise
+ * @throws Never throws - returns false on invalid input
  * 
  * @example
  * ```typescript
@@ -96,8 +121,8 @@ export function useSiteUrlLower(siteUrl: string): string {
  * ```
  */
 export function siteMatchesSearch(site: ISite, searchText: string): boolean {
-  // Validate inputs
-  if (!site || typeof site !== 'object') {
+  // Validate inputs with defensive checks
+  if (!site || typeof site !== 'object' || site === null) {
     return false;
   }
   
@@ -113,16 +138,20 @@ export function siteMatchesSearch(site: ISite, searchText: string): boolean {
   const searchLower: string = searchText.toLowerCase();
   
   // Validate site properties exist and are strings before searching
+  // Use optional chaining and type guards for safe property access
   const titleMatch: boolean = 
     typeof site.title === 'string' && 
+    site.title.length > 0 &&
     site.title.toLowerCase().includes(searchLower);
     
   const descriptionMatch: boolean = 
     typeof site.description === 'string' && 
+    site.description.length > 0 &&
     site.description.toLowerCase().includes(searchLower);
     
   const urlMatch: boolean = 
     typeof site.url === 'string' && 
+    site.url.length > 0 &&
     site.url.toLowerCase().includes(searchLower);
   
   return titleMatch || descriptionMatch || urlMatch;
@@ -148,7 +177,9 @@ export function siteMatchesSearch(site: ISite, searchText: string): boolean {
  * <div onClick={handleClick}>Click me</div>
  * ```
  */
-export function createSafeEventHandler<T extends React.SyntheticEvent>(
+export function createSafeEventHandler<
+  T extends React.SyntheticEvent<HTMLElement, Event>
+>(
   handler: (e: T) => void
 ): (e: T) => void {
   return (e: T): void => {
@@ -167,6 +198,12 @@ export function createSafeEventHandler<T extends React.SyntheticEvent>(
  * 
  * This is a pure function that can be used outside React components for better performance.
  * 
+ * Input validation:
+ * - Validates text is a string (converts to string if not)
+ * - Validates searchText is a non-empty string
+ * - Handles null/undefined values safely
+ * - Validates string bounds before substring operations
+ * 
  * @param text - The text to search and highlight within
  * @param searchText - The search text to highlight
  * @returns JSX element with highlighted match wrapped in <mark> tag, or plain text if no match
@@ -179,52 +216,52 @@ export function createSafeEventHandler<T extends React.SyntheticEvent>(
  * ```
  */
 export function highlightText(text: string, searchText: string): React.ReactElement {
-  // Validate inputs
-  if (typeof text !== 'string') {
-    return React.createElement(React.Fragment, null, String(text || ''));
+  // Fast path: empty search text returns original text
+  if (!searchText || typeof searchText !== 'string' || !searchText.trim()) {
+    const textStr: string = typeof text === 'string' ? text : String(text ?? '');
+    return React.createElement(React.Fragment, null, textStr);
   }
   
-  if (typeof searchText !== 'string' || !searchText.trim()) {
-    return React.createElement(React.Fragment, null, text);
+  // Validate inputs with defensive checks
+  // Convert non-string text to string for safety
+  const textStr: string = typeof text === 'string' ? text : String(text ?? '');
+  
+  // Fast path: empty text returns empty fragment
+  if (!textStr) {
+    return React.createElement(React.Fragment, null, '');
   }
   
   // Use case-insensitive string matching to avoid regex security concerns
   // This prevents ReDoS (Regular Expression Denial of Service) attacks
-  const textLower: string = text.toLowerCase();
+  const textLower: string = textStr.toLowerCase();
   const searchLower: string = searchText.toLowerCase();
   
   // Use indexOf instead of includes because we need the index position to extract
   // the parts before, during, and after the match for highlighting
   const matchIndex: number = textLower.indexOf(searchLower);
   
+  // Fast path: no match found
   if (matchIndex === -1) {
-    return React.createElement(React.Fragment, null, text);
+    return React.createElement(React.Fragment, null, textStr);
   }
   
   // Validate matchIndex is within bounds before extracting substrings
-  if (matchIndex < 0 || matchIndex >= text.length) {
-    return React.createElement(React.Fragment, null, text);
+  // This prevents out-of-bounds errors
+  if (matchIndex < 0 || matchIndex >= textStr.length) {
+    return React.createElement(React.Fragment, null, textStr);
   }
   
   // Extract parts: text before match, the match itself, and text after match
-  const beforeMatch: string = text.substring(0, matchIndex);
-  const matchLength: number = Math.min(searchText.length, text.length - matchIndex);
-  const match: string = text.substring(matchIndex, matchIndex + matchLength);
-  const afterMatch: string = text.substring(matchIndex + matchLength);
-  
-  const markStyle: React.CSSProperties = {
-    backgroundColor: 'var(--sp-color-themePrimary)',
-    color: 'var(--sp-color-white)',
-    padding: '2px 0',
-    borderRadius: '2px',
-    // Ensure text is readable in both light and dark themes
-    // SharePoint's themePrimary automatically adapts for contrast
-  };
+  // Use Math.min to ensure we don't exceed string bounds
+  const beforeMatch: string = textStr.substring(0, matchIndex);
+  const matchLength: number = Math.min(searchText.length, textStr.length - matchIndex);
+  const match: string = textStr.substring(matchIndex, matchIndex + matchLength);
+  const afterMatch: string = textStr.substring(matchIndex + matchLength);
   
   const markElement: React.ReactElement = React.createElement(
     'mark',
     {
-      style: markStyle,
+      style: highlightMarkStyle,
       'aria-label': `Highlighted match: ${match}`,
     },
     match

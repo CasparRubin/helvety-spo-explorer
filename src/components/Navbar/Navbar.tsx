@@ -44,7 +44,11 @@ import { navbarStyles, navbarInnerStyles, navbarContentStyles, sitesButtonStyles
  * ```
  */
 export const Navbar: React.FC<INavbarProps> = React.memo(({ context }) => {
-  const userId = context.pageContext.user.loginName || DEFAULT_USER_ID;
+  // Memoize userId to avoid recalculation on every render
+  const userId = React.useMemo((): string => {
+    return context.pageContext.user.loginName || DEFAULT_USER_ID;
+  }, [context.pageContext.user.loginName]);
+  
   const [isPanelOpen, setIsPanelOpen] = React.useState<boolean>(false);
 
   // Use custom hooks for sites, favorites, and settings
@@ -53,15 +57,17 @@ export const Navbar: React.FC<INavbarProps> = React.memo(({ context }) => {
   const { settings, updateSettings } = useSettings(userId);
 
   // Handle refresh - clears cache and re-fetches sites and favorites
+  // Optimized: use stable references, avoid unnecessary dependencies
   const handleRefresh = React.useCallback(async (): Promise<void> => {
     refreshFavorites();
     await refreshSites();
   }, [refreshFavorites, refreshSites]);
 
+  // Handle site selection - uses current settings value to ensure latest preference
   const handleSiteSelect = React.useCallback((site: ISite): void => {
     selectSite(site);
     if (site.url) {
-      // Use current settings value from state to ensure we have the latest preference
+      // Access settings.openInNewTab directly to ensure we have the latest preference
       navigateToSite(site.url, settings.openInNewTab);
     }
   }, [selectSite, navigateToSite, settings.openInNewTab]);
@@ -74,20 +80,29 @@ export const Navbar: React.FC<INavbarProps> = React.memo(({ context }) => {
     updateSettings(newSettings);
   }, [updateSettings]);
 
-  const handleOpenPanel = React.useCallback(() => {
+  const handleOpenPanel = React.useCallback((): void => {
     setIsPanelOpen(true);
   }, []);
 
-  const handleClosePanel = React.useCallback(() => {
+  const handleClosePanel = React.useCallback((): void => {
     setIsPanelOpen(false);
   }, []);
 
   // Get favorite sites for menu (sorted alphabetically)
-  const favoriteSitesList = React.useMemo(() => {
-    if (favoriteSites.size === 0) {
+  // Optimized: Early return for empty favorites, memoized to avoid recalculation
+  const favoriteSitesList = React.useMemo((): ISite[] => {
+    if (favoriteSites.size === 0 || sites.length === 0) {
       return [];
     }
-    const favoriteList = sites.filter(site => favoriteSites.has(site.url.toLowerCase()));
+    
+    // Pre-compute lowercase URLs for efficient Set lookup
+    const favoriteList = sites.filter((site: ISite): boolean => {
+      if (!site.url) {
+        return false;
+      }
+      return favoriteSites.has(site.url.toLowerCase());
+    });
+    
     // Sort alphabetically by title (case-insensitive)
     return sortSitesAlphabetically(favoriteList);
   }, [sites, favoriteSites]);

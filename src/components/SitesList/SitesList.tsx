@@ -16,6 +16,7 @@ import { ISite } from "../../types/Site";
 // Utils
 import { sortSitesAlphabetically } from '../../utils/siteUtils';
 import { siteMatchesSearch, highlightText as highlightTextUtil } from '../../utils/componentUtils';
+import { compareSitesListProps } from '../../utils/componentComparisonUtils';
 
 // Constants
 import { LAYOUT, TIMEOUTS, UI_MESSAGES } from '../../utils/constants';
@@ -139,16 +140,38 @@ export const SitesList: React.FC<ISitesListProps> = React.memo(({
    * This function is called on scroll events and resize events to keep the fade
    * overlay state synchronized with the actual scroll position.
    * 
-   * @throws Never throws - safely handles missing refs
+   * Defensive checks:
+   * - Validates ref exists before accessing properties
+   * - Validates scroll properties are valid numbers
+   * - Handles edge cases (negative values, NaN, Infinity)
+   * 
+   * @throws Never throws - safely handles missing refs and invalid values
    */
   const checkScrollPosition = React.useCallback((): void => {
     if (!scrollableRef.current) {
       return;
     }
 
-    const { scrollTop, scrollHeight, clientHeight } = scrollableRef.current;
+    const element = scrollableRef.current;
+    const scrollTop = element.scrollTop;
+    const scrollHeight = element.scrollHeight;
+    const clientHeight = element.clientHeight;
+
+    // Defensive checks: validate scroll properties are valid numbers
+    if (
+      !Number.isFinite(scrollTop) ||
+      !Number.isFinite(scrollHeight) ||
+      !Number.isFinite(clientHeight) ||
+      scrollTop < 0 ||
+      scrollHeight < 0 ||
+      clientHeight < 0
+    ) {
+      return;
+    }
+
     // Check if scrolled to bottom (within threshold for minor differences)
-    const isAtBottom = scrollHeight - scrollTop - clientHeight <= LAYOUT.SCROLL_THRESHOLD_PX;
+    const scrollDifference = scrollHeight - scrollTop - clientHeight;
+    const isAtBottom = scrollDifference <= LAYOUT.SCROLL_THRESHOLD_PX;
     // Show fade only if not at bottom and content actually overflows
     setShowBottomFade(!isAtBottom && scrollHeight > clientHeight);
   }, []);
@@ -156,13 +179,17 @@ export const SitesList: React.FC<ISitesListProps> = React.memo(({
   // Reset scroll position when search changes
   React.useEffect((): (() => void) | void => {
     if (scrollableRef.current) {
-      scrollableRef.current.scrollTop = 0;
-      // Check fade visibility after reset
-      const timeoutId: ReturnType<typeof setTimeout> = setTimeout(checkScrollPosition, TIMEOUTS.IMMEDIATE);
-      // Cleanup timeout if component unmounts or dependencies change
-      return (): void => {
-        clearTimeout(timeoutId);
-      };
+      // Defensive check: ensure element is still valid before accessing
+      const element = scrollableRef.current;
+      if (element && typeof element.scrollTop === 'number') {
+        element.scrollTop = 0;
+        // Check fade visibility after reset
+        const timeoutId: ReturnType<typeof setTimeout> = setTimeout(checkScrollPosition, TIMEOUTS.IMMEDIATE);
+        // Cleanup timeout if component unmounts or dependencies change
+        return (): void => {
+          clearTimeout(timeoutId);
+        };
+      }
     }
   }, [searchText, sortedSites.length, checkScrollPosition]);
 
@@ -307,8 +334,19 @@ export const SitesList: React.FC<ISitesListProps> = React.memo(({
             tabIndex={0}
           >
             {sortedSites.map((site: ISite, index: number): JSX.Element => {
+              // Defensive check: validate site and index
+              if (!site || typeof site.id !== 'string' || !Number.isInteger(index) || index < 0) {
+                // Return empty fragment for invalid sites (shouldn't happen, but defensive)
+                return <React.Fragment key={`invalid-${index}`} />;
+              }
+
               // Render separator between favorite sites and regular sites
-              const shouldShowSeparator: boolean = favoriteCount > 0 && index === favoriteCount;
+              // Defensive check: validate favoriteCount and index before comparison
+              const shouldShowSeparator: boolean = 
+                Number.isInteger(favoriteCount) &&
+                favoriteCount > 0 &&
+                Number.isInteger(index) &&
+                index === favoriteCount;
               
               return (
                 <React.Fragment key={site.id}>
@@ -349,65 +387,6 @@ export const SitesList: React.FC<ISitesListProps> = React.memo(({
       )}
     </div>
   );
-}, (prevProps: ISitesListProps, nextProps: ISitesListProps): boolean => {
-  // Custom comparison function for React.memo
-  // Returns true if props are equal (skip re-render), false if different (re-render)
-  
-  // Fast reference equality checks for stable props (callbacks, Sets)
-  if (
-    prevProps.onSiteSelect !== nextProps.onSiteSelect ||
-    prevProps.onToggleFavorite !== nextProps.onToggleFavorite ||
-    prevProps.onRefresh !== nextProps.onRefresh ||
-    prevProps.favoriteSites !== nextProps.favoriteSites ||
-    prevProps.displayFavoriteSites !== nextProps.displayFavoriteSites
-  ) {
-    return false;
-  }
-  
-  // Check display settings (cheap boolean comparisons)
-  if (
-    prevProps.showFullUrl !== nextProps.showFullUrl ||
-    prevProps.showPartialUrl !== nextProps.showPartialUrl ||
-    prevProps.showDescription !== nextProps.showDescription ||
-    prevProps.isLoading !== nextProps.isLoading ||
-    prevProps.error !== nextProps.error
-  ) {
-    return false;
-  }
-  
-  // Check selected site (compare by ID)
-  const prevSelectedId = prevProps.selectedSite?.id;
-  const nextSelectedId = nextProps.selectedSite?.id;
-  if (prevSelectedId !== nextSelectedId) {
-    return false;
-  }
-  
-  // Check sites array (compare length first, then reference)
-  if (prevProps.sites.length !== nextProps.sites.length) {
-    return false;
-  }
-  
-  // If sites array reference changed but length is same, check if content changed
-  if (prevProps.sites !== nextProps.sites) {
-    // Quick check: compare first and last items
-    const prevFirst = prevProps.sites[0];
-    const nextFirst = nextProps.sites[0];
-    const prevLast = prevProps.sites[prevProps.sites.length - 1];
-    const nextLast = nextProps.sites[nextProps.sites.length - 1];
-    
-    if (
-      prevFirst?.id !== nextFirst?.id ||
-      prevLast?.id !== nextLast?.id
-    ) {
-      return false;
-    }
-    
-    // If first/last match, assume array is same (full comparison would be expensive)
-    // This is a trade-off between accuracy and performance
-  }
-  
-  // All props are equal, skip re-render
-  return true;
-});
+}, compareSitesListProps);
 
 SitesList.displayName = 'SitesList';

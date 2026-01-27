@@ -27,10 +27,20 @@ export * from './siteUtils';
 // Component utilities
 export * from './componentUtils';
 
+// DOM utilities
+export * from './domUtils';
+
 // Validation utilities
 export * from './validationUtils';
 
+// Error handling utilities
+export * from './errorHandlingUtils';
+
+// Service utilities
+export * from './serviceUtils';
+
 // Custom hooks
+// Note: useServiceInitialization is an internal utility hook and is not exported
 export * from './hooks';
 export * from './customHooks/useSites';
 export * from './customHooks/useFavorites';

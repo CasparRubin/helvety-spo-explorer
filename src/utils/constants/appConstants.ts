@@ -45,6 +45,12 @@ export const KEYBOARD_SHORTCUTS = {
 export const TIMEOUTS = {
   /** Immediate timeout (next tick) - used for DOM updates */
   IMMEDIATE: 0,
+  /** Short delay for focus operations after DOM updates (e.g., panel animations) */
+  FOCUS_DELAY_SHORT_MS: 100,
+  /** Medium delay for focus operations after DOM updates (e.g., panel opens) */
+  FOCUS_DELAY_MEDIUM_MS: 150,
+  /** API request timeout - prevents hanging requests (30 seconds) */
+  API_REQUEST_TIMEOUT_MS: 30000,
 } as const;
 
 /**

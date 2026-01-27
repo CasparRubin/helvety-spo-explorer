@@ -1,5 +1,8 @@
-import { STORAGE_KEYS, DEFAULT_USER_ID, DEFAULT_SETTINGS } from '../utils/constants';
+import { STORAGE_KEYS, DEFAULT_SETTINGS } from '../utils/constants';
 import { getStorageItem, setStorageItem, removeStorageItem } from '../utils/storageUtils';
+import { isValidUserSettings, isPlainObject } from '../utils/validationUtils';
+import { logWarning } from '../utils/errorUtils';
+import { normalizeUserId, generateStorageKey } from '../utils/serviceUtils';
 
 
 /**
@@ -39,14 +42,14 @@ export class SettingsService {
    * @param userId - The user ID for storing user-specific settings. Falls back to DEFAULT_USER_ID if not provided.
    */
   constructor(userId: string) {
-    this.userId = userId || DEFAULT_USER_ID;
+    this.userId = normalizeUserId(userId, 'SettingsService');
   }
 
   /**
    * Get the storage key for the current user
    */
   private getStorageKey(): string {
-    return `${STORAGE_KEYS.SETTINGS_PREFIX}-${this.userId}`;
+    return generateStorageKey(STORAGE_KEYS.SETTINGS_PREFIX, this.userId);
   }
 
   /**
@@ -58,6 +61,10 @@ export class SettingsService {
    * Handles errors from:
    * - localStorage.getItem() - may throw in restricted environments
    * - JSON.parse() - may throw if stored data is corrupted
+   * 
+   * Input validation:
+   * - Validates stored settings is a valid user settings object
+   * - Merges with defaults to ensure all properties exist
    * 
    * @returns The user's settings merged with defaults
    * @throws Never throws - returns default settings on error (localStorage/JSON errors are caught and logged)
@@ -72,8 +79,15 @@ export class SettingsService {
   public getSettings(): IUserSettings {
     const key = this.getStorageKey();
     const settings = getStorageItem<IUserSettings>(key);
-    // Merge with defaults to ensure all properties exist (handles corrupted or partial data)
-    return settings ? { ...DEFAULT_SETTINGS, ...settings } : { ...DEFAULT_SETTINGS };
+    
+    // Validate stored settings is a valid user settings object
+    if (settings && isValidUserSettings(settings)) {
+      // Merge with defaults to ensure all properties exist (handles partial data)
+      return { ...DEFAULT_SETTINGS, ...settings };
+    }
+    
+    // Return defaults if no valid settings found
+    return { ...DEFAULT_SETTINGS };
   }
 
   /**
@@ -97,6 +111,10 @@ export class SettingsService {
    * other settings will remain unchanged. The updated settings are immediately
    * persisted to localStorage.
    * 
+   * Input validation:
+   * - Validates updates is a plain object
+   * - Validates merged settings is a valid user settings object
+   * 
    * @param updates - Partial settings object containing the properties to update
    * @throws Never throws - errors are logged but operation continues
    * 
@@ -108,8 +126,21 @@ export class SettingsService {
    * ```
    */
   public updateSettings(updates: Partial<IUserSettings>): void {
+    // Validate input is a plain object
+    if (!isPlainObject(updates)) {
+      logWarning('SettingsService', 'Invalid updates object provided to updateSettings', 'updateSettings');
+      return;
+    }
+
     const currentSettings = this.getSettings();
     const newSettings: IUserSettings = { ...currentSettings, ...updates };
+    
+    // Validate merged settings is valid
+    if (!isValidUserSettings(newSettings)) {
+      logWarning('SettingsService', 'Merged settings are invalid', 'updateSettings');
+      return;
+    }
+    
     this.saveSettings(newSettings);
   }
 
@@ -118,10 +149,19 @@ export class SettingsService {
    * 
    * Uses the shared storage utility for consistent error handling.
    * 
+   * Input validation:
+   * - Validates settings is a valid user settings object
+   * 
    * @param settings - Settings object to save
    * @throws Never throws - errors are caught and logged by storage utility
    */
   private saveSettings(settings: IUserSettings): void {
+    // Validate input
+    if (!isValidUserSettings(settings)) {
+      logWarning('SettingsService', 'Invalid settings object provided to saveSettings', 'saveSettings');
+      return;
+    }
+
     const key = this.getStorageKey();
     setStorageItem(key, settings);
   }

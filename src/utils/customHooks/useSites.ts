@@ -4,6 +4,8 @@ import { SiteService } from '../../services/SiteService';
 import { ISite } from '../../types/Site';
 import { logError, extractErrorMessage } from '../errorUtils';
 import { navigateToSite as navigateToSiteUtil } from '../navigationUtils';
+import { isValidSitesArray, isValidSite, isNonEmptyString } from '../validationUtils';
+import { safeExecuteSync, withErrorBoundary } from '../errorHandlingUtils';
 
 const LOG_SOURCE = 'useSites';
 
@@ -56,7 +58,10 @@ export function useSites(context: ApplicationCustomizerContext): IUseSitesReturn
     try {
       siteServiceRef.current = new SiteService(context);
     } catch (err: unknown) {
-      logError(LOG_SOURCE, err, 'Error initializing SiteService');
+      logError(LOG_SOURCE, err, 'Error initializing SiteService - sites will not be available');
+      // Set error state so UI can handle gracefully
+      setError('Failed to initialize site service');
+      setIsLoading(false);
     }
   }, [context]);
 
@@ -74,78 +79,105 @@ export function useSites(context: ApplicationCustomizerContext): IUseSitesReturn
     setIsLoading(true);
     setError(undefined);
 
-    try {
-      const fetchedSites: ISite[] = await siteServiceRef.current.getSites();
-      
-      // Validate fetched sites is an array
-      if (!Array.isArray(fetchedSites)) {
-        const errorMessage: string = 'Invalid sites data received from API';
-        logError(LOG_SOURCE, new Error(errorMessage), 'fetchSites - invalid response format');
-        setError(errorMessage);
-        setSites([]);
-        return;
-      }
-      
-      // Set current site as selected using functional update to avoid stale closure
-      const currentWebUrl: string = context.pageContext.web.absoluteUrl.toLowerCase();
-      const currentSite: ISite | undefined = fetchedSites.find(
-        (site: ISite): boolean => 
-          typeof site.url === 'string' && 
-          site.url.toLowerCase() === currentWebUrl
-      );
-      
-      // Update sites and selectedSite together to minimize re-renders
-      setSites(fetchedSites);
-      setSelectedSite((prevSelected: ISite | undefined): ISite | undefined => {
-        // Only update if the current site changed or wasn't set before
-        if (currentSite) {
-          // Use reference equality if possible, otherwise check ID
-          return prevSelected?.id === currentSite.id ? prevSelected : currentSite;
+    // Use error boundary wrapper for consistent error handling
+    await withErrorBoundary(
+      async (): Promise<void> => {
+        const fetchedSites: ISite[] = await siteServiceRef.current!.getSites();
+        
+        // Validate fetched sites is a valid sites array
+        if (!isValidSitesArray(fetchedSites)) {
+          const errorMessage: string = 'Invalid sites data received from API';
+          logError(LOG_SOURCE, new Error(errorMessage), 'fetchSites - invalid response format');
+          setError(errorMessage);
+          setSites([]);
+          return;
         }
-        // Keep previous selection if current site not found
-        return prevSelected;
-      });
-    } catch (err: unknown) {
-      const errorMessage: string = extractErrorMessage(err);
-      logError(LOG_SOURCE, err, 'Error fetching sites from API');
-      setError(errorMessage);
-      // Clear sites on error to prevent showing stale data
-      setSites([]);
-      setSelectedSite(undefined);
-    } finally {
-      setIsLoading(false);
-    }
+        
+        // Set current site as selected using functional update to avoid stale closure
+        const currentWebUrl: string = context.pageContext.web.absoluteUrl.toLowerCase();
+        const currentSite: ISite | undefined = fetchedSites.find(
+          (site: ISite): boolean => 
+            isValidSite(site) &&
+            typeof site.url === 'string' && 
+            site.url.length > 0 &&
+            site.url.toLowerCase() === currentWebUrl
+        );
+        
+        // Update sites and selectedSite together to minimize re-renders
+        setSites(fetchedSites);
+        setSelectedSite((prevSelected: ISite | undefined): ISite | undefined => {
+          // Only update if the current site changed or wasn't set before
+          if (currentSite && isValidSite(currentSite)) {
+            // Use reference equality if possible, otherwise check ID
+            return prevSelected?.id === currentSite.id ? prevSelected : currentSite;
+          }
+          // Keep previous selection if current site not found
+          return prevSelected;
+        });
+      },
+      (err: unknown): void => {
+        const errorMessage: string = extractErrorMessage(err);
+        logError(LOG_SOURCE, err, 'Error fetching sites from API');
+        setError(errorMessage);
+        // Clear sites on error to prevent showing stale data
+        setSites([]);
+        setSelectedSite(undefined);
+      },
+      undefined // No default value - let error handler manage state
+    );
+    
+    setIsLoading(false);
   }, [context]);
 
-  // Fetch sites on mount
-  React.useEffect((): void => {
-    // fetchSites already handles errors internally, but we add a catch as a safety net
-    fetchSites().catch((err: unknown): void => {
-      // This should rarely happen since fetchSites has internal error handling
-      // but serves as a final safety net for any unexpected promise rejections
-      logError(LOG_SOURCE, err, 'Unhandled promise rejection in fetchSites');
-    });
+  // Fetch sites on mount - delay significantly to ensure page is fully loaded and not blocking
+  React.useEffect((): (() => void) => {
+    // Delay API call significantly to prevent blocking page load
+    // Wait for page to be fully interactive before making API calls
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    
+    const startFetch = (): void => {
+      timeoutId = setTimeout((): void => {
+        // fetchSites already handles errors internally via withErrorBoundary
+        // This catch serves as a final safety net for unexpected promise rejections
+        // Using void operator to explicitly mark intentional fire-and-forget pattern
+        // eslint-disable-next-line no-void -- void operator required to satisfy @typescript-eslint/no-floating-promises
+        void fetchSites().catch((err: unknown): void => {
+          logError(LOG_SOURCE, err, 'Unhandled promise rejection in fetchSites');
+          // Ensure loading state is cleared even on error to prevent UI freeze
+          setIsLoading(false);
+        });
+      }, 1000); // Longer delay to ensure page is fully loaded and interactive
+    };
+
+    // Wait for document to be ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', startFetch, { once: true });
+    } else {
+      startFetch();
+    }
+
+    // Cleanup timeout if component unmounts
+    return (): void => {
+      if (timeoutId !== undefined) {
+        clearTimeout(timeoutId);
+      }
+    };
   }, [fetchSites]);
 
   // Refresh function that clears cache and re-fetches
   const refresh = React.useCallback(async (): Promise<void> => {
-    try {
-      if (siteServiceRef.current) {
-        siteServiceRef.current.clearCache();
-      }
-      await fetchSites();
-    } catch (err: unknown) {
-      // fetchSites already handles errors internally, but log here for additional context
-      logError(LOG_SOURCE, err, 'Error refreshing sites');
-      // Re-throw to allow caller to handle if needed
-      throw err;
+    if (siteServiceRef.current) {
+      siteServiceRef.current.clearCache();
     }
+    // fetchSites handles errors internally via withErrorBoundary
+    // Re-throw to allow caller to handle if needed
+    await fetchSites();
   }, [fetchSites]);
 
   // Select site function - optimized to avoid unnecessary updates
   const selectSite = React.useCallback((site: ISite): void => {
-    // Validate site parameter
-    if (!site || typeof site !== 'object' || !site.id) {
+    // Validate site parameter using validation utility
+    if (!isValidSite(site)) {
       logError(LOG_SOURCE, new Error('Invalid site provided to selectSite'), `Site: ${JSON.stringify(site)}`);
       return;
     }
@@ -158,17 +190,24 @@ export function useSites(context: ApplicationCustomizerContext): IUseSitesReturn
 
   // Navigate to site function
   const navigateToSite = React.useCallback((url: string, openInNewTab?: boolean): void => {
-    // Validate URL parameter
-    if (!url || typeof url !== 'string') {
+    // Validate URL parameter using validation utility
+    if (!isNonEmptyString(url)) {
       logError(LOG_SOURCE, new Error('Invalid URL provided to navigateToSite'), `URL: ${String(url)}`);
       return;
     }
     
-    try {
-      navigateToSiteUtil(url, openInNewTab);
-    } catch (err: unknown) {
-      logError(LOG_SOURCE, err, `Error navigating to site: ${url}`);
-    }
+    // Use safe execution wrapper for consistent error handling
+    safeExecuteSync(
+      (): void => {
+        navigateToSiteUtil(url, openInNewTab);
+      },
+      {
+        logError: true,
+        logSource: LOG_SOURCE,
+        context: `Error navigating to site: ${url}`,
+        rethrow: false,
+      }
+    );
   }, []);
 
   return {

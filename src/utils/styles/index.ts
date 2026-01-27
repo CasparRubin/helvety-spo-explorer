@@ -5,6 +5,8 @@
  * Import styles from this file to maintain clean imports.
  */
 
+import * as React from 'react';
+
 // Common styles
 export {
   optionContainerStyles,
@@ -62,3 +64,13 @@ export {
   separatorContainerStyles,
   refreshButtonStyles,
 } from './sitesStyles';
+
+/**
+ * Style for highlighted text in search results
+ */
+export const highlightMarkStyle: React.CSSProperties = {
+  backgroundColor: 'var(--sp-color-themePrimary)',
+  color: 'var(--sp-color-white)',
+  padding: '2px 0',
+  borderRadius: '2px',
+};

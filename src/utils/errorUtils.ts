@@ -23,6 +23,12 @@ export enum ErrorCategory {
  * This type guard narrows the type from `unknown` to `Error`, allowing safe
  * access to error properties like `message` and `stack`.
  * 
+ * Handles edge cases:
+ * - null and undefined values
+ * - Primitive types (strings, numbers, etc.)
+ * - Objects that are not Error instances
+ * - Error-like objects that may have lost their prototype chain
+ * 
  * @param error - The value to check
  * @returns true if the value is an Error instance, false otherwise
  * 
@@ -39,7 +45,51 @@ export enum ErrorCategory {
  * ```
  */
 export function isError(error: unknown): error is Error {
-  return error instanceof Error;
+  // Fast path: instanceof check (most reliable when it works)
+  if (error instanceof Error) {
+    return true;
+  }
+  
+  // Handle null/undefined
+  if (error === null || error === undefined) {
+    return false;
+  }
+  
+  // Handle primitives
+  if (typeof error !== 'object') {
+    return false;
+  }
+  
+  // Must not be an array (arrays are objects but not errors)
+  if (Array.isArray(error)) {
+    return false;
+  }
+  
+  // Fallback: check for Error-like structure (handles serialized errors)
+  // This is useful when errors are passed through boundaries that may lose prototype chain
+  const errorLike = error as Record<string, unknown>;
+  
+  // Validate required Error properties exist and have correct types
+  const hasMessage: boolean = typeof errorLike.message === 'string';
+  const hasName: boolean = typeof errorLike.name === 'string' && errorLike.name.length > 0;
+  const hasValidStack: boolean = 
+    typeof errorLike.stack === 'string' || 
+    errorLike.stack === undefined ||
+    errorLike.stack === null;
+  
+  return hasMessage && hasName && hasValidStack;
+}
+
+/**
+ * Validates HTTP status code range
+ */
+function isValidHttpStatusCode(statusCode: unknown): statusCode is number {
+  return (
+    typeof statusCode === 'number' &&
+    Number.isFinite(statusCode) &&
+    statusCode >= 100 &&
+    statusCode < 600
+  );
 }
 
 /**
@@ -47,6 +97,12 @@ export function isError(error: unknown): error is Error {
  * 
  * Uses instanceof check and error structure for reliable type discrimination.
  * Handles both runtime instances and serialized errors that may have lost their prototype chain.
+ * 
+ * Edge cases handled:
+ * - null/undefined values
+ * - Non-Error objects
+ * - Serialized errors (JSON.parse/stringify)
+ * - Errors from different execution contexts
  * 
  * @param error - The error to check
  * @returns true if the error is an ApiError instance, false otherwise
@@ -58,40 +114,40 @@ export function isError(error: unknown): error is Error {
  * } catch (err: unknown) {
  *   if (isApiError(err)) {
  *     // TypeScript knows err is ApiError
- *     console.log(err.statusCode);
+ *     logError('Component', err, `API call failed with status ${err.statusCode}`);
  *   }
  * }
  * ```
  */
 export function isApiError(error: unknown): error is ApiError {
-  // Check instanceof first (most reliable when it works)
   if (error instanceof ApiError) {
     return true;
   }
-  // Fallback: check error structure (more reliable in Jest/ES5 compilation or serialized errors)
-  if (!(error instanceof Error)) {
+  
+  if (!isError(error)) {
     return false;
   }
   
-  // Type guard: check if error has ApiError-like structure with runtime validation
   const errorWithProps = error as Error & { 
     category?: unknown;
     statusCode?: unknown;
     apiEndpoint?: unknown;
   };
   
-  // Validate category is NETWORK (ApiError always has NETWORK category)
-  const hasNetworkCategory: boolean = errorWithProps.category === ErrorCategory.NETWORK;
+  // ApiError must have NETWORK category
+  const hasNetworkCategory: boolean = 
+    errorWithProps.category === ErrorCategory.NETWORK;
   
-  // Check for ApiError-specific properties (statusCode or apiEndpoint)
-  const hasApiErrorProperties: boolean = 
-    typeof errorWithProps.statusCode === 'number' || 
-    typeof errorWithProps.apiEndpoint === 'string';
+  // Check for ApiError-specific properties with proper validation
+  const hasValidStatusCode: boolean = isValidHttpStatusCode(errorWithProps.statusCode);
+  const hasValidApiEndpoint: boolean = 
+    typeof errorWithProps.apiEndpoint === 'string' && 
+    errorWithProps.apiEndpoint.length > 0;
+  const hasApiErrorProperties: boolean = hasValidStatusCode || hasValidApiEndpoint;
   
   // Check error name as additional validation
   const hasApiErrorName: boolean = error.name === 'ApiError';
   
-  // ApiError must have NETWORK category AND (statusCode/apiEndpoint OR matching name)
   return hasNetworkCategory && (hasApiErrorProperties || hasApiErrorName);
 }
 
@@ -100,6 +156,12 @@ export function isApiError(error: unknown): error is ApiError {
  * 
  * Uses instanceof check and error structure for reliable type discrimination.
  * Handles both runtime instances and serialized errors that may have lost their prototype chain.
+ * 
+ * Edge cases handled:
+ * - null/undefined values
+ * - Non-Error objects
+ * - Serialized errors (JSON.parse/stringify)
+ * - Errors from different execution contexts
  * 
  * @param error - The error to check
  * @returns true if the error is a PermissionError instance, false otherwise
@@ -111,32 +173,27 @@ export function isApiError(error: unknown): error is ApiError {
  * } catch (err: unknown) {
  *   if (isPermissionError(err)) {
  *     // TypeScript knows err is PermissionError
- *     console.log(err.category);
+ *     logError('Component', err, 'Permission denied');
  *   }
- *   }
+ * }
  * ```
  */
 export function isPermissionError(error: unknown): error is PermissionError {
-  // Check instanceof first (most reliable when it works)
   if (error instanceof PermissionError) {
     return true;
   }
-  // Fallback: check error structure (more reliable in Jest/ES5 compilation or serialized errors)
-  if (!(error instanceof Error) || !('category' in error)) {
+  
+  if (!isError(error)) {
     return false;
   }
   
-  // Type guard: check if error has PermissionError-like structure with runtime validation
-  const errorWithCategory = error as Error & { category: unknown };
-  
-  // Validate category is PERMISSION (PermissionError always has PERMISSION category)
-  const hasPermissionCategory: boolean = errorWithCategory.category === ErrorCategory.PERMISSION;
-  
-  // Check error name as additional validation
-  const hasPermissionName: boolean = error.name === 'PermissionError';
+  const errorWithCategory = error as Error & { category?: unknown };
   
   // PermissionError must have PERMISSION category OR matching name
-  return hasPermissionCategory || hasPermissionName;
+  return (
+    errorWithCategory.category === ErrorCategory.PERMISSION ||
+    error.name === 'PermissionError'
+  );
 }
 
 /**
@@ -144,6 +201,12 @@ export function isPermissionError(error: unknown): error is PermissionError {
  * 
  * Uses instanceof check and error structure for reliable type discrimination.
  * Handles both runtime instances and serialized errors that may have lost their prototype chain.
+ * 
+ * Edge cases handled:
+ * - null/undefined values
+ * - Non-Error objects
+ * - Serialized errors (JSON.parse/stringify)
+ * - Errors from different execution contexts
  * 
  * @param error - The error to check
  * @returns true if the error is a ValidationError instance, false otherwise
@@ -155,40 +218,40 @@ export function isPermissionError(error: unknown): error is PermissionError {
  * } catch (err: unknown) {
  *   if (isValidationError(err)) {
  *     // TypeScript knows err is ValidationError
- *     console.log(err.field, err.value);
+ *     logError('Component', err, `Validation failed for field: ${err.field}`);
  *   }
- *   }
+ * }
  * ```
  */
 export function isValidationError(error: unknown): error is ValidationError {
-  // Check instanceof first (most reliable when it works)
   if (error instanceof ValidationError) {
     return true;
   }
-  // Fallback: check error structure (more reliable in Jest/ES5 compilation or serialized errors)
-  if (!(error instanceof Error)) {
+  
+  if (!isError(error)) {
     return false;
   }
   
-  // Type guard: check if error has ValidationError-like structure with runtime validation
   const errorWithProps = error as Error & { 
     category?: unknown;
     field?: unknown;
     value?: unknown;
   };
   
-  // Validate category is VALIDATION (ValidationError always has VALIDATION category)
-  const hasValidationCategory: boolean = errorWithProps.category === ErrorCategory.VALIDATION;
+  // ValidationError must have VALIDATION category
+  const hasValidationCategory: boolean = 
+    errorWithProps.category === ErrorCategory.VALIDATION;
   
-  // Check for ValidationError-specific properties (field or value)
-  const hasValidationProperties: boolean = 
-    typeof errorWithProps.field === 'string' || 
-    errorWithProps.value !== undefined;
+  // Check for ValidationError-specific properties with proper validation
+  const hasValidField: boolean = 
+    typeof errorWithProps.field === 'string' && 
+    errorWithProps.field.length > 0;
+  const hasValue: boolean = errorWithProps.value !== undefined && errorWithProps.value !== null;
+  const hasValidationProperties: boolean = hasValidField || hasValue;
   
   // Check error name as additional validation
   const hasValidationName: boolean = error.name === 'ValidationError';
   
-  // ValidationError must have VALIDATION category AND (field/value properties OR matching name)
   return hasValidationCategory && (hasValidationProperties || hasValidationName);
 }
 
@@ -197,6 +260,12 @@ export function isValidationError(error: unknown): error is ValidationError {
  * 
  * Performs runtime validation to ensure the object has the expected structure
  * before type narrowing. This prevents runtime errors when accessing nested properties.
+ * 
+ * Edge cases handled:
+ * - null/undefined values
+ * - Primitive types
+ * - Objects missing required nested properties
+ * - Arrays (which are objects but not error structures)
  * 
  * @param obj - The object to check
  * @returns true if the object matches ISPApiError structure, false otherwise
@@ -207,12 +276,24 @@ export function isValidationError(error: unknown): error is ValidationError {
  * const data = await response.json();
  * if (isSPApiError(data)) {
  *   // TypeScript knows data is ISPApiError
- *   console.log(data.error.message.value);
+ *   const errorMessage = data.error.message.value;
+ *   logError('ApiService', new Error(errorMessage), 'SharePoint API error');
  * }
  * ```
  */
 export function isSPApiError(obj: unknown): obj is ISPApiError {
-  if (!obj || typeof obj !== 'object') {
+  // Handle null/undefined
+  if (obj === null || obj === undefined) {
+    return false;
+  }
+  
+  // Must be an object (not primitive)
+  if (typeof obj !== 'object') {
+    return false;
+  }
+  
+  // Must not be an array
+  if (Array.isArray(obj)) {
     return false;
   }
   
@@ -233,8 +314,14 @@ export function isSPApiError(obj: unknown): obj is ISPApiError {
   
   const messageObj = errorObj.message as Record<string, unknown>;
   
-  // Check value property exists and is a string
-  return 'value' in messageObj && typeof messageObj.value === 'string';
+  // Check value property exists and is a non-empty string
+  // Additional validation: ensure value is actually a string and not just truthy
+  return (
+    'value' in messageObj &&
+    typeof messageObj.value === 'string' &&
+    messageObj.value.length > 0 &&
+    messageObj.value.trim().length > 0
+  );
 }
 
 /**
@@ -274,9 +361,24 @@ export function extractErrorMessage(error: unknown): string {
 
 /**
  * Logs an error using SPFx Log utility with consistent formatting
+ * 
+ * Formats and logs errors consistently across the application. Handles various
+ * error types (Error instances, strings, unknown types) and extracts meaningful
+ * messages for logging.
+ * 
  * @param source - The source/component name where the error occurred
  * @param error - The error object (can be Error, string, or unknown type)
  * @param context - Optional context information about where the error occurred
+ * @throws Never throws - all errors are caught internally
+ * 
+ * @example
+ * ```typescript
+ * try {
+ *   // some operation
+ * } catch (err: unknown) {
+ *   logError('ComponentName', err, 'Operation failed');
+ * }
+ * ```
  */
 export function logError(source: string, error: unknown, context?: string): void {
   const errorMessage = extractErrorMessage(error);
@@ -288,10 +390,21 @@ export function logError(source: string, error: unknown, context?: string): void
 
 /**
  * Logs a warning using SPFx Log utility with consistent formatting
- * Note: Log.warn requires a ServiceScope, so we use Log.info for warnings when scope is not available
+ * 
+ * Note: Log.warn requires a ServiceScope, so we use Log.info for warnings when scope is not available.
+ * Warnings are prefixed with [WARNING] for easy identification in logs.
+ * 
  * @param source - The source/component name where the warning occurred
  * @param message - The warning message
  * @param context - Optional context information about where the warning occurred
+ * @throws Never throws - all errors are caught internally
+ * 
+ * @example
+ * ```typescript
+ * if (someCondition) {
+ *   logWarning('ComponentName', 'Unexpected condition detected', 'Operation context');
+ * }
+ * ```
  */
 export function logWarning(source: string, message: string, context?: string): void {
   const contextMessage = context ? `${context}: ${message}` : message;
@@ -302,14 +415,116 @@ export function logWarning(source: string, message: string, context?: string): v
 
 /**
  * Logs an info message using SPFx Log utility with consistent formatting
+ * 
+ * Use this for informational messages that don't indicate errors or warnings.
+ * Useful for debugging and tracking application flow.
+ * 
  * @param source - The source/component name where the info occurred
  * @param message - The info message
  * @param context - Optional context information
+ * @throws Never throws - all errors are caught internally
+ * 
+ * @example
+ * ```typescript
+ * logInfo('ComponentName', 'Operation completed successfully', 'User action');
+ * ```
  */
 export function logInfo(source: string, message: string, context?: string): void {
   const contextMessage: string = context ? `${context}: ${message}` : message;
   Log.info(source, contextMessage);
 }
+
+/**
+ * Valid error category values
+ */
+const VALID_ERROR_CATEGORIES: readonly ErrorCategory[] = [
+  ErrorCategory.NETWORK,
+  ErrorCategory.PERMISSION,
+  ErrorCategory.VALIDATION,
+  ErrorCategory.UNKNOWN,
+] as const;
+
+/**
+ * Checks if a category value is valid
+ */
+function isValidErrorCategory(category: unknown): category is ErrorCategory {
+  return VALID_ERROR_CATEGORIES.indexOf(category as ErrorCategory) !== -1;
+}
+
+/**
+ * Extracts error category from custom error object if present
+ */
+function getErrorCategoryFromObject(error: Error): ErrorCategory | undefined {
+  if ('category' in error) {
+    const appError = error as { category: unknown };
+    if (isValidErrorCategory(appError.category)) {
+      return appError.category;
+    }
+  }
+  return undefined;
+}
+
+/**
+ * Parses HTTP status code from error message
+ */
+function parseHttpStatusFromMessage(message: string): number | undefined {
+  const httpStatusMatch: RegExpMatchArray | null = message.match(/\b(40[0-9]|50[0-9])\b/);
+  if (httpStatusMatch) {
+    const statusCode: number = parseInt(httpStatusMatch[1], 10);
+    if (Number.isFinite(statusCode) && statusCode >= 100 && statusCode < 600) {
+      return statusCode;
+    }
+  }
+  return undefined;
+}
+
+/**
+ * Categorizes error based on HTTP status code
+ */
+function categorizeByHttpStatus(statusCode: number): ErrorCategory | undefined {
+  if (statusCode === 401 || statusCode === 403) {
+    return ErrorCategory.PERMISSION;
+  }
+  if (statusCode >= 500 || statusCode === 408 || statusCode === 504) {
+    return ErrorCategory.NETWORK;
+  }
+  if (statusCode >= 400 && statusCode < 500) {
+    return ErrorCategory.VALIDATION;
+  }
+  return undefined;
+}
+
+/**
+ * Checks if error message matches any keywords in the provided list
+ */
+function matchErrorKeywords(message: string, keywords: readonly string[]): boolean {
+  return keywords.some((keyword: string): boolean => message.includes(keyword));
+}
+
+/**
+ * Permission error keywords
+ */
+const PERMISSION_KEYWORDS: readonly string[] = [
+  'permission', 'unauthorized', 'access denied', 'forbidden', 
+  '401', '403', 'authentication', 'authorization', 'access token'
+] as const;
+
+/**
+ * Network error keywords
+ */
+const NETWORK_KEYWORDS: readonly string[] = [
+  'network', 'fetch', 'timeout', 'connection', 'dns', 
+  'econnrefused', 'enotfound', 'econnreset', 'etimedout',
+  'failed to fetch', 'network error', 'offline'
+] as const;
+
+/**
+ * Validation error keywords
+ */
+const VALIDATION_KEYWORDS: readonly string[] = [
+  'parse', 'invalid', 'validation', 'malformed', 'syntax',
+  'type error', 'format error', 'schema', '400', '422'
+] as const;
 
 /**
  * Categorizes an error based on its message or type
@@ -321,58 +536,40 @@ export function logInfo(source: string, message: string, context?: string): void
  * @returns The error category
  */
 export function categorizeError(error: unknown): ErrorCategory {
-  // Strategy: First check if error is a custom AppError with explicit category
-  // This is the most reliable method since custom errors set category explicitly
-  
-  // Check if it's a custom error with a category property
-  if (error instanceof Error && 'category' in error) {
-    const appError = error as { category: ErrorCategory };
-    
-    // Validate that the category is a valid ErrorCategory enum value
-    // This prevents issues if error object has invalid category value
-    const validCategories: ErrorCategory[] = [
-      ErrorCategory.NETWORK,
-      ErrorCategory.PERMISSION,
-      ErrorCategory.VALIDATION,
-      ErrorCategory.UNKNOWN,
-    ];
-    
-    // Only trust the category if it's a valid enum value
-    // Use indexOf for ES5 compatibility (SPFx targets ES5)
-    if (validCategories.indexOf(appError.category) !== -1) {
-      return appError.category;
+  // First check if error is a custom AppError with explicit category
+  if (error instanceof Error) {
+    const category = getErrorCategoryFromObject(error);
+    if (category !== undefined) {
+      return category;
     }
-    // If category exists but is invalid, fall through to message analysis
   }
   
-  // Fallback strategy: Analyze error message for keywords
-  // This handles native errors, string errors, and custom errors without category
-  // Convert to lowercase for case-insensitive matching
+  // Fallback: Analyze error message for keywords
   const errorMessage: string = extractErrorMessage(error).toLowerCase();
   
-  // Permission errors: user lacks access or authentication failed
-  if (errorMessage.includes('permission') || 
-      errorMessage.includes('unauthorized') || 
-      errorMessage.includes('access denied')) {
+  // Check HTTP status codes in error message
+  const httpStatus: number | undefined = parseHttpStatusFromMessage(errorMessage);
+  if (httpStatus !== undefined) {
+    const category = categorizeByHttpStatus(httpStatus);
+    if (category !== undefined) {
+      return category;
+    }
+  }
+  
+  // Check keyword matches
+  if (matchErrorKeywords(errorMessage, PERMISSION_KEYWORDS)) {
     return ErrorCategory.PERMISSION;
   }
   
-  // Network errors: connection issues, timeouts, fetch failures
-  if (errorMessage.includes('network') || 
-      errorMessage.includes('fetch') || 
-      errorMessage.includes('timeout') || 
-      errorMessage.includes('connection')) {
+  if (matchErrorKeywords(errorMessage, NETWORK_KEYWORDS)) {
     return ErrorCategory.NETWORK;
   }
   
-  // Validation errors: data format issues, parsing failures
-  if (errorMessage.includes('parse') || 
-      errorMessage.includes('invalid') || 
-      errorMessage.includes('validation')) {
+  if (matchErrorKeywords(errorMessage, VALIDATION_KEYWORDS)) {
     return ErrorCategory.VALIDATION;
   }
   
-  // Default: unknown error type (catch-all for unclassified errors)
+  // Default: unknown error type
   return ErrorCategory.UNKNOWN;
 }
 

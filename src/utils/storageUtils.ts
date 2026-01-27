@@ -22,9 +22,17 @@ const LOG_SOURCE = 'storageUtils';
  * 
  * @example
  * ```typescript
+ * import { IUserSettings } from '../services/SettingsService';
+ * import { logInfo } from './errorUtils';
+ * 
+ * // Get settings from localStorage
  * const settings = getStorageItem<IUserSettings>('my-settings');
  * if (settings) {
- *   // Use settings
+ *   // Use settings - TypeScript knows this is IUserSettings
+ *   logInfo('SettingsService', `Loaded settings: showFullUrl=${settings.showFullUrl}`);
+ * } else {
+ *   // Settings not found or invalid - use defaults
+ *   logInfo('SettingsService', 'No settings found, using defaults');
  * }
  * ```
  */
@@ -54,9 +62,22 @@ export function getStorageItem<T>(key: string): T | undefined {
  * 
  * @example
  * ```typescript
- * const success = setStorageItem('my-settings', { theme: 'dark' });
+ * import { IUserSettings } from '../services/SettingsService';
+ * 
+ * // Save settings to localStorage
+ * const settings: IUserSettings = {
+ *   showFullUrl: true,
+ *   showPartialUrl: false,
+ *   showDescription: true,
+ *   openInNewTab: false
+ * };
+ * 
+ * import { logError } from './errorUtils';
+ * 
+ * const success = setStorageItem<IUserSettings>('my-settings', settings);
  * if (!success) {
- *   // Handle storage failure
+ *   // Handle storage failure (e.g., quota exceeded)
+ *   logError('SettingsService', new Error('Failed to save settings'), 'setStorageItem');
  * }
  * ```
  */

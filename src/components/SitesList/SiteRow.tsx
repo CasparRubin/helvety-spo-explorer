@@ -277,6 +277,7 @@ export const SiteRow: React.FC<ISiteRowProps> = React.memo(({
   }
   
   // Check display settings (cheap boolean/number comparisons)
+  // These are primitive values, very fast to compare
   if (
     prevProps.selectedSiteId !== nextProps.selectedSiteId ||
     prevProps.showFullUrl !== nextProps.showFullUrl ||
@@ -298,21 +299,23 @@ export const SiteRow: React.FC<ISiteRowProps> = React.memo(({
   const prevSite: ISite = prevProps.site;
   const nextSite: ISite = nextProps.site;
   
-  // Validate site objects have required properties
+  // Validate site objects have required properties (defensive check)
   if (!prevSite || !nextSite || typeof prevSite !== 'object' || typeof nextSite !== 'object') {
     return false;
   }
   
   // Early return if site ID changed (most common case when site object changes)
+  // ID comparison is very fast (string comparison)
   if (prevSite.id !== nextSite.id) {
     return false;
   }
   
   // Check site properties (only check if ID is same)
   // These are the properties that affect rendering
+  // Order matters: check most likely to change properties first
   if (
-    prevSite.url !== nextSite.url ||
     prevSite.title !== nextSite.title ||
+    prevSite.url !== nextSite.url ||
     prevSite.description !== nextSite.description
   ) {
     return false;

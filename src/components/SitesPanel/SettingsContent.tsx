@@ -184,6 +184,38 @@ export const SettingsContent: React.FC<ISettingsContentProps> = React.memo(({
       </section>
     </div>
   );
+}, (prevProps: ISettingsContentProps, nextProps: ISettingsContentProps): boolean => {
+  /**
+   * Custom comparison function for React.memo optimization
+   * 
+   * Compares props to determine if re-render is needed. Uses shallow equality
+   * for settings object since it's a flat object with primitive values.
+   * 
+   * @param prevProps - Previous component props
+   * @param nextProps - Next component props
+   * @returns true if props are equal (skip re-render), false if different (re-render)
+   */
+  
+  // Fast reference equality check for callback
+  if (prevProps.onSettingsChange !== nextProps.onSettingsChange) {
+    return false;
+  }
+  
+  // Fast reference equality check for settings object
+  if (prevProps.settings === nextProps.settings) {
+    return true;
+  }
+  
+  // Shallow comparison of settings properties (all are booleans, so this is efficient)
+  const prevSettings = prevProps.settings;
+  const nextSettings = nextProps.settings;
+  
+  return (
+    prevSettings.showFullUrl === nextSettings.showFullUrl &&
+    prevSettings.showPartialUrl === nextSettings.showPartialUrl &&
+    prevSettings.showDescription === nextSettings.showDescription &&
+    prevSettings.openInNewTab === nextSettings.openInNewTab
+  );
 });
 
 SettingsContent.displayName = 'SettingsContent';

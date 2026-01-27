@@ -5,7 +5,7 @@
  */
 
 import { logWarning, logError } from './errorUtils';
-import { isValidUrl } from './validationUtils';
+import { isValidUrl, isNonEmptyString } from './validationUtils';
 
 const LOG_SOURCE = 'navigationUtils';
 
@@ -30,14 +30,12 @@ const LOG_SOURCE = 'navigationUtils';
  * ```
  */
 export function navigateToSite(url: string, openInNewTab?: boolean): void {
-  if (!url || typeof url !== 'string') {
+  // Validate input using validation utility
+  if (!isNonEmptyString(url)) {
     return;
   }
 
   const trimmedUrl: string = url.trim();
-  if (trimmedUrl.length === 0) {
-    return;
-  }
 
   // Validate URL before navigation
   if (!isValidUrl(trimmedUrl)) {

@@ -1,7 +1,9 @@
 import * as React from 'react';
 import { FavoriteService } from '../../services/FavoriteService';
 import { logError } from '../errorUtils';
-import { DEFAULT_USER_ID } from '../constants';
+import { isValidStringArray, isNonEmptyString } from '../validationUtils';
+import { safeExecuteSync } from '../errorHandlingUtils';
+import { useServiceInitialization } from './useServiceInitialization';
 
 const LOG_SOURCE = 'useFavorites';
 
@@ -35,29 +37,32 @@ export interface IUseFavoritesReturn {
  */
 export function useFavorites(userId: string): IUseFavoritesReturn {
   const [favoriteSites, setFavoriteSites] = React.useState<Set<string>>(new Set());
-  const favoriteServiceRef = React.useRef<FavoriteService | null>(null);
 
-  // Initialize favorite service
-  React.useEffect((): void => {
-    try {
-      const normalizedUserId: string = userId || DEFAULT_USER_ID;
-      favoriteServiceRef.current = new FavoriteService(normalizedUserId);
-      
+  // Initialize favorite service using reusable hook
+  const { serviceRef: favoriteServiceRef } = useServiceInitialization<FavoriteService>({
+    createService: (normalizedUserId: string): FavoriteService => {
+      return new FavoriteService(normalizedUserId);
+    },
+    userId,
+    logSource: LOG_SOURCE,
+    serviceName: 'FavoriteService',
+    onInitialized: (service: FavoriteService): void => {
       // Load favorite sites with error handling
-      try {
-        const favoriteUrls: string[] = favoriteServiceRef.current.getFavorites();
+      const favoriteUrls: string[] = service.getFavorites();
+      
+      // Validate favorite URLs array before creating Set
+      if (isValidStringArray(favoriteUrls)) {
         setFavoriteSites(new Set(favoriteUrls));
-      } catch (loadError: unknown) {
-        logError(LOG_SOURCE, loadError, `Error loading favorites for user: ${normalizedUserId}`);
-        // Set empty set as fallback to prevent UI errors
+      } else {
+        // Set empty set if validation fails
         setFavoriteSites(new Set());
       }
-    } catch (initError: unknown) {
-      logError(LOG_SOURCE, initError, `Error initializing FavoriteService for user: ${userId || DEFAULT_USER_ID}`);
-      // Set empty set as fallback
+    },
+    onInitializationFailed: (): void => {
+      // Set empty set as fallback if initialization failed
       setFavoriteSites(new Set());
-    }
-  }, [userId]);
+    },
+  });
 
   // Refresh favorite sites list
   const refreshFavorites = React.useCallback((): void => {
@@ -84,7 +89,8 @@ export function useFavorites(userId: string): IUseFavoritesReturn {
         }
         
         // If sizes are same, check if content is different
-        // Convert Set to array for ES5 compatibility (SPFx targets ES5)
+        // Use Array.from for ES5 compatibility (SPFx targets ES5)
+        // Check if any item in new set is missing from previous set
         const newFavoriteArray = Array.from(newFavoriteSet);
         for (let i = 0; i < newFavoriteArray.length; i++) {
           const url = newFavoriteArray[i];
@@ -105,7 +111,8 @@ export function useFavorites(userId: string): IUseFavoritesReturn {
 
   // Toggle favorite status
   const toggleFavorite = React.useCallback((siteUrl: string): void => {
-    if (!siteUrl || typeof siteUrl !== 'string') {
+    // Validate input using validation utility
+    if (!isNonEmptyString(siteUrl)) {
       logError(LOG_SOURCE, new Error('Invalid site URL provided'), `Cannot toggle favorite - invalid URL: ${siteUrl}`);
       return;
     }
@@ -115,14 +122,20 @@ export function useFavorites(userId: string): IUseFavoritesReturn {
       return;
     }
 
-    try {
-      favoriteServiceRef.current.toggleFavorite(siteUrl);
-      // Refresh favorite sites list to reflect the change
-      refreshFavorites();
-    } catch (err: unknown) {
-      logError(LOG_SOURCE, err, `Error toggling favorite for site: ${siteUrl}`);
-      // Don't refresh on error to prevent inconsistent state
-    }
+    // Use safe execution for consistent error handling
+    safeExecuteSync(
+      (): void => {
+        favoriteServiceRef.current!.toggleFavorite(siteUrl);
+        // Refresh favorite sites list to reflect the change
+        refreshFavorites();
+      },
+      {
+        logError: true,
+        logSource: LOG_SOURCE,
+        context: `Error toggling favorite for site: ${siteUrl}`,
+        rethrow: false,
+      }
+    );
   }, [refreshFavorites]);
 
   return {

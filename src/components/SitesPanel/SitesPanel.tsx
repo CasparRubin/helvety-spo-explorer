@@ -11,7 +11,10 @@ import { SettingsContent } from "./SettingsContent";
 import { ISitesPanelProps } from "../../types/ComponentProps";
 
 // Constants
-import { UI_MESSAGES } from '../../utils/constants';
+import { UI_MESSAGES, TIMEOUTS } from '../../utils/constants';
+
+// Utils
+import { querySearchInput, safeFocusDelayed, queryNavbarButton } from '../../utils/domUtils';
 
 // Styles
 import { pivotStyles, tabDescriptionStyles, pivotItemContentStyles, srOnlyStyles } from '../../utils/styles';
@@ -118,30 +121,24 @@ export const SitesPanel: React.FC<ISitesPanelProps> = React.memo(({
       return;
     }
     
-    // Small delay to ensure panel is fully rendered and accessible
-    const timeoutId: ReturnType<typeof setTimeout> = setTimeout((): void => {
-      // Try multiple selectors to find the search input reliably
-      const searchInput: HTMLInputElement | null = 
-        document.querySelector('[role="searchbox"]') as HTMLInputElement ||
-        document.querySelector('[aria-label*="Search"]') as HTMLInputElement ||
-        document.querySelector('input[type="text"]') as HTMLInputElement;
-        
-      if (searchInput && typeof searchInput.focus === 'function') {
-        try {
-          searchInput.focus();
-        } catch (focusError: unknown) {
-          // Some browsers may throw if element is not focusable
-          // Log but don't break the flow
-          if (process.env.NODE_ENV === 'development') {
-            console.warn('Failed to focus search input:', focusError);
-          }
-        }
-      }
-    }, 150); // Slightly increased delay for better reliability
+    // Query for search input using type-safe utility
+    const searchInput: HTMLInputElement | null = querySearchInput();
     
-    return (): void => {
-      clearTimeout(timeoutId);
-    };
+    if (searchInput) {
+      // Small delay to ensure panel is fully rendered and accessible
+      // Use safeFocusDelayed for better error handling and recovery
+      const cancelFocus: (() => void) | undefined = safeFocusDelayed(
+        searchInput,
+        TIMEOUTS.FOCUS_DELAY_MEDIUM_MS,
+        'Focusing search input after panel opens'
+      );
+      
+      // Return cleanup function to cancel delayed focus if component unmounts
+      return cancelFocus ?? undefined;
+    }
+    
+    // No cleanup needed if search input not found
+    return undefined;
   }, [isOpen, selectedKey]);
 
   const handleLinkClick = React.useCallback((item?: PivotItem): void => {
@@ -171,27 +168,20 @@ export const SitesPanel: React.FC<ISitesPanelProps> = React.memo(({
   // Handle panel dismiss with focus management
   // Returns focus to the button that opened the panel for better keyboard navigation
   const handleDismiss = React.useCallback((): void => {
-    // Return focus to the button that opened the panel for accessibility
-    // Try multiple selectors to find the button reliably
-    const navbarButton: HTMLElement | null = 
-      document.querySelector('[aria-label*="Open sites panel"]') as HTMLElement ||
-      document.querySelector('[aria-label*="Sites you have access to"]') as HTMLElement ||
-      document.querySelector('button[aria-expanded="true"]') as HTMLElement;
-      
-    if (navbarButton && typeof navbarButton.focus === 'function') {
-      try {
-        // Small delay to ensure panel is fully closed before focusing
-        setTimeout((): void => {
-          navbarButton.focus();
-        }, 100);
-      } catch (focusError: unknown) {
-        // Some browsers may throw if element is not focusable
-        // Log but don't break the flow
-        if (process.env.NODE_ENV === 'development') {
-          console.warn('Failed to return focus to navbar button:', focusError);
-        }
-      }
+    // Query for navbar button using type-safe utility
+    const navbarButton: HTMLElement | null = queryNavbarButton();
+    
+    if (navbarButton) {
+      // Small delay to ensure panel is fully closed before focusing
+      // Use safeFocusDelayed for better error handling and recovery
+      safeFocusDelayed(
+        navbarButton,
+        TIMEOUTS.FOCUS_DELAY_SHORT_MS,
+        'Returning focus to navbar button after panel closes'
+      );
     }
+    
+    // Always call onDismiss, even if focus operation fails
     onDismiss();
   }, [onDismiss]);
 
