@@ -6,7 +6,7 @@
     "node": ">=22.14.0 < 23.0.0"
   },
   "scripts": {
-    "build": "heft test --clean --production && heft package-solution --production",
+    "build": "heft build --clean --production && heft package-solution --production",
     "start": "heft start --clean",
     "clean": "heft clean",
     "eject-webpack": "heft eject-webpack"
@@ -16,7 +16,13 @@
     "@microsoft/sp-core-library": "1.22.1",
     "@microsoft/decorators": "1.22.1",
     "@microsoft/sp-dialog": "1.22.1",
-    "@microsoft/sp-application-base": "1.22.1"
+    "@microsoft/sp-application-base": "1.22.1",
+    "@microsoft/sp-http": "1.22.1",
+    "@fluentui/react": "^8.125.0",
+    "react": "17.0.1",
+    "react-dom": "17.0.1",
+    "@tanstack/react-table": "^8.20.5",
+    "react-window": "^1.8.10"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "4.5.2",
@@ -25,8 +31,10 @@
     "@microsoft/spfx-web-build-rig": "1.22.1",
     "@microsoft/spfx-heft-plugins": "1.22.1",
     "@rushstack/heft": "1.1.2",
-    "@types/heft-jest": "1.0.2",
     "@types/webpack-env": "~1.15.2",
+    "@types/react": "17.0.62",
+    "@types/react-dom": "17.0.20",
+    "@types/react-window": "^1.8.8",
     "@typescript-eslint/parser": "8.46.2",
     "css-loader": "~7.1.2",
     "eslint": "8.57.1",

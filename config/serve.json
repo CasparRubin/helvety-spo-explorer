@@ -4,24 +4,20 @@
   "https": true,
   "serveConfigurations": {
     "default": {
-      "pageUrl": "https://{tenantDomain}/SitePages/myPage.aspx",
+      "pageUrl": "https://helvety.sharepoint.com/sites/allcompany/SitePages/Home.aspx",
       "customActions": {
         "3f9d14c6-c154-4aaf-bcb9-b1f3c064fd4c": {
           "location": "ClientSideExtension.ApplicationCustomizer",
-          "properties": {
-            "testMessage": "Test message"
-          }
+          "properties": {}
         }
       }
     },
     "helvetySpoExplorer": {
-      "pageUrl": "https://{tenantDomain}/SitePages/myPage.aspx",
+      "pageUrl": "https://helvety.sharepoint.com/sites/allcompany/SitePages/Home.aspx",
       "customActions": {
         "3f9d14c6-c154-4aaf-bcb9-b1f3c064fd4c": {
           "location": "ClientSideExtension.ApplicationCustomizer",
-          "properties": {
-            "testMessage": "Test message"
-          }
+          "properties": {}
         }
       }
     }

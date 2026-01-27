@@ -3,7 +3,6 @@
     <ClientSideComponentInstance
         Title="HelvetySpoExplorer"
         Location="ClientSideExtension.ApplicationCustomizer"
-        ComponentId="3f9d14c6-c154-4aaf-bcb9-b1f3c064fd4c"
-        Properties="{&quot;testMessage&quot;:&quot;Test message&quot;}">
+        ComponentId="3f9d14c6-c154-4aaf-bcb9-b1f3c064fd4c">
     </ClientSideComponentInstance>
 </Elements>

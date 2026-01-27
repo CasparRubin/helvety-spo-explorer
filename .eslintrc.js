@@ -14,8 +14,6 @@ module.exports = {
       rules: {
         // Prevent usage of the JavaScript null value, while allowing code to access existing APIs that may require null. https://www.npmjs.com/package/@rushstack/eslint-plugin
         '@rushstack/no-new-null': 1,
-        // Require Jest module mocking APIs to be called before any other statements in their code block. https://www.npmjs.com/package/@rushstack/eslint-plugin
-        '@rushstack/hoist-jest-mock': 1,
         // Require chunk names for dynamic imports in SPFx projects. https://www.npmjs.com/package/@rushstack/eslint-plugin
         '@rushstack/import-requires-chunk-name': 1,
         // Ensure that React components rendered with ReactDOM.render() are unmounted with ReactDOM.unmountComponentAtNode(). https://www.npmjs.com/package/@rushstack/eslint-plugin
@@ -295,27 +293,5 @@ module.exports = {
         '@microsoft/spfx/no-require-ensure': 2,
       }
     },
-    {
-      // For unit tests, we can be a little bit less strict.  The settings below revise the
-      // defaults specified in the extended configurations, as well as above.
-      files: [
-        // Test files
-        '*.test.ts',
-        '*.test.tsx',
-        '*.spec.ts',
-        '*.spec.tsx',
-
-        // Facebook convention
-        '**/__mocks__/*.ts',
-        '**/__mocks__/*.tsx',
-        '**/__tests__/*.ts',
-        '**/__tests__/*.tsx',
-
-        // Microsoft convention
-        '**/test/*.ts',
-        '**/test/*.tsx'
-      ],
-      rules: {}
-    }
   ]
 };

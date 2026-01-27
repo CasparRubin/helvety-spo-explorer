@@ -1,71 +1,171 @@
-# helvety-spo-explorer
+# Helvety SPO Explorer
 
-## Summary
+SharePoint Framework TypeScript React License
 
-Short summary on functionality and used technologies.
+A SharePoint Framework (SPFx) application customizer that provides a navigation bar for exploring and accessing SharePoint sites. The extension displays a "Sites you have access to" button in the top placeholder, which opens a panel with a searchable list of all SharePoint sites the current user can access.
 
-[picture of the solution in action, if possible]
-
-## Used SharePoint Framework Version
-
-![version](https://img.shields.io/badge/version-1.22.1-green.svg)
-
-## Applies to
-
-- [SharePoint Framework](https://aka.ms/spfx)
-- [Microsoft 365 tenant](https://docs.microsoft.com/sharepoint/dev/spfx/set-up-your-developer-tenant)
-
-> Get your own free development tenant by subscribing to [Microsoft 365 developer program](http://aka.ms/o365devprogram)
-
-## Prerequisites
-
-> Any special pre-requisites?
-
-## Solution
-
-| Solution    | Author(s)                                               |
-| ----------- | ------------------------------------------------------- |
-| folder name | Author details (name, company, twitter alias with link) |
-
-## Version history
-
-| Version | Date             | Comments        |
-| ------- | ---------------- | --------------- |
-| 1.1     | March 10, 2021   | Update comment  |
-| 1.0     | January 29, 2021 | Initial release |
-
-## Disclaimer
-
-**THIS CODE IS PROVIDED _AS IS_ WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.**
-
----
-
-## Minimal Path to Awesome
-
-- Clone this repository
-- Ensure that you are at the solution folder
-- in the command-line run:
-  - `npm install -g @rushstack/heft`
-  - `npm install`
-  - `heft start`
-
-> Include any additional steps as needed.
-
-Other build commands can be listed using `heft --help`.
+**Privacy First** - All data processing happens client-side. User preferences (favorites and settings) are stored locally in the browser's localStorage. The application does not collect or transmit user data to external servers (SharePoint APIs are used for site discovery only).
 
 ## Features
 
-Description of the extension that expands upon high-level summary above.
+* **Site Discovery** - Automatically fetches and displays all SharePoint sites the current user has access to
+* **Real-time Search** - Search across site titles, descriptions, and URLs with highlighted matches
+* **Favorites Management** - Mark frequently used sites as favorites for quick access
+* **Quick Access Menu** - Dropdown menu from the navbar button showing favorite sites
+* **Settings Panel** - Customize display preferences:
+  - Show/hide full URLs
+  - Show/hide partial URLs (path only)
+  - Show/hide site descriptions
+  - Open sites in new tab vs current tab
+* **Dual API Support** - Uses SharePoint Search API as primary method with automatic fallback to WebInfos API
+* **Performance Optimized** - 5-minute caching, React.memo optimizations, and efficient rendering
+* **Accessibility** - Full keyboard navigation support, ARIA labels, and screen reader support
+* **Theme Aware** - Automatically adapts to SharePoint light/dark themes
+* **Error Handling** - Comprehensive error handling with user-friendly messages
 
-This extension illustrates the following concepts:
+## How It Works
 
-- topic 1
-- topic 2
-- topic 3
+1. **Installation** - Deploy the SPFx solution package to your SharePoint App Catalog
+2. **Activation** - Add the application customizer to your site(s) via Site Settings
+3. **Usage** - Click the "Sites you have access to" button in the top navigation bar
+4. **Explore** - Browse, search, and favorite sites from the panel
+5. **Customize** - Adjust display preferences in the Settings tab
 
-> Notice that better pictures and documentation will increase the sample usage and the value you are providing for others. Thanks for your submissions advance.
+## Tech Stack
 
-> Share your web part with others through Microsoft 365 Patterns and Practices program to get visibility and exposure. More details on the community, open-source projects and other activities from http://aka.ms/m365pnp.
+This project is built with modern web technologies:
+
+* **SharePoint Framework 1.22.1** - Microsoft's framework for building SharePoint extensions
+* **React 17.0.1** - UI library
+* **TypeScript 5.8.0** - Type-safe JavaScript
+* **Fluent UI 8.125.0** - Microsoft's design system (formerly Office UI Fabric)
+* **Heft 1.1.2** - Build system from Rush Stack
+* **SharePoint REST APIs** - For site discovery and data fetching
+
+## Project Structure
+
+```
+helvety-spo-explorer/
+├── src/
+│   ├── components/          # React components
+│   │   ├── ErrorBoundary/  # Error boundary component
+│   │   ├── Navbar/         # Main navigation bar component
+│   │   ├── SitesList/      # Sites list and site row components
+│   │   └── SitesPanel/     # Panel with sites and settings tabs
+│   ├── extensions/          # SPFx application customizer
+│   │   └── helvetySpoExplorer/
+│   │       ├── HelvetySpoExplorerApplicationCustomizer.ts
+│   │       └── loc/         # Localization files
+│   ├── services/           # Business logic services
+│   │   ├── SiteService.ts      # SharePoint site fetching
+│   │   ├── FavoriteService.ts  # Favorites management
+│   │   └── SettingsService.ts  # User settings management
+│   ├── types/              # TypeScript type definitions
+│   │   ├── ComponentProps.ts
+│   │   ├── Site.ts
+│   │   └── JSOM.d.ts
+│   └── utils/              # Utility functions
+│       ├── constants/      # Application constants
+│       ├── customHooks/    # Custom React hooks
+│       ├── styles/         # Style definitions
+│       ├── componentUtils.ts
+│       ├── errorUtils.ts
+│       ├── navigationUtils.ts
+│       ├── siteUtils.ts
+│       ├── storageUtils.ts
+│       ├── urlUtils.ts
+│       └── validationUtils.ts
+├── config/                 # Build configuration files
+├── docs/                   # Documentation
+│   ├── ARCHITECTURE.md
+│   └── DESIGN_DECISIONS.md
+├── sharepoint/             # SharePoint solution assets
+│   └── assets/
+│       ├── ClientSideInstance.xml
+│       └── elements.xml
+└── [config files]          # Configuration files (TypeScript, ESLint, etc.)
+```
+
+## Architecture & Performance
+
+This application is built with performance and code quality in mind:
+
+* **Service Layer Architecture** - Separated business logic into services for maintainability
+* **Custom Hooks** - Reusable React hooks for common patterns (sites, favorites, settings)
+* **Type Safety** - Comprehensive TypeScript types with explicit return types throughout
+* **Error Handling** - Centralized error handling with detailed context and user-friendly messages
+* **Performance Optimizations** - React.memo with custom comparison functions, useCallback, and useMemo
+* **Caching Strategy** - 5-minute in-memory cache for site data to reduce API calls
+* **Dual API Fallback** - Automatic fallback from Search API to WebInfos API for reliability
+* **Code Organization** - Modular architecture with extracted utilities and reusable components
+* **Accessibility** - Full keyboard navigation, ARIA labels, and screen reader support
+
+## Prerequisites
+
+- Node.js >=22.14.0 < 23.0.0
+- A Microsoft 365 developer tenant or SharePoint Online tenant
+- SharePoint Framework development environment set up
+
+## Getting Started
+
+### Installation
+
+1. Clone this repository
+2. Ensure that you are at the solution folder
+3. In the command-line run:
+   ```bash
+   npm install -g @rushstack/heft
+   npm install
+   ```
+
+### Development
+
+Start the local development server:
+
+```bash
+npm start
+```
+
+This will:
+- Build the project
+- Start the local workbench
+- Open your browser to the workbench URL
+
+### Build
+
+Build the production bundle:
+
+```bash
+npm run build
+```
+
+This will:
+- Clean previous builds
+- Compile TypeScript
+- Run ESLint
+- Bundle with Webpack
+- Create the SharePoint solution package (.sppkg)
+
+The solution package will be created at: `sharepoint/solution/helvety-spo-explorer.sppkg`
+
+### Deployment
+
+1. Upload the `.sppkg` file to your SharePoint App Catalog
+2. Add the application customizer to your site(s) via Site Settings > Site App Permissions
+3. The navigation bar will appear in the top placeholder
+
+## SharePoint Framework Concepts
+
+This extension illustrates the following SharePoint Framework concepts:
+
+- Application Customizers and placeholders
+- SharePoint REST API integration (Search API and WebInfos API)
+- React component development with SPFx
+- LocalStorage for user preferences
+- Fluent UI component usage
+- Error handling and logging in SPFx
+- TypeScript type safety
+- Performance optimization techniques
 
 ## References
 
@@ -75,3 +175,25 @@ This extension illustrates the following concepts:
 - [Publish SharePoint Framework applications to the Marketplace](https://docs.microsoft.com/sharepoint/dev/spfx/publish-to-marketplace-overview)
 - [Microsoft 365 Patterns and Practices](https://aka.ms/m365pnp) - Guidance, tooling, samples and open-source controls for your Microsoft 365 development
 - [Heft Documentation](https://heft.rushstack.io/)
+
+## Developer
+
+This application is developed and maintained by Helvety, a Swiss company committed to transparency, strong security, and respect for user privacy and data protection.
+
+For questions or inquiries, please contact us at contact@helvety.com.
+
+## License & Usage
+
+This repository is public for transparency purposes only—all code is open for inspection so users can verify its behavior.
+
+**No license is granted; this is the default "All rights reserved" status.** You may view the code, but you cannot reuse, redistribute, or sell it without explicit permission. All rights are retained by the author.
+
+## Version History
+
+| Version | Date             | Comments                    |
+| ------- | ---------------- | --------------------------- |
+| 0.0.1   | January 27, 2026 | Initial release with code quality improvements |
+
+## Disclaimer
+
+**THIS CODE IS PROVIDED _AS IS_ WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.**
