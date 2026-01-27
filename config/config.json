@@ -1,0 +1,18 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json",
+  "version": "2.0",
+  "bundles": {
+    "helvety-spo-explorer-application-customizer": {
+      "components": [
+        {
+          "entrypoint": "./lib/extensions/helvetySpoExplorer/HelvetySpoExplorerApplicationCustomizer.js",
+          "manifest": "./src/extensions/helvetySpoExplorer/HelvetySpoExplorerApplicationCustomizer.manifest.json"
+        }
+      ]
+    }
+  },
+  "externals": {},
+  "localizedResources": {
+    "HelvetySpoExplorerApplicationCustomizerStrings": "lib/extensions/helvetySpoExplorer/loc/{locale}.js"
+  }
+}

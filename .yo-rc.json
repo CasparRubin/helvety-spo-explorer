@@ -1,0 +1,20 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "useGulp": false,
+    "plusBeta": false,
+    "isCreatingSolution": true,
+    "nodeVersion": "22.18.0",
+    "sdksVersions": {},
+    "version": "1.22.1",
+    "libraryName": "helvety-spo-explorer",
+    "libraryId": "9193252e-cd60-4616-bab5-9f98b29d2b0c",
+    "environment": "spo",
+    "packageManager": "npm",
+    "solutionName": "helvety-spo-explorer",
+    "solutionShortDescription": "helvety-spo-explorer description",
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "componentType": "extension",
+    "extensionType": "ApplicationCustomizer"
+  }
+}
