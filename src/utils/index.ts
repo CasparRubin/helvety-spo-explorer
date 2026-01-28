@@ -32,9 +32,13 @@ export * from './domUtils';
 
 // Validation utilities
 export * from './validationUtils';
+// Export branded type helpers
+export { createSiteId, createWebId } from './validationUtils';
 
 // Error handling utilities
 export * from './errorHandlingUtils';
+export * from './errorRetryUtils';
+export * from './errorHandlerFactories';
 
 // Service utilities
 export * from './serviceUtils';

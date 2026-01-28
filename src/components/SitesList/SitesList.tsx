@@ -19,21 +19,19 @@ import { siteMatchesSearch, highlightText as highlightTextUtil } from '../../uti
 import { compareSitesListProps } from '../../utils/componentComparisonUtils';
 
 // Constants
-import { LAYOUT, TIMEOUTS, UI_MESSAGES } from '../../utils/constants';
+import { LAYOUT, TIMEOUTS, UI_MESSAGES, CSS_VARIABLES, SPACING } from '../../utils/constants';
 
 // Styles
 import {
   sitesListContainerStyles,
   emptyStateStyles,
   loadingContainerStyles,
-  emptySitesStyles,
   srOnlyStyles,
   scrollableContainerStyles,
   bottomFadeOverlayStyles,
   scrollableContainerWrapperStyles,
   searchContainerStyles,
   separatorContainerStyles,
-  refreshButtonStyles,
 } from '../../utils/styles';
 
 /**
@@ -257,12 +255,35 @@ export const SitesList: React.FC<ISitesListProps> = React.memo(({
     return (
       <div style={sitesListContainerStyles}>
         <div 
-          style={emptySitesStyles} 
+          style={emptyStateStyles} 
           role="status" 
           aria-live="polite"
           aria-atomic="true"
         >
-          {UI_MESSAGES.NO_SITES_AVAILABLE}
+          <div style={{ marginBottom: SPACING.LG }}>
+            <div style={{ fontSize: '16px', fontWeight: 500, color: CSS_VARIABLES.NEUTRAL_PRIMARY, marginBottom: SPACING.SM }}>
+              {UI_MESSAGES.NO_SITES_AVAILABLE}
+            </div>
+            <div style={{ fontSize: '14px', color: CSS_VARIABLES.NEUTRAL_SECONDARY, marginBottom: SPACING.XS }}>
+              {UI_MESSAGES.NO_SITES_AVAILABLE_DESCRIPTION}
+            </div>
+            <div style={{ fontSize: '13px', color: CSS_VARIABLES.NEUTRAL_TERTIARY }}>
+              {UI_MESSAGES.NO_SITES_AVAILABLE_TROUBLESHOOTING}
+            </div>
+          </div>
+          {onRefresh && (
+            <IconButton
+              iconProps={{ 
+                iconName: 'Refresh',
+              }}
+              title={UI_MESSAGES.REFRESH_SITES}
+              ariaLabel={UI_MESSAGES.REFRESH_SITES}
+              onClick={onRefresh}
+              disabled={isLoading}
+              className={isLoading ? 'helvety-spo-refresh-button-spinning' : undefined}
+              text={UI_MESSAGES.REFRESH_SITES}
+            />
+          )}
         </div>
       </div>
     );
@@ -301,7 +322,6 @@ export const SitesList: React.FC<ISitesListProps> = React.memo(({
             onClick={onRefresh}
             disabled={isLoading}
             className={isLoading ? 'helvety-spo-refresh-button-spinning' : undefined}
-            styles={refreshButtonStyles}
           />
         )}
       </div>

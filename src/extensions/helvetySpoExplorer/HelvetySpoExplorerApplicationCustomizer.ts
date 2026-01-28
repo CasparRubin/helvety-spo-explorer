@@ -19,8 +19,9 @@ import { getApplicationCustomizerStyles, APPLICATION_CUSTOMIZER_STYLE_ID } from 
 const LOG_SOURCE: string = 'HelvetySpoExplorerApplicationCustomizer';
 
 /**
- * If your command set uses the ClientSideComponentProperties JSON input,
- * it will be deserialized into the BaseExtension.properties object.
+ * Application Customizer properties interface.
+ * If the extension uses ClientSideComponentProperties JSON input,
+ * it will be deserialized into the BaseApplicationCustomizer.properties object.
  * You can define an interface to describe it.
  */
 export interface IHelvetySpoExplorerApplicationCustomizerProperties {

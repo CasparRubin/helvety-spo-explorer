@@ -21,7 +21,7 @@ import { sortSitesAlphabetically } from '../../utils/siteUtils';
 import { DEFAULT_USER_ID, UI_MESSAGES } from '../../utils/constants';
 
 // Styles
-import { navbarStyles, navbarInnerStyles, navbarContentStyles, sitesButtonStyles, srOnlyStyles } from '../../utils/styles';
+import { navbarStyles, navbarInnerStyles, navbarContentStyles, srOnlyStyles } from '../../utils/styles';
 
 /**
  * Navbar component - main navigation bar for SharePoint sites
@@ -160,7 +160,6 @@ export const Navbar: React.FC<INavbarProps> = React.memo(({ context }) => {
               items: menuItems,
               ariaLabel: UI_MESSAGES.FAVORITES_QUICK_ACCESS_MENU,
             }}
-            styles={sitesButtonStyles}
             ariaLabel={UI_MESSAGES.OPEN_SITES_PANEL}
             aria-describedby="sites-button-description"
             aria-expanded={isPanelOpen}

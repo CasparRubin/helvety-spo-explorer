@@ -2,7 +2,7 @@ import { STORAGE_KEYS, DEFAULT_SETTINGS } from '../utils/constants';
 import { getStorageItem, setStorageItem, removeStorageItem } from '../utils/storageUtils';
 import { isValidUserSettings, isPlainObject } from '../utils/validationUtils';
 import { logWarning } from '../utils/errorUtils';
-import { normalizeUserId, generateStorageKey } from '../utils/serviceUtils';
+import { normalizeUserId, generateStorageKey, formatValidationErrorMessage } from '../utils/serviceUtils';
 
 
 /**
@@ -128,7 +128,8 @@ export class SettingsService {
   public updateSettings(updates: Partial<IUserSettings>): void {
     // Validate input is a plain object
     if (!isPlainObject(updates)) {
-      logWarning('SettingsService', 'Invalid updates object provided to updateSettings', 'updateSettings');
+      const errorMessage: string = formatValidationErrorMessage('updates object', 'updateSettings');
+      logWarning('SettingsService', errorMessage, 'updateSettings');
       return;
     }
 
@@ -137,7 +138,8 @@ export class SettingsService {
     
     // Validate merged settings is valid
     if (!isValidUserSettings(newSettings)) {
-      logWarning('SettingsService', 'Merged settings are invalid', 'updateSettings');
+      const errorMessage: string = formatValidationErrorMessage('merged settings', 'updateSettings');
+      logWarning('SettingsService', errorMessage, 'updateSettings');
       return;
     }
     
@@ -158,7 +160,8 @@ export class SettingsService {
   private saveSettings(settings: IUserSettings): void {
     // Validate input
     if (!isValidUserSettings(settings)) {
-      logWarning('SettingsService', 'Invalid settings object provided to saveSettings', 'saveSettings');
+      const errorMessage: string = formatValidationErrorMessage('settings object', 'saveSettings');
+      logWarning('SettingsService', errorMessage, 'saveSettings');
       return;
     }
 

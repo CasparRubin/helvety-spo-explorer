@@ -9,7 +9,7 @@
 
 A SharePoint Framework (SPFx) application customizer that provides a navigation bar for exploring and accessing SharePoint sites. The extension displays a "Sites you have access to" button in the top placeholder, which opens a panel with a searchable list of all SharePoint sites the current user can access.
 
-**Privacy First** - All data processing happens client-side. User preferences (favorites and settings) are stored locally in the browser's localStorage. The application does not collect or transmit user data to external servers (SharePoint APIs are used for site discovery only).
+**Privacy First** - All data processing happens client-side. User preferences (favorites and settings) are stored locally in the browser's localStorage. The application does not collect or transmit user data to external servers (SharePoint Search API is used for site discovery only).
 
 ## Features
 
@@ -22,7 +22,7 @@ A SharePoint Framework (SPFx) application customizer that provides a navigation 
   - Show/hide partial URLs (path only)
   - Show/hide site descriptions
   - Open sites in new tab vs current tab
-* **Dual API Support** - Uses SharePoint Search API as primary method with automatic fallback to WebInfos API
+* **SharePoint Search API** - Uses SharePoint Search API to fetch sites the user has access to (no additional permissions required)
 * **Performance Optimized** - 5-minute caching, React.memo optimizations, and efficient rendering
 * **Accessibility** - Full keyboard navigation support, ARIA labels, and screen reader support
 * **Theme Aware** - Automatically adapts to SharePoint light/dark themes
@@ -45,7 +45,7 @@ This project is built with modern web technologies:
 * **TypeScript 5.8.0** - Type-safe JavaScript
 * **Fluent UI 8.125.0** - Microsoft's design system (formerly Office UI Fabric)
 * **Heft 1.1.2** - Build system from Rush Stack
-* **SharePoint REST APIs** - For site discovery and data fetching
+* **SharePoint Search API** - For site discovery and data fetching
 
 ## Project Structure
 
@@ -103,7 +103,7 @@ This application is built with performance and code quality in mind:
 * **Error Handling** - Centralized error handling with unified patterns, error categorization, and user-friendly messages
 * **Performance Optimizations** - React.memo with custom comparison functions, useCallback, and useMemo
 * **Caching Strategy** - 5-minute in-memory cache for site data to reduce API calls
-* **Dual API Fallback** - Automatic fallback from Search API to WebInfos API for reliability
+* **SharePoint Search Integration** - Uses SharePoint Search API for reliable and consistent site discovery across tenants
 * **Code Organization** - Modular architecture with extracted utilities, shared service patterns, and reusable components
 * **Accessibility** - Full keyboard navigation, ARIA labels, and screen reader support
 * **Code Quality** - Reduced duplication, simplified complex functions, improved type safety, and consistent patterns
@@ -169,7 +169,7 @@ The solution package will be created at: `sharepoint/solution/helvety-spo-explor
 This extension illustrates the following SharePoint Framework concepts:
 
 - Application Customizers and placeholders
-- SharePoint REST API integration (Search API and WebInfos API)
+- SharePoint Search API integration for site discovery
 - React component development with SPFx
 - LocalStorage for user preferences
 - Fluent UI component usage
@@ -181,7 +181,7 @@ This extension illustrates the following SharePoint Framework concepts:
 
 - [Getting started with SharePoint Framework](https://docs.microsoft.com/sharepoint/dev/spfx/set-up-your-developer-tenant)
 - [Building for Microsoft teams](https://docs.microsoft.com/sharepoint/dev/spfx/build-for-teams-overview)
-- [Use Microsoft Graph in your solution](https://docs.microsoft.com/sharepoint/dev/spfx/web-parts/get-started/using-microsoft-graph-apis)
+- [SharePoint Search REST API](https://docs.microsoft.com/sharepoint/dev/general-development/sharepoint-search-rest-api-overview)
 - [Publish SharePoint Framework applications to the Marketplace](https://docs.microsoft.com/sharepoint/dev/spfx/publish-to-marketplace-overview)
 - [Microsoft 365 Patterns and Practices](https://aka.ms/m365pnp) - Guidance, tooling, samples and open-source controls for your Microsoft 365 development
 - [Heft Documentation](https://heft.rushstack.io/)
@@ -204,6 +204,7 @@ This repository is public for transparency purposes only—all code is open for 
 | ------- | ---------------- | --------------------------- |
 | 0.0.1   | January 27, 2026 | Initial release with comprehensive code quality improvements: reduced duplication, simplified complex functions, improved type safety, unified error handling, and optimized performance |
 | 0.0.1   | January 28, 2026 | Fixed SharePoint packaging issues: removed invalid JSON comments from manifest, removed ClientSideInstance.xml from elementManifests for site-level deployment |
+| 1.0.0.3 | January 28, 2026 | Version bump to 1.0.0.3 - build verification and code quality improvements |
 
 ## Disclaimer
 

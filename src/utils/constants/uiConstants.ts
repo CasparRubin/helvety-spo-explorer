@@ -27,6 +27,8 @@ export const ERROR_MESSAGES = {
 export const UI_MESSAGES = {
   LOADING_SITES: 'Loading sites...',
   NO_SITES_AVAILABLE: 'No sites available',
+  NO_SITES_AVAILABLE_DESCRIPTION: 'No SharePoint sites were found. This could mean you don\'t have access to any sites, or there was an issue loading them.',
+  NO_SITES_AVAILABLE_TROUBLESHOOTING: 'Try refreshing the list, or check with your administrator if you should have access to sites.',
   NO_SITES_FOUND: 'No sites found matching',
   SEARCH_PLACEHOLDER: 'Search sites...',
   SEARCH_DESCRIPTION: 'Search sites by title, description, or URL',

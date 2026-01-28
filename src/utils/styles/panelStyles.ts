@@ -24,16 +24,6 @@ export const settingsToggleStyles = {
 } as const;
 
 /**
- * Settings toggle description styles
- */
-export const settingsToggleDescriptionStyles: React.CSSProperties = {
-  fontSize: TYPOGRAPHY.FONT_SIZE_XSMALL,
-  color: CSS_VARIABLES.NEUTRAL_SECONDARY,
-  marginTop: SPACING.XS,
-  lineHeight: TYPOGRAPHY.LINE_HEIGHT_SMALL,
-} as const;
-
-/**
  * Pivot (tabs) styles
  */
 export const pivotStyles = {
@@ -75,9 +65,7 @@ export const pivotItemContentStyles: React.CSSProperties = {
  * Settings section container styles
  */
 export const settingsSectionStyles: React.CSSProperties = {
-  marginBottom: SPACING.XXL,
   paddingBottom: SPACING.XL,
-  borderBottom: `${SPACING.DIVIDER_HEIGHT} solid ${CSS_VARIABLES.NEUTRAL_2}`,
 } as const;
 
 /**

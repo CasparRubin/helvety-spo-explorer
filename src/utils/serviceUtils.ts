@@ -30,7 +30,8 @@ export function normalizeUserId(userId: string, logSource?: string): string {
   }
   
   if (logSource) {
-    logWarning(logSource, `Invalid userId provided: ${String(userId)}, using default`, 'normalizeUserId');
+    const errorMessage: string = formatValidationErrorMessage('userId', 'normalizeUserId', userId);
+    logWarning(logSource, `${errorMessage}, using default`, 'normalizeUserId');
   }
   
   return DEFAULT_USER_ID;
@@ -54,6 +55,31 @@ export function normalizeUserId(userId: string, logSource?: string): string {
  */
 export function generateStorageKey(prefix: string, userId: string): string {
   return `${prefix}-${userId}`;
+}
+
+/**
+ * Formats a standardized validation error message
+ * 
+ * Creates consistent validation error messages across all services.
+ * 
+ * @param valueName - Name of the value that failed validation
+ * @param operationName - Name of the operation where validation failed
+ * @param value - The invalid value (optional, for logging)
+ * @returns Formatted error message
+ * 
+ * @example
+ * ```typescript
+ * const message = formatValidationErrorMessage('URL', 'addFavorite', url);
+ * // Returns: "Invalid URL provided to addFavorite: <url>"
+ * ```
+ */
+export function formatValidationErrorMessage(
+  valueName: string,
+  operationName: string,
+  value?: unknown
+): string {
+  const valueStr: string = value !== undefined ? `: ${String(value)}` : '';
+  return `Invalid ${valueName} provided to ${operationName}${valueStr}`;
 }
 
 /**
@@ -94,6 +120,7 @@ export function validateServiceInput<T>(
     return { isValid: true, value };
   }
   
-  logWarning(logSource, `Invalid ${valueName} provided to ${operationName}: ${String(value)}`, operationName);
+  const errorMessage: string = formatValidationErrorMessage(valueName, operationName, value);
+  logWarning(logSource, errorMessage, operationName);
   return { isValid: false };
 }

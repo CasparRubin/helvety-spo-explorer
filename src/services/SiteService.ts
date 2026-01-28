@@ -1,21 +1,27 @@
+// External dependencies
 import { SPHttpClient, SPHttpClientResponse } from "@microsoft/sp-http";
 import { ApplicationCustomizerContext } from "@microsoft/sp-application-base";
-import { ISite, ISiteSearchResultRow, ISearchResultCell, ISPRestResponse, IWebInfo, SiteId, WebId } from "../types/Site";
-import { logError, logWarning } from '../utils/errorUtils';
-import { ValidationError } from '../utils/errors';
-import { CACHE_CONFIG, API_ENDPOINTS, SEARCH_QUERY_PARAMS, DEFAULT_SITE_TITLE, ERROR_MESSAGES } from '../utils/constants';
+
+// Types
+import { ISite, ISiteSearchResultRow, SiteId, WebId } from "../types/Site";
+
+// Utils
+import { logError, extractErrorMessage, logInfo, logWarning } from '../utils/errorUtils';
+import { ValidationError, ApiError, PermissionError } from '../utils/errors';
 import { navigateToSite as navigateToSiteUtil } from '../utils/navigationUtils';
-import { isValidSitesArray, isValidSiteIdCandidate, isValidWebIdCandidate } from '../utils/validationUtils';
-import { handleSearchApiError, handleWebInfosApiError, handleApiResponseError, withTimeout } from '../utils/errorHandlingUtils';
+import { isValidSitesArray, createSiteId, createWebId } from '../utils/validationUtils';
+import { handleSharePointApiError, withTimeout } from '../utils/errorHandlingUtils';
+
+// Constants
+import { CACHE_CONFIG, API_ENDPOINTS, SEARCH_QUERY_PARAMS, DEFAULT_SITE_TITLE, ERROR_MESSAGES } from '../utils/constants';
 
 const LOG_SOURCE = 'SiteService';
 
 /**
- * Service for fetching SharePoint sites using REST API
+ * Service for fetching SharePoint sites using SharePoint Search API
  * 
  * This service provides methods to retrieve SharePoint sites that the current user has access to.
- * It uses the SharePoint Search API as the primary method and falls back to the WebInfos API
- * if the search API is unavailable. Results are cached for 5 minutes to improve performance.
+ * It uses the SharePoint Search API to fetch sites. Results are cached for 5 minutes to improve performance.
  * 
  * @example
  * ```typescript
@@ -72,93 +78,11 @@ export class SiteService {
     return null;
   }
 
-  /**
-   * Attempts to fetch sites from Search API with fallback handling
-   * 
-   * Tries the Search API first, and if it fails or returns invalid/empty results,
-   * logs a warning and returns null to allow fallback to WebInfos API.
-   * 
-   * @param now - Current timestamp for caching
-   * @returns Sites array if successful, null if should fallback
-   */
-  private async tryFetchFromSearchApi(now: number): Promise<ISite[] | null> {
-    try {
-      const sites: ISite[] = await withTimeout(
-        this.getSitesFromSearch(),
-        undefined, // Use default timeout
-        'Search API request timed out'
-      );
-      
-      // Validate and cache if valid and non-empty
-      if (sites.length > 0 && this.validateAndCacheSites(sites, now)) {
-        return sites;
-      }
-      
-      // Invalid or empty results - log warning and fall through to webinfos API
-      const webUrl: string = this.context.pageContext.web.absoluteUrl;
-      if (!isValidSitesArray(sites)) {
-        logWarning(
-          LOG_SOURCE, 
-          'Search API returned invalid sites array', 
-          `getSites - invalid response format. Web URL: ${webUrl}`
-        );
-      } else {
-        logWarning(
-          LOG_SOURCE, 
-          'Search API returned no results, falling back to WebInfos API', 
-          `getSites - empty results. Web URL: ${webUrl}`
-        );
-      }
-      
-      return null;
-    } catch (searchError: unknown) {
-      // Search API failed - log error and continue to fallback API
-      handleSearchApiError(searchError, this.context, LOG_SOURCE);
-      return null;
-    }
-  }
-
-  /**
-   * Fetches sites from WebInfos API with validation
-   * 
-   * This is the fallback method when Search API fails or returns invalid results.
-   * 
-   * @param now - Current timestamp for caching
-   * @returns Sites array
-   * @throws ValidationError, ApiError, or PermissionError if API fails
-   */
-  private async fetchFromWebInfosApi(now: number): Promise<ISite[]> {
-    const sites: ISite[] = await withTimeout(
-      this.getSitesFromWebInfos(),
-      undefined, // Use default timeout
-      'WebInfos API request timed out'
-    );
-    
-    // Validate returned sites array
-    if (!isValidSitesArray(sites)) {
-      throw new ValidationError(
-        'WebInfos API returned invalid sites array',
-        'sites',
-        sites,
-        undefined,
-        'getSites'
-      );
-    }
-    
-    // Cache and return valid sites (even if empty)
-    this.validateAndCacheSites(sites, now);
-    return sites;
-  }
 
   /**
    * Get all sites the current user has access to
-   * Uses SharePoint Search API as primary method, falls back to webinfos if needed
+   * Uses SharePoint Search API to fetch sites
    * Results are cached for 5 minutes to improve performance
-   * 
-   * Error handling strategy:
-   * 1. Try Search API first (better for large tenants, faster, better filtering)
-   * 2. If Search API fails or returns empty/invalid results, fall back to WebInfos API
-   * 3. If both APIs fail, throw standardized error based on error category
    * 
    * Caching strategy:
    * - Results cached for 5 minutes (CACHE_CONFIG.DURATION_MS)
@@ -166,7 +90,7 @@ export class SiteService {
    * - Cache cleared if invalid data detected
    * 
    * @returns A promise that resolves to an array of ISite objects
-   * @throws ApiError, PermissionError, or ValidationError if both API methods fail
+   * @throws ApiError, PermissionError, or ValidationError if API fails
    * 
    * @example
    * ```typescript
@@ -191,151 +115,271 @@ export class SiteService {
       return cachedSites;
     }
 
-    // Try Search API first (better for large tenants)
-    const searchResults: ISite[] | null = await this.tryFetchFromSearchApi(now);
-    if (searchResults) {
-      return searchResults;
-    }
-
-    // Fallback to WebInfos API (slower but more reliable)
+    // Fetch from SharePoint Search API
     try {
-      return await this.fetchFromWebInfosApi(now);
-    } catch (webInfosError: unknown) {
-      // Both APIs failed - throw appropriate error type
-      handleWebInfosApiError(webInfosError, this.context, LOG_SOURCE, ERROR_MESSAGES);
+      const sites: ISite[] = await withTimeout(
+        this.getSitesFromSearch(),
+        undefined, // Use default timeout
+        'SharePoint Search API request timed out'
+      );
+      
+      // Validate returned sites array
+      if (!isValidSitesArray(sites)) {
+        throw new ValidationError(
+          'SharePoint Search API returned invalid sites array',
+          'sites',
+          sites,
+          undefined,
+          'getSites'
+        );
+      }
+      
+      // Cache and return valid sites (even if empty)
+      this.validateAndCacheSites(sites, now);
+      return sites;
+    } catch (searchError: unknown) {
+      // Search API failed - throw appropriate error type
+      const searchUrl: string = `${this.context.pageContext.web.absoluteUrl}${API_ENDPOINTS.SEARCH_POSTQUERY}`;
+      handleSharePointApiError(searchError, this.context, LOG_SOURCE, searchUrl, ERROR_MESSAGES.FETCH_SITES_FAILED);
     }
+  }
+
+  /**
+   * Handles API response errors and throws appropriate error types
+   * 
+   * Centralizes error handling for SharePoint Search API responses by categorizing
+   * errors and throwing appropriate error types (PermissionError for 401/403,
+   * ApiError for other HTTP errors).
+   * 
+   * @param response - The HTTP response object with status and error information
+   * @param searchUrl - The API URL that was called (for logging context)
+   * @param errorText - The error text extracted from the response body
+   * @throws PermissionError - If response status is 401 or 403 (authentication/authorization failure)
+   * @throws ApiError - For all other HTTP error status codes (network, server errors, etc.)
+   * 
+   * @example
+   * ```typescript
+   * if (!response.ok) {
+   *   const errorText = await response.text();
+   *   this.handleSearchApiResponseError(response, searchUrl, errorText);
+   * }
+   * ```
+   */
+  private handleSearchApiResponseError(response: SPHttpClientResponse, searchUrl: string, errorText: string): never {
+    const errorMessage: string = extractErrorMessage(new Error(errorText));
+    
+    // Check if it's a permission error (401, 403)
+    if (response.status === 401 || response.status === 403) {
+      logError(LOG_SOURCE, new Error(errorText), `SharePoint Search API permission error (${response.status}). URL: ${searchUrl}`);
+      throw new PermissionError(
+        `Unable to fetch sites from SharePoint Search API. Please check your permissions and try again.`,
+        new Error(errorText),
+        'getSitesFromSearch - permission denied'
+      );
+    }
+    
+    // Other API errors
+    logError(LOG_SOURCE, new Error(errorText), `SharePoint Search API request failed (${response.status}). URL: ${searchUrl}`);
+    throw new ApiError(
+      `Failed to fetch sites from SharePoint Search API: ${errorMessage}`,
+      response.status,
+      searchUrl,
+      new Error(errorText),
+      'getSitesFromSearch - API error'
+    );
+  }
+
+  /**
+   * Processes and validates search results through multiple stages
+   * 
+   * Implements a three-stage validation and transformation pipeline:
+   * 1. Filters rows by isValidSearchResult (validates required properties exist)
+   * 2. Maps valid rows to ISite format using mapSearchResultToSite
+   * 3. Final validation filter for sites with valid URL and ID
+   * 
+   * Logs progress at each stage and provides summary statistics for debugging.
+   * 
+   * @param rows - Raw search result rows from SharePoint Search API
+   * @returns Validated and mapped sites array, ready for use in the application
+   * 
+   * @example
+   * ```typescript
+   * const rows = data.PrimaryQueryResult?.RelevantResults?.Table?.Rows || [];
+   * const sites = this.processSearchResults(rows);
+   * // Returns: ISite[] with validated sites
+   * ```
+   */
+  private processSearchResults(rows: readonly ISiteSearchResultRow[]): ISite[] {
+    const rawSiteCount: number = rows.length;
+    
+    // Stage 1: Filter by isValidSearchResult
+    const validSearchResults: ISiteSearchResultRow[] = rows.filter((row: ISiteSearchResultRow): boolean => {
+      return this.isValidSearchResult(row);
+    });
+    logInfo(LOG_SOURCE, `${validSearchResults.length} sites passed isValidSearchResult validation`, `out of ${rawSiteCount} total`);
+    
+    // Stage 2: Map to ISite format
+    const mappedSites: ISite[] = validSearchResults.map((row: ISiteSearchResultRow): ISite => this.mapSearchResultToSite(row));
+    logInfo(LOG_SOURCE, `${mappedSites.length} sites mapped to ISite format`, '');
+    
+    // Stage 3: Final filter for sites with valid url and id
+    const finalSites: ISite[] = mappedSites.filter((site: ISite): boolean => {
+      const isValid: boolean = Boolean(site.url && site.id);
+      if (!isValid) {
+        logWarning(LOG_SOURCE, `Site filtered out at final validation stage`, `ID: ${site.id || 'missing'}, URL: ${site.url || 'missing'}, Title: ${site.title || 'missing'}`);
+      }
+      return isValid;
+    });
+    logInfo(LOG_SOURCE, `${finalSites.length} sites passed final validation`, `out of ${mappedSites.length} mapped sites`);
+    
+    // Log summary
+    if (finalSites.length === 0 && rawSiteCount > 0) {
+      const warningDetails: string = `All ${rawSiteCount} sites from API were filtered out. Check validation logic.`;
+      logError(LOG_SOURCE, new Error(warningDetails), 'getSitesFromSearch - all sites filtered out');
+    } else if (finalSites.length < rawSiteCount) {
+      const filteredCount: number = rawSiteCount - finalSites.length;
+      logWarning(LOG_SOURCE, `${filteredCount} sites were filtered out during processing`, `from ${rawSiteCount} total to ${finalSites.length} valid`);
+    }
+    
+    return finalSites;
   }
 
   /**
    * Fetch sites using SharePoint Search API
-   * This is the preferred method as it's faster and provides better filtering
-   * @returns A promise that resolves to an array of ISite objects from search results
-   * @throws {ApiError} If the API request fails (network error, invalid response, etc.)
-   * @throws {ValidationError} If the API response has an invalid structure
-   */
-  private async getSitesFromSearch(): Promise<ISite[]> {
-    const webUrl = this.context.pageContext.web.absoluteUrl;
-    const searchUrl = `${webUrl}${API_ENDPOINTS.SEARCH_QUERY}?querytext='${SEARCH_QUERY_PARAMS.QUERY_TEXT}'&selectproperties='${SEARCH_QUERY_PARAMS.SELECT_PROPERTIES}'&rowlimit=${SEARCH_QUERY_PARAMS.ROW_LIMIT}`;
-
-    const response: SPHttpClientResponse = await this.context.spHttpClient.get(
-      searchUrl,
-      SPHttpClient.configurations.v1
-    );
-
-    if (!response.ok) {
-      await handleApiResponseError(response, {
-        logSource: LOG_SOURCE,
-        apiUrl: searchUrl,
-        defaultErrorMessage: ERROR_MESSAGES.FETCH_SITES_FAILED,
-        operationContext: 'getSitesFromSearch'
-      });
-    }
-
-    const data: unknown = await response.json();
-    
-    // Validate response structure
-    if (!data || typeof data !== 'object') {
-      const errorMessage: string = `Invalid search API response format. Expected object, received: ${typeof data}. URL: ${searchUrl}`;
-      const context: string = 'getSitesFromSearch - invalid response format';
-      
-      logError(LOG_SOURCE, new Error(errorMessage), context);
-      throw new ValidationError(
-        errorMessage,
-        'response.data',
-        data,
-        undefined,
-        context
-      );
-    }
-    
-    // Safely access nested properties with optional chaining
-    const responseData = data as Record<string, unknown>;
-    const primaryResult = responseData.PrimaryQueryResult as Record<string, unknown> | undefined;
-    const relevantResults = primaryResult?.RelevantResults as Record<string, unknown> | undefined;
-    const table = relevantResults?.Table as Record<string, unknown> | undefined;
-    const rows = table?.Rows;
-    
-    // Validate Rows is an array if it exists
-    if (rows !== undefined && !Array.isArray(rows)) {
-      const errorMessage: string = `Invalid search API response structure. Expected Rows to be an array. URL: ${searchUrl}`;
-      const context: string = 'getSitesFromSearch - invalid response structure';
-      
-      logError(LOG_SOURCE, new Error(errorMessage), context);
-      throw new ValidationError(
-        errorMessage,
-        'response.data.PrimaryQueryResult.RelevantResults.Table.Rows',
-        rows,
-        undefined,
-        context
-      );
-    }
-    
-    const results: readonly ISiteSearchResultRow[] = (rows as readonly ISiteSearchResultRow[] | undefined) ?? [];
-
-    // Validate and filter results before mapping
-    const validResults: ISiteSearchResultRow[] = results.filter((result: ISiteSearchResultRow): boolean => {
-      // Ensure result has Cells array
-      return Array.isArray(result.Cells) && result.Cells.length > 0;
-    });
-    
-    return validResults.map((result: ISiteSearchResultRow): ISite => {
-      return this.mapSearchResultToSite(result);
-    }).filter((site: ISite): boolean => Boolean(site.url && site.id)); // Filter out invalid sites
-  }
-
-  /**
-   * Fetch sites using SharePoint WebInfos API
-   * Fallback method when search API is not available
-   * @returns A promise that resolves to an array of ISite objects from web infos
+   * 
+   * Uses the SharePoint Search API /_api/search/query endpoint to retrieve all sites the current user has access to.
+   * Search API returns results in a table format with cells containing key-value pairs.
+   * 
+   * @returns A promise that resolves to an array of ISite objects from Search API
    * @throws {ApiError} If the API request fails (network error, invalid response, etc.)
    * @throws {PermissionError} If the user lacks permissions (401, 403 status codes)
    * @throws {ValidationError} If the API response has an invalid structure
    */
-  private async getSitesFromWebInfos(): Promise<ISite[]> {
-    const siteUrl = this.context.pageContext.site.absoluteUrl;
+  private async getSitesFromSearch(): Promise<ISite[]> {
+    // Get SPHttpClient instance - automatically handles authentication using SPFx context
+    const client: SPHttpClient = this.context.spHttpClient;
     
-    // Get web infos from current site collection
-    const webInfosUrl = `${siteUrl}${API_ENDPOINTS.WEB_INFOS}`;
+    // Build Search API URL
+    const searchUrl: string = `${this.context.pageContext.web.absoluteUrl}${API_ENDPOINTS.SEARCH_POSTQUERY}`;
+    
+    // Build Search API request body - wrapped in 'request' object
+    const requestBody = {
+      request: {
+        Querytext: SEARCH_QUERY_PARAMS.QUERY_TEXT,
+        SelectProperties: SEARCH_QUERY_PARAMS.SELECT_PROPERTIES,
+        RowLimit: SEARCH_QUERY_PARAMS.ROW_LIMIT,
+        TrimDuplicates: SEARCH_QUERY_PARAMS.TRIM_DUPLICATES,
+      },
+    };
 
-    const response: SPHttpClientResponse = await this.context.spHttpClient.get(
-      webInfosUrl,
-      SPHttpClient.configurations.v1
-    );
-
-    if (!response.ok) {
-      await handleApiResponseError(response, {
-        logSource: LOG_SOURCE,
-        apiUrl: webInfosUrl,
-        defaultErrorMessage: ERROR_MESSAGES.FETCH_SITES_FAILED,
-        operationContext: 'getSitesFromWebInfos'
-      });
+    let response: SPHttpClientResponse;
+    let data: unknown;
+    try {
+      // Use SPHttpClient to make POST request to Search API
+      response = await client.post(
+        searchUrl,
+        SPHttpClient.configurations.v1,
+        {
+          headers: {
+            'Accept': 'application/json;odata.metadata=none',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestBody),
+        }
+      );
+      
+      if (!response.ok) {
+        const errorText: string = await response.text();
+        this.handleSearchApiResponseError(response, searchUrl, errorText);
+      }
+      
+      const responseData = await response.json();
+      
+      // OData metadata=none format returns direct response (no 'd' wrapper)
+      // Fallback to 'd' property for compatibility with verbose format if needed
+      data = (responseData as { d?: unknown }).d || responseData;
+    } catch (apiError: unknown) {
+      // Handle errors that occurred before response parsing
+      if (apiError instanceof PermissionError || apiError instanceof ApiError) {
+        throw apiError;
+      }
+      
+      const errorMessage: string = extractErrorMessage(apiError);
+      const errorType: string = apiError instanceof Error ? apiError.constructor.name : typeof apiError;
+      const errorDetails: string = `SharePoint Search API call failed. URL: ${searchUrl}. Error type: ${errorType}. Error: ${errorMessage}`;
+      
+      // Check if it's a permission error (401, 403)
+      if (apiError instanceof Error && (
+        errorMessage.includes('401') || 
+        errorMessage.includes('403') ||
+        errorMessage.includes('Unauthorized') ||
+        errorMessage.includes('Forbidden')
+      )) {
+        logError(LOG_SOURCE, apiError, `SharePoint Search API permission error (401/403). URL: ${searchUrl}`);
+        throw new PermissionError(
+          `Unable to fetch sites from SharePoint Search API. Please check your permissions and try again.`,
+          apiError,
+          'getSitesFromSearch - permission denied'
+        );
+      }
+      
+      // Check if it's a network/API error
+      logError(LOG_SOURCE, apiError, errorDetails);
+      throw new ApiError(
+        `Failed to fetch sites from SharePoint Search API: ${errorMessage}`,
+        undefined,
+        searchUrl,
+        apiError instanceof Error ? apiError : new Error(String(apiError)),
+        'getSitesFromSearch - API error'
+      );
     }
-
-    const data: unknown = await response.json();
     
     /**
-     * Type guard for SharePoint REST API response structure
+     * Type guard for SharePoint Search API response structure
      * 
-     * Validates that the response has the expected structure with a 'value' array.
+     * Validates that the response has the expected structure with PrimaryQueryResult.RelevantResults.Table.Rows.
+     * Handles both OData verbose format (wrapped in 'd') and direct format.
      * 
      * @param obj - The object to validate
-     * @returns true if the object matches ISPRestResponse structure, false otherwise
+     * @returns true if the object matches Search API response structure, false otherwise
      */
-    function isSPRestResponse<T>(obj: unknown): obj is ISPRestResponse<T> {
+    function isSearchApiResponse(obj: unknown): obj is {
+      PrimaryQueryResult?: {
+        RelevantResults?: {
+          Table?: {
+            Rows?: readonly ISiteSearchResultRow[];
+          };
+        };
+      };
+    } {
       if (!obj || typeof obj !== 'object') {
         return false;
       }
       
       const response = obj as Record<string, unknown>;
       
-      // Must have 'value' property that is an array
-      return 'value' in response && Array.isArray(response.value);
+      // Check for PrimaryQueryResult structure
+      if (!('PrimaryQueryResult' in response) || typeof response.PrimaryQueryResult !== 'object' || response.PrimaryQueryResult === null) {
+        return false;
+      }
+      
+      const primaryResult = response.PrimaryQueryResult as Record<string, unknown>;
+      if (!('RelevantResults' in primaryResult) || typeof primaryResult.RelevantResults !== 'object' || primaryResult.RelevantResults === null) {
+        return false;
+      }
+      
+      const relevantResults = primaryResult.RelevantResults as Record<string, unknown>;
+      if (!('Table' in relevantResults) || typeof relevantResults.Table !== 'object' || relevantResults.Table === null) {
+        return false;
+      }
+      
+      const table = relevantResults.Table as Record<string, unknown>;
+      return 'Rows' in table && Array.isArray(table.Rows);
     }
     
-    if (!isSPRestResponse<IWebInfo>(data)) {
-      // Standardized error handling pattern
-      const errorMessage: string = `Invalid WebInfos API response structure. Expected object with 'value' array. URL: ${webInfosUrl}`;
-      const context: string = 'getSitesFromWebInfos - invalid response structure';
+    if (!isSearchApiResponse(data)) {
+      const errorMessage: string = `Invalid SharePoint Search API response structure. Expected PrimaryQueryResult.RelevantResults.Table.Rows. URL: ${searchUrl}`;
+      const context: string = `getSitesFromSearch - invalid response structure. Data type: ${typeof data}, isObject: ${typeof data === 'object'}, isNull: ${data === null}`;
       
       logError(LOG_SOURCE, new Error(errorMessage), context);
       throw new ValidationError(
@@ -347,107 +391,70 @@ export class SiteService {
       );
     }
     
-    const webInfosData: ISPRestResponse<IWebInfo> = data;
+    // Extract rows from Search API response
+    const rows: readonly ISiteSearchResultRow[] = data.PrimaryQueryResult?.RelevantResults?.Table?.Rows || [];
+    logInfo(LOG_SOURCE, `SharePoint Search API returned ${rows.length} sites`, `URL: ${searchUrl}`);
     
-    // Validate each webInfo has required properties before mapping
-    return webInfosData.value
-      .filter((webInfo: IWebInfo): boolean => this.isValidWebInfo(webInfo))
-      .map((webInfo: IWebInfo): ISite => this.mapWebInfoToSite(webInfo))
-      .filter((site: ISite): boolean => Boolean(site.url && site.id));
+    // Process and validate search results
+    return this.processSearchResults(rows);
   }
 
   /**
-   * Maps a search result row to an ISite object
+   * Validates if a Search API result row has required properties
    * 
-   * Extracts site information from a SharePoint Search API result row.
+   * Helper method to validate Search API result rows before mapping.
+   * 
+   * @param row - The Search API result row to validate
+   * @returns true if the row is valid, false otherwise
+   */
+  private isValidSearchResult(row: ISiteSearchResultRow): boolean {
+    // Validate that row has Cells array
+    if (!row.Cells || !Array.isArray(row.Cells) || row.Cells.length === 0) {
+      return false;
+    }
+    
+    // Check for required properties: Path (URL) and Title
+    const hasPath: boolean = row.Cells.some((cell) => cell.Key === 'Path' && typeof cell.Value === 'string' && cell.Value.length > 0);
+    const hasTitle: boolean = row.Cells.some((cell) => cell.Key === 'Title' && typeof cell.Value === 'string');
+    
+    return hasPath && hasTitle;
+  }
+
+  /**
+   * Maps a Search API result row to an ISite object
+   * 
+   * Extracts site information from a SharePoint Search API response row.
    * This is a helper method to keep getSitesFromSearch focused.
    * 
-   * @param result - The search result row to map
+   * @param row - The Search API result row to map
    * @returns An ISite object with extracted data
    */
-  private mapSearchResultToSite(result: ISiteSearchResultRow): ISite {
-    const cells: readonly ISearchResultCell[] = result.Cells ?? [];
+  private mapSearchResultToSite(row: ISiteSearchResultRow): ISite {
+    // Helper function to get cell value by key
+    const getCellValue = (key: string): string => {
+      const cell = row.Cells.find((c) => c.Key === key);
+      return cell?.Value || '';
+    };
     
-    /**
-     * Helper function to safely extract cell value with type validation
-     * 
-     * @param name - The cell key to search for
-     * @returns The cell value as string, or empty string if not found
-     */
-    const getCellValue = (name: string): string => {
-      const cell: ISearchResultCell | undefined = cells.find((c: ISearchResultCell): boolean => {
-        // Validate cell structure before comparing
-        return (
-          typeof c === 'object' &&
-          c !== null &&
-          'Key' in c &&
-          typeof c.Key === 'string' &&
-          c.Key === name
-        );
-      });
-      
-      // Validate cell has Value property and it's a string
-      if (cell && 'Value' in cell && typeof cell.Value === 'string') {
-        return cell.Value;
-      }
-      return "";
-    };
-
-    const siteIdValue: string = getCellValue("SiteId") || getCellValue("WebId") || "";
-    const webIdValue: string = getCellValue("WebId") || "";
-
-    // Validate and create branded types safely
-    // Only create SiteId if we have a valid non-empty string
-    const siteId: SiteId = isValidSiteIdCandidate(siteIdValue) ? (siteIdValue as SiteId) : ("" as SiteId);
-    const webId: WebId | undefined = isValidWebIdCandidate(webIdValue) ? (webIdValue as WebId) : undefined;
-
-    return {
-      id: siteId,
-      title: getCellValue("Title") || DEFAULT_SITE_TITLE,
-      url: getCellValue("Path") || "",
-      description: getCellValue("Description") || "",
-      webId,
-      siteCollectionUrl: getCellValue("SiteCollectionUrl") || "",
-    };
-  }
-
-  /**
-   * Validates if a webInfo object has required properties
-   * 
-   * Helper method to validate webInfo objects before mapping.
-   * 
-   * @param webInfo - The webInfo object to validate
-   * @returns true if the webInfo is valid, false otherwise
-   */
-  private isValidWebInfo(webInfo: IWebInfo): boolean {
-    // Validate required properties exist
-    return (
-      typeof webInfo.Id === 'string' &&
-      webInfo.Id.length > 0 &&
-      (typeof webInfo.Url === 'string' || typeof webInfo.ServerRelativeUrl === 'string')
-    );
-  }
-
-  /**
-   * Maps a webInfo object to an ISite object
-   * 
-   * Extracts site information from a SharePoint WebInfos API response.
-   * This is a helper method to keep getSitesFromWebInfos focused.
-   * 
-   * @param webInfo - The webInfo object to map
-   * @returns An ISite object with extracted data
-   */
-  private mapWebInfoToSite(webInfo: IWebInfo): ISite {
-    // Validate and create branded types safely
-    const siteId: SiteId = isValidSiteIdCandidate(webInfo.Id) ? (webInfo.Id as SiteId) : ("" as SiteId);
-    const webId: WebId = isValidWebIdCandidate(webInfo.Id) ? (webInfo.Id as WebId) : ("" as WebId);
+    // Extract values from cells
+    const path: string = getCellValue('Path');
+    const title: string = getCellValue('Title') || DEFAULT_SITE_TITLE;
+    const description: string = getCellValue('Description');
+    const siteId: string = getCellValue('SiteId');
+    const webId: string = getCellValue('WebId');
+    const siteCollectionUrl: string = getCellValue('SiteCollectionUrl');
+    
+    // Validate and create branded types safely using helper functions
+    const validatedSiteId: SiteId = createSiteId(siteId);
+    const validatedWebId: WebId | undefined = createWebId(webId);
     
     return {
-      id: siteId,
-      title: webInfo.Title || DEFAULT_SITE_TITLE,
-      url: webInfo.Url || webInfo.ServerRelativeUrl || "",
-      description: webInfo.Description || "",
-      webId,
+      id: validatedSiteId,
+      title,
+      url: path,
+      description: description || undefined,
+      webId: validatedWebId,
+      siteCollectionUrl: siteCollectionUrl || undefined,
     };
   }
 

@@ -175,8 +175,8 @@ declare namespace SP {
      * @param failedCallback - Failure callback
      */
     executeQueryAsync(
-      succeededCallback: (sender: any, args: SP.ClientRequestSucceededEventArgs) => void,
-      failedCallback: (sender: any, args: SP.ClientRequestFailedEventArgs) => void
+      succeededCallback: (sender: unknown, args: SP.ClientRequestSucceededEventArgs) => void,
+      failedCallback: (sender: unknown, args: SP.ClientRequestFailedEventArgs) => void
     ): void;
 
     /**
@@ -184,7 +184,7 @@ declare namespace SP {
      * @param clientObject - Client object to load
      * @param clientObjectPropertyPaths - Property paths to load
      */
-    load(clientObject: any, ...clientObjectPropertyPaths: string[]): void;
+    load(clientObject: unknown, ...clientObjectPropertyPaths: string[]): void;
   }
 
   namespace Client {
@@ -192,7 +192,11 @@ declare namespace SP {
      * Client request succeeded event arguments
      */
     interface ClientRequestSucceededEventArgs {
-      get_sender(): any;
+      /**
+       * Gets the sender of the request
+       * @returns The sender object (typically ClientContext)
+       */
+      get_sender(): unknown;
     }
 
     /**

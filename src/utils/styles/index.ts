@@ -14,7 +14,6 @@ export {
   siteTitleStyles,
   siteDescriptionStyles,
   siteUrlStyles,
-  followIconContainerStyles,
   followingHeaderStyles,
   dividerStyles,
   emptyStateStyles,
@@ -31,14 +30,12 @@ export {
   settingsButtonContainerStyles,
   settingsButtonStyles,
   comboBoxStyles,
-  sitesButtonStyles,
 } from './navbarStyles';
 
 // Panel styles
 export {
   settingsPanelContentStyles,
   settingsToggleStyles,
-  settingsToggleDescriptionStyles,
   pivotStyles,
   tabDescriptionStyles,
   pivotItemContentStyles,
@@ -57,12 +54,11 @@ export {
   bottomFadeOverlayStyles,
   scrollableContainerWrapperStyles,
   getSiteItemHoverStyles,
+  getSiteItemBackgroundStyles,
   getSiteUrlStyles,
   getActionButtonsContainerStyles,
-  getActionButtonHoverStyles,
   searchContainerStyles,
   separatorContainerStyles,
-  refreshButtonStyles,
 } from './sitesStyles';
 
 /**

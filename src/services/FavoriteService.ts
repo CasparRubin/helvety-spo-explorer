@@ -3,7 +3,7 @@ import { validateAndNormalizeUrl } from '../utils/urlUtils';
 import { getStorageItem, setStorageItem, removeStorageItem } from '../utils/storageUtils';
 import { isValidStringArray } from '../utils/validationUtils';
 import { logWarning } from '../utils/errorUtils';
-import { normalizeUserId, generateStorageKey } from '../utils/serviceUtils';
+import { normalizeUserId, generateStorageKey, formatValidationErrorMessage } from '../utils/serviceUtils';
 
 
 /**
@@ -99,7 +99,8 @@ export class FavoriteService {
     const validationResult = validateAndNormalizeUrl(url);
     
     if (!validationResult.isValid) {
-      logWarning('FavoriteService', `Invalid URL provided to addFavorite: ${String(url)}`, 'addFavorite');
+      const errorMessage: string = formatValidationErrorMessage('URL', 'addFavorite', url);
+      logWarning('FavoriteService', errorMessage, 'addFavorite');
       return;
     }
 
@@ -130,7 +131,8 @@ export class FavoriteService {
     const validationResult = validateAndNormalizeUrl(url);
     
     if (!validationResult.isValid) {
-      logWarning('FavoriteService', `Invalid URL provided to removeFavorite: ${String(url)}`, 'removeFavorite');
+      const errorMessage: string = formatValidationErrorMessage('URL', 'removeFavorite', url);
+      logWarning('FavoriteService', errorMessage, 'removeFavorite');
       return;
     }
 
@@ -226,7 +228,8 @@ export class FavoriteService {
   private saveFavorites(favorites: string[]): void {
     // Validate input
     if (!isValidStringArray(favorites)) {
-      logWarning('FavoriteService', 'Invalid favorites array provided to saveFavorites', 'saveFavorites');
+      const errorMessage: string = formatValidationErrorMessage('favorites array', 'saveFavorites');
+      logWarning('FavoriteService', errorMessage, 'saveFavorites');
       return;
     }
 

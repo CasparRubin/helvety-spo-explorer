@@ -81,22 +81,3 @@ export const comboBoxStyles = {
     maxHeight: LAYOUT.DROPDOWN_MAX_HEIGHT,
   },
 } as const;
-
-/**
- * Button styles for "Sites you have access to" split button
- * Minimal overrides to match SharePoint theme while preserving Fluent UI defaults
- */
-export const sitesButtonStyles = {
-  root: {
-    color: CSS_VARIABLES.NEUTRAL_PRIMARY,
-    backgroundColor: 'transparent',
-  },
-  rootHovered: {
-    backgroundColor: CSS_VARIABLES.BACKGROUND_HOVER,
-    color: CSS_VARIABLES.NEUTRAL_PRIMARY,
-  },
-  rootPressed: {
-    backgroundColor: CSS_VARIABLES.BACKGROUND_HOVER,
-    color: CSS_VARIABLES.NEUTRAL_PRIMARY,
-  },
-} as const;

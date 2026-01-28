@@ -1,6 +1,6 @@
 // External dependencies
 import * as React from "react";
-import { Icon } from '@fluentui/react/lib/Icon';
+import { IconButton } from '@fluentui/react/lib/Button';
 
 // Types
 import { ISite } from "../../types/Site";
@@ -8,10 +8,10 @@ import { ISite } from "../../types/Site";
 // Utils and hooks
 import { useHoverState, useKeyboardHandler } from '../../utils/hooks';
 import { getPartialUrl } from '../../utils/urlUtils';
-import { useSiteUrlLower, createSafeEventHandler } from '../../utils/componentUtils';
+import { useSiteUrlLower } from '../../utils/componentUtils';
 
 // Constants
-import { CSS_VARIABLES, URL_CONSTANTS, TYPOGRAPHY, UI_MESSAGES } from '../../utils/constants';
+import { URL_CONSTANTS, UI_MESSAGES } from '../../utils/constants';
 
 // Styles
 import {
@@ -21,8 +21,8 @@ import {
   siteDescriptionStyles,
   getSiteUrlStyles,
   getSiteItemHoverStyles,
+  getSiteItemBackgroundStyles,
   getActionButtonsContainerStyles,
-  getActionButtonHoverStyles,
 } from '../../utils/styles';
 
 /**
@@ -102,23 +102,13 @@ export const SiteRow: React.FC<ISiteRowProps> = React.memo(({
   
   // Use custom hooks for hover state management
   const [isHovered, handleMouseEnter, handleMouseLeave] = useHoverState(false);
-  const [isFavoriteHovered, handleFavoriteMouseEnter, handleFavoriteMouseLeave] = useHoverState(false);
-  const [isOpenInNewTabHovered, handleOpenInNewTabMouseEnter, handleOpenInNewTabMouseLeave] = useHoverState(false);
   
   const handleSiteClick = React.useCallback((): void => {
     onSiteSelect(site);
   }, [site, onSiteSelect]);
 
-  const handleFavoriteClick = React.useCallback(
-    createSafeEventHandler<React.MouseEvent<HTMLElement>>((_e: React.MouseEvent<HTMLElement>): void => {
-      if (onToggleFavorite) {
-        onToggleFavorite(site.url);
-      }
-    }),
-    [site.url, onToggleFavorite]
-  );
-
-  const handleFavoriteActivate = React.useCallback((): void => {
+  const handleFavoriteClick = React.useCallback((e: React.MouseEvent<HTMLElement>): void => {
+    e.stopPropagation();
     if (onToggleFavorite) {
       onToggleFavorite(site.url);
     }
@@ -126,24 +116,11 @@ export const SiteRow: React.FC<ISiteRowProps> = React.memo(({
 
   const handleKeyDown = useKeyboardHandler(handleSiteClick);
 
-  const handleFavoriteKeyDown = useKeyboardHandler((e: React.KeyboardEvent<HTMLElement>): void => {
-    e.stopPropagation();
-    e.preventDefault();
-    handleFavoriteActivate();
-  });
-
-  const handleOpenInNewTabClick = React.useCallback(
-    createSafeEventHandler<React.MouseEvent<HTMLElement>>((_e: React.MouseEvent<HTMLElement>): void => {
+  const handleOpenInNewTabClick = React.useCallback((): void => {
+    if (site.url) {
       window.open(site.url, '_blank');
-    }),
-    [site.url]
-  );
-
-  const handleOpenInNewTabKeyDown = useKeyboardHandler(
-    createSafeEventHandler<React.KeyboardEvent<HTMLElement>>((_e: React.KeyboardEvent<HTMLElement>): void => {
-      window.open(site.url, '_blank');
-    })
-  );
+    }
+  }, [site.url]);
 
   // Build comprehensive aria-label for better screen reader support
   const ariaLabelParts: string[] = [`Site: ${site.title}`];
@@ -162,6 +139,7 @@ export const SiteRow: React.FC<ISiteRowProps> = React.memo(({
     <div
       style={{
         ...siteItemStyles,
+        ...getSiteItemBackgroundStyles(index),
         alignItems: 'center',
         ...getSiteItemHoverStyles(isHovered),
       }}
@@ -212,51 +190,19 @@ export const SiteRow: React.FC<ISiteRowProps> = React.memo(({
 
       <div style={getActionButtonsContainerStyles(isHovered)}>
         {onToggleFavorite && (
-          <div
-            style={getActionButtonHoverStyles(isFavoriteHovered)}
-            role="button"
-            tabIndex={0}
-            aria-label={isFavorite ? `${UI_MESSAGES.REMOVE_FROM_FAVORITES} ${site.title}` : `${UI_MESSAGES.ADD_TO_FAVORITES} ${site.title}`}
+          <IconButton
+            iconProps={{ iconName: isFavorite ? 'FavoriteStarFill' : 'FavoriteStar' }}
             onClick={handleFavoriteClick}
-            onKeyDown={handleFavoriteKeyDown}
-            onMouseEnter={handleFavoriteMouseEnter}
-            onMouseLeave={handleFavoriteMouseLeave}
+            ariaLabel={isFavorite ? `${UI_MESSAGES.REMOVE_FROM_FAVORITES} ${site.title}` : `${UI_MESSAGES.ADD_TO_FAVORITES} ${site.title}`}
             title={isFavorite ? UI_MESSAGES.REMOVE_FROM_FAVORITES : UI_MESSAGES.ADD_TO_FAVORITES}
-          >
-            <Icon
-              iconName={isFavorite ? 'FavoriteStarFill' : 'FavoriteStar'}
-              style={{
-                fontSize: TYPOGRAPHY.ICON_SIZE,
-                color: isFavorite
-                  ? CSS_VARIABLES.NEUTRAL_PRIMARY
-                  : (isFavoriteHovered ? CSS_VARIABLES.NEUTRAL_PRIMARY : CSS_VARIABLES.NEUTRAL_SECONDARY),
-                transition: 'color 0.2s ease',
-              }}
-              aria-hidden="true"
-            />
-          </div>
-        )}
-        <div
-          style={getActionButtonHoverStyles(isOpenInNewTabHovered)}
-          role="button"
-          tabIndex={0}
-          aria-label={`${UI_MESSAGES.OPEN_IN_NEW_TAB} ${site.title}`}
-          onClick={handleOpenInNewTabClick}
-          onKeyDown={handleOpenInNewTabKeyDown}
-          onMouseEnter={handleOpenInNewTabMouseEnter}
-          onMouseLeave={handleOpenInNewTabMouseLeave}
-          title={UI_MESSAGES.OPEN_IN_NEW_TAB}
-        >
-          <Icon
-            iconName="OpenInNewWindow"
-            style={{
-              fontSize: TYPOGRAPHY.ICON_SIZE,
-              color: isOpenInNewTabHovered ? CSS_VARIABLES.NEUTRAL_PRIMARY : CSS_VARIABLES.NEUTRAL_SECONDARY,
-              transition: 'color 0.2s ease',
-            }}
-            aria-hidden="true"
           />
-        </div>
+        )}
+        <IconButton
+          iconProps={{ iconName: 'OpenInNewWindow' }}
+          onClick={handleOpenInNewTabClick}
+          ariaLabel={`${UI_MESSAGES.OPEN_IN_NEW_TAB} ${site.title}`}
+          title={UI_MESSAGES.OPEN_IN_NEW_TAB}
+        />
       </div>
     </div>
   );

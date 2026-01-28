@@ -9,7 +9,7 @@
  * They return boolean values indicating validation success or failure.
  */
 
-import { ISite } from '../types/Site';
+import { ISite, SiteId, WebId } from '../types/Site';
 import { IUserSettings } from '../services/SettingsService';
 
 /**
@@ -489,4 +489,52 @@ export function isValidSiteIdCandidate(value: unknown): value is string {
  */
 export function isValidWebIdCandidate(value: unknown): value is string {
   return typeof value === 'string' && value.length > 0;
+}
+
+/**
+ * Safely creates a SiteId branded type from a string
+ * 
+ * Validates the input and creates a SiteId branded type. Returns an empty
+ * SiteId if validation fails. This function provides type safety by ensuring
+ * only validated strings are used as SiteId, preventing accidental mixing
+ * with WebId or other string types.
+ * 
+ * @param value - The string value to convert to SiteId
+ * @returns A SiteId branded type (empty string if validation fails)
+ * 
+ * @example
+ * ```typescript
+ * const siteId = createSiteId('12345678-1234-1234-1234-123456789012');
+ * // Returns: SiteId type
+ * 
+ * const invalidId = createSiteId('');
+ * // Returns: '' as SiteId (empty but valid SiteId type)
+ * ```
+ */
+export function createSiteId(value: string): SiteId {
+  return (isValidSiteIdCandidate(value) ? value : '') as SiteId;
+}
+
+/**
+ * Safely creates a WebId branded type from a string
+ * 
+ * Validates the input and creates a WebId branded type. Returns undefined
+ * if validation fails. This function provides type safety by ensuring
+ * only validated strings are used as WebId, preventing accidental mixing
+ * with SiteId or other string types.
+ * 
+ * @param value - The string value to convert to WebId
+ * @returns A WebId branded type or undefined if validation fails
+ * 
+ * @example
+ * ```typescript
+ * const webId = createWebId('12345678-1234-1234-1234-123456789012');
+ * // Returns: WebId type
+ * 
+ * const invalidId = createWebId('');
+ * // Returns: undefined
+ * ```
+ */
+export function createWebId(value: string): WebId | undefined {
+  return isValidWebIdCandidate(value) ? (value as WebId) : undefined;
 }

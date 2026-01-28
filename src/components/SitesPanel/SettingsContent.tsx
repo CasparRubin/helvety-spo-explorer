@@ -1,6 +1,7 @@
 // External dependencies
 import * as React from "react";
 import { Toggle } from '@fluentui/react/lib/Toggle';
+import { Separator } from '@fluentui/react/lib/Separator';
 
 // Types
 import { IUserSettings } from "../../services/SettingsService";
@@ -134,6 +135,8 @@ export const SettingsContent: React.FC<ISettingsContentProps> = React.memo(({
         />
       </section>
 
+      <Separator />
+
       {/* Site Information Section */}
       <section 
         style={settingsSectionStyles}
@@ -156,14 +159,11 @@ export const SettingsContent: React.FC<ISettingsContentProps> = React.memo(({
         />
       </section>
 
+      <Separator />
+
       {/* Navigation Section */}
       <section 
-        style={{
-          ...settingsSectionStyles,
-          borderBottom: 'none', // Remove border from last section
-          marginBottom: 0,
-          paddingBottom: 0,
-        }}
+        style={settingsSectionStyles}
         aria-labelledby="navigation-section-header"
         aria-describedby="navigation-section-description"
       >

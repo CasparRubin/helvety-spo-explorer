@@ -1,5 +1,5 @@
 import { CSS_VARIABLES, LAYOUT, ANIMATION, EFFECTS, SPACING } from '../constants';
-import { siteUrlStyles, followIconContainerStyles } from './commonStyles';
+import { siteUrlStyles } from './commonStyles';
 
 /**
  * Sites list component styles
@@ -57,20 +57,37 @@ export const scrollableContainerStyles: React.CSSProperties = {
 
 /**
  * Site item styles
- * Note: minHeight is set dynamically in component based on visible fields
+ * Note: backgroundColor is set by getSiteItemBackgroundStyles for alternating rows
  */
 export const siteItemStyles: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
   padding: '6px 12px',
   cursor: 'pointer',
-  borderBottom: `1px solid ${CSS_VARIABLES.NEUTRAL_2}`,
-  transition: 'background-color 0.2s ease',
+  border: `1px solid ${CSS_VARIABLES.NEUTRAL_6}`,
+  borderRadius: LAYOUT.SITE_ITEM_BORDER_RADIUS,
+  marginBottom: SPACING.XS,
+  transition: 'background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease',
   width: '100%',
   maxWidth: '100%',
   boxSizing: 'border-box',
   overflow: 'hidden',
 } as const;
+
+/**
+ * Site item background styles - alternating colors for visual separation
+ * @param index - Optional index of the row (0-based)
+ * @returns Style object with appropriate background color
+ */
+export function getSiteItemBackgroundStyles(index?: number): React.CSSProperties {
+  const isEven: boolean = index === undefined ? true : index % 2 === 0;
+  
+  return {
+    backgroundColor: isEven 
+      ? CSS_VARIABLES.BACKGROUND 
+      : 'rgba(128, 128, 128, 0.04)',
+  };
+}
 
 /**
  * Bottom fade overlay styles for scrollable container
@@ -99,19 +116,17 @@ export const scrollableContainerWrapperStyles: React.CSSProperties = {
 } as const;
 
 /**
- * Site item hover styles - base styles that can be merged with siteItemStyles
+ * Site item hover styles
  * @param isHovered - Whether the item is currently hovered
  * @returns Style object with hover-specific properties
  */
 export function getSiteItemHoverStyles(isHovered: boolean): React.CSSProperties {
   return {
-    backgroundColor: isHovered ? CSS_VARIABLES.BACKGROUND_HOVER_STRONG : 'transparent',
-    borderLeftWidth: LAYOUT.SITE_ITEM_BORDER_LEFT_WIDTH,
-    borderLeftStyle: 'solid',
-    borderLeftColor: isHovered ? CSS_VARIABLES.BORDER_HOVER : 'transparent',
+    ...(isHovered && { backgroundColor: 'rgba(128, 128, 128, 0.12)' }),
+    borderColor: isHovered ? CSS_VARIABLES.NEUTRAL_10 : CSS_VARIABLES.NEUTRAL_6,
     boxShadow: isHovered ? EFFECTS.BOX_SHADOW_HOVER : 'none',
     transform: isHovered ? `scale(${LAYOUT.SITE_ITEM_SCALE_HOVER})` : `scale(${LAYOUT.SITE_ITEM_SCALE_NORMAL})`,
-    transition: `background-color ${ANIMATION.TRANSITION_DURATION} ${ANIMATION.TRANSITION_EASING}, border-left-color ${ANIMATION.TRANSITION_DURATION} ${ANIMATION.TRANSITION_EASING}, box-shadow ${ANIMATION.TRANSITION_DURATION} ${ANIMATION.TRANSITION_EASING}, transform ${ANIMATION.TRANSITION_DURATION} ${ANIMATION.TRANSITION_EASING}`,
+    transition: `background-color ${ANIMATION.TRANSITION_DURATION} ${ANIMATION.TRANSITION_EASING}, border-color ${ANIMATION.TRANSITION_DURATION} ${ANIMATION.TRANSITION_EASING}, box-shadow ${ANIMATION.TRANSITION_DURATION} ${ANIMATION.TRANSITION_EASING}, transform ${ANIMATION.TRANSITION_DURATION} ${ANIMATION.TRANSITION_EASING}`,
   };
 }
 
@@ -144,27 +159,6 @@ export function getActionButtonsContainerStyles(isHovered: boolean): React.CSSPr
 }
 
 /**
- * Action button hover styles (for favorite and open in new tab buttons)
- * @param isHovered - Whether the button is hovered
- * @returns Style object with hover-specific properties
- */
-export function getActionButtonHoverStyles(isHovered: boolean): React.CSSProperties {
-  return {
-    ...followIconContainerStyles,
-    backgroundColor: isHovered ? CSS_VARIABLES.ACTION_BUTTON_HOVER : 'transparent',
-    border: isHovered ? `1px solid ${CSS_VARIABLES.BORDER_HOVER}` : '1px solid transparent',
-    borderRadius: LAYOUT.SITE_ITEM_BORDER_RADIUS,
-    transition: `background-color ${ANIMATION.TRANSITION_DURATION} ${ANIMATION.TRANSITION_EASING}, transform ${ANIMATION.TRANSITION_DURATION} ${ANIMATION.TRANSITION_EASING}, border-color ${ANIMATION.TRANSITION_DURATION} ${ANIMATION.TRANSITION_EASING}`,
-    transform: isHovered ? `scale(${LAYOUT.ACTION_BUTTON_SCALE_HOVER})` : `scale(${LAYOUT.ACTION_BUTTON_SCALE_NORMAL})`,
-    minWidth: LAYOUT.ACTION_BUTTON_MIN_SIZE,
-    minHeight: LAYOUT.ACTION_BUTTON_MIN_SIZE,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  };
-}
-
-/**
  * Search container styles
  */
 export const searchContainerStyles: React.CSSProperties = {
@@ -182,25 +176,4 @@ export const separatorContainerStyles: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
   padding: LAYOUT.SEPARATOR_PADDING,
-} as const;
-
-/**
- * Refresh button styles
- */
-export const refreshButtonStyles = {
-  root: {
-    color: CSS_VARIABLES.NEUTRAL_PRIMARY,
-    flexShrink: 0,
-  },
-  rootHovered: {
-    backgroundColor: CSS_VARIABLES.BACKGROUND_HOVER,
-    color: CSS_VARIABLES.NEUTRAL_PRIMARY,
-  },
-  rootPressed: {
-    backgroundColor: CSS_VARIABLES.BACKGROUND_HOVER,
-    color: CSS_VARIABLES.NEUTRAL_PRIMARY,
-  },
-  rootDisabled: {
-    color: CSS_VARIABLES.NEUTRAL_TERTIARY,
-  },
 } as const;
