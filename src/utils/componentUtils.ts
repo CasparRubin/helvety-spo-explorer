@@ -216,7 +216,7 @@ export function createSafeEventHandler<
  * ```
  */
 export function highlightText(text: string, searchText: string): React.ReactElement {
-  // Fast path: empty search text returns original text
+  // Guard clause: empty search text returns original text
   if (!searchText || typeof searchText !== 'string' || !searchText.trim()) {
     const textStr: string = typeof text === 'string' ? text : String(text ?? '');
     return React.createElement(React.Fragment, null, textStr);
@@ -226,7 +226,7 @@ export function highlightText(text: string, searchText: string): React.ReactElem
   // Convert non-string text to string for safety
   const textStr: string = typeof text === 'string' ? text : String(text ?? '');
   
-  // Fast path: empty text returns empty fragment
+  // Guard clause: empty text returns empty fragment
   if (!textStr) {
     return React.createElement(React.Fragment, null, '');
   }
@@ -240,12 +240,12 @@ export function highlightText(text: string, searchText: string): React.ReactElem
   // the parts before, during, and after the match for highlighting
   const matchIndex: number = textLower.indexOf(searchLower);
   
-  // Fast path: no match found
+  // Guard clause: no match found
   if (matchIndex === -1) {
     return React.createElement(React.Fragment, null, textStr);
   }
   
-  // Validate matchIndex is within bounds before extracting substrings
+  // Guard clause: validate matchIndex is within bounds before extracting substrings
   // This prevents out-of-bounds errors
   if (matchIndex < 0 || matchIndex >= textStr.length) {
     return React.createElement(React.Fragment, null, textStr);

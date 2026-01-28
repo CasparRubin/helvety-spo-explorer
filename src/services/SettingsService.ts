@@ -1,8 +1,7 @@
 import { STORAGE_KEYS, DEFAULT_SETTINGS } from '../utils/constants';
 import { getStorageItem, setStorageItem, removeStorageItem } from '../utils/storageUtils';
 import { isValidUserSettings, isPlainObject } from '../utils/validationUtils';
-import { logWarning } from '../utils/errorUtils';
-import { normalizeUserId, generateStorageKey, formatValidationErrorMessage } from '../utils/serviceUtils';
+import { normalizeUserId, generateStorageKey, validateAndHandleInvalidInput } from '../utils/serviceUtils';
 
 
 /**
@@ -126,10 +125,8 @@ export class SettingsService {
    * ```
    */
   public updateSettings(updates: Partial<IUserSettings>): void {
-    // Validate input is a plain object
-    if (!isPlainObject(updates)) {
-      const errorMessage: string = formatValidationErrorMessage('updates object', 'updateSettings');
-      logWarning('SettingsService', errorMessage, 'updateSettings');
+    // Use shared validation pattern for consistent error handling
+    if (!validateAndHandleInvalidInput(isPlainObject(updates), 'SettingsService', 'updateSettings', 'updates object')) {
       return;
     }
 
@@ -137,9 +134,7 @@ export class SettingsService {
     const newSettings: IUserSettings = { ...currentSettings, ...updates };
     
     // Validate merged settings is valid
-    if (!isValidUserSettings(newSettings)) {
-      const errorMessage: string = formatValidationErrorMessage('merged settings', 'updateSettings');
-      logWarning('SettingsService', errorMessage, 'updateSettings');
+    if (!validateAndHandleInvalidInput(isValidUserSettings(newSettings), 'SettingsService', 'updateSettings', 'merged settings')) {
       return;
     }
     
@@ -158,10 +153,8 @@ export class SettingsService {
    * @throws Never throws - errors are caught and logged by storage utility
    */
   private saveSettings(settings: IUserSettings): void {
-    // Validate input
-    if (!isValidUserSettings(settings)) {
-      const errorMessage: string = formatValidationErrorMessage('settings object', 'saveSettings');
-      logWarning('SettingsService', errorMessage, 'saveSettings');
+    // Use shared validation pattern for consistent error handling
+    if (!validateAndHandleInvalidInput(isValidUserSettings(settings), 'SettingsService', 'saveSettings', 'settings object')) {
       return;
     }
 

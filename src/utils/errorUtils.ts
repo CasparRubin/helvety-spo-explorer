@@ -50,17 +50,17 @@ export function isError(error: unknown): error is Error {
     return true;
   }
   
-  // Handle null/undefined
+  // Early return: handle null/undefined
   if (error === null || error === undefined) {
     return false;
   }
   
-  // Handle primitives
+  // Early return: handle primitives
   if (typeof error !== 'object') {
     return false;
   }
   
-  // Must not be an array (arrays are objects but not errors)
+  // Early return: must not be an array (arrays are objects but not errors)
   if (Array.isArray(error)) {
     return false;
   }
@@ -120,25 +120,34 @@ function isValidHttpStatusCode(statusCode: unknown): statusCode is number {
  * ```
  */
 export function isApiError(error: unknown): error is ApiError {
+  // Fast path: instanceof check (most reliable)
   if (error instanceof ApiError) {
     return true;
   }
   
+  // Early return: must be an Error instance
   if (!isError(error)) {
     return false;
   }
   
+  // Type-safe property access with runtime validation
   const errorWithProps = error as Error & { 
     category?: unknown;
     statusCode?: unknown;
     apiEndpoint?: unknown;
   };
   
-  // ApiError must have NETWORK category
+  // ApiError must have NETWORK category (primary indicator)
   const hasNetworkCategory: boolean = 
     errorWithProps.category === ErrorCategory.NETWORK;
   
-  // Check for ApiError-specific properties with proper validation
+  // If category doesn't match, check other indicators
+  if (!hasNetworkCategory) {
+    // Check error name as fallback (for serialized errors)
+    return error.name === 'ApiError';
+  }
+  
+  // Category matches - validate ApiError-specific properties
   const hasValidStatusCode: boolean = isValidHttpStatusCode(errorWithProps.statusCode);
   const hasValidApiEndpoint: boolean = 
     typeof errorWithProps.apiEndpoint === 'string' && 
@@ -148,7 +157,8 @@ export function isApiError(error: unknown): error is ApiError {
   // Check error name as additional validation
   const hasApiErrorName: boolean = error.name === 'ApiError';
   
-  return hasNetworkCategory && (hasApiErrorProperties || hasApiErrorName);
+  // Must have either ApiError properties or matching name
+  return hasApiErrorProperties || hasApiErrorName;
 }
 
 /**
@@ -224,25 +234,34 @@ export function isPermissionError(error: unknown): error is PermissionError {
  * ```
  */
 export function isValidationError(error: unknown): error is ValidationError {
+  // Fast path: instanceof check (most reliable)
   if (error instanceof ValidationError) {
     return true;
   }
   
+  // Early return: must be an Error instance
   if (!isError(error)) {
     return false;
   }
   
+  // Type-safe property access with runtime validation
   const errorWithProps = error as Error & { 
     category?: unknown;
     field?: unknown;
     value?: unknown;
   };
   
-  // ValidationError must have VALIDATION category
+  // ValidationError must have VALIDATION category (primary indicator)
   const hasValidationCategory: boolean = 
     errorWithProps.category === ErrorCategory.VALIDATION;
   
-  // Check for ValidationError-specific properties with proper validation
+  // If category doesn't match, check other indicators
+  if (!hasValidationCategory) {
+    // Check error name as fallback (for serialized errors)
+    return error.name === 'ValidationError';
+  }
+  
+  // Category matches - validate ValidationError-specific properties
   const hasValidField: boolean = 
     typeof errorWithProps.field === 'string' && 
     errorWithProps.field.length > 0;
@@ -252,7 +271,8 @@ export function isValidationError(error: unknown): error is ValidationError {
   // Check error name as additional validation
   const hasValidationName: boolean = error.name === 'ValidationError';
   
-  return hasValidationCategory && (hasValidationProperties || hasValidationName);
+  // Must have either validation properties or matching name
+  return hasValidationProperties || hasValidationName;
 }
 
 /**
@@ -282,17 +302,17 @@ export function isValidationError(error: unknown): error is ValidationError {
  * ```
  */
 export function isSPApiError(obj: unknown): obj is ISPApiError {
-  // Handle null/undefined
+  // Early return: handle null/undefined
   if (obj === null || obj === undefined) {
     return false;
   }
   
-  // Must be an object (not primitive)
+  // Early return: must be an object (not primitive)
   if (typeof obj !== 'object') {
     return false;
   }
   
-  // Must not be an array
+  // Early return: must not be an array
   if (Array.isArray(obj)) {
     return false;
   }
@@ -300,27 +320,41 @@ export function isSPApiError(obj: unknown): obj is ISPApiError {
   // Type-safe property access with runtime validation
   const apiError = obj as Record<string, unknown>;
   
-  // Check error property exists and is an object
-  if (!('error' in apiError) || typeof apiError.error !== 'object' || apiError.error === null) {
+  // Validate error property exists and is an object
+  if (!('error' in apiError)) {
     return false;
   }
   
-  const errorObj = apiError.error as Record<string, unknown>;
-  
-  // Check message property exists and is an object
-  if (!('message' in errorObj) || typeof errorObj.message !== 'object' || errorObj.message === null) {
+  const errorValue: unknown = apiError.error;
+  if (typeof errorValue !== 'object' || errorValue === null) {
     return false;
   }
   
-  const messageObj = errorObj.message as Record<string, unknown>;
+  const errorObj = errorValue as Record<string, unknown>;
   
-  // Check value property exists and is a non-empty string
+  // Validate message property exists and is an object
+  if (!('message' in errorObj)) {
+    return false;
+  }
+  
+  const messageValue: unknown = errorObj.message;
+  if (typeof messageValue !== 'object' || messageValue === null) {
+    return false;
+  }
+  
+  const messageObj = messageValue as Record<string, unknown>;
+  
+  // Validate value property exists and is a non-empty string
   // Additional validation: ensure value is actually a string and not just truthy
+  if (!('value' in messageObj)) {
+    return false;
+  }
+  
+  const value: unknown = messageObj.value;
   return (
-    'value' in messageObj &&
-    typeof messageObj.value === 'string' &&
-    messageObj.value.length > 0 &&
-    messageObj.value.trim().length > 0
+    typeof value === 'string' &&
+    value.length > 0 &&
+    value.trim().length > 0
   );
 }
 
@@ -442,7 +476,7 @@ const VALID_ERROR_CATEGORIES: readonly ErrorCategory[] = [
   ErrorCategory.PERMISSION,
   ErrorCategory.VALIDATION,
   ErrorCategory.UNKNOWN,
-] as const;
+] as const satisfies readonly ErrorCategory[];
 
 /**
  * Checks if a category value is valid
@@ -507,7 +541,7 @@ function matchErrorKeywords(message: string, keywords: readonly string[]): boole
 const PERMISSION_KEYWORDS: readonly string[] = [
   'permission', 'unauthorized', 'access denied', 'forbidden', 
   '401', '403', 'authentication', 'authorization', 'access token'
-] as const;
+] as const satisfies readonly string[];
 
 /**
  * Network error keywords
@@ -516,7 +550,7 @@ const NETWORK_KEYWORDS: readonly string[] = [
   'network', 'fetch', 'timeout', 'connection', 'dns', 
   'econnrefused', 'enotfound', 'econnreset', 'etimedout',
   'failed to fetch', 'network error', 'offline'
-] as const;
+] as const satisfies readonly string[];
 
 /**
  * Validation error keywords
@@ -524,39 +558,43 @@ const NETWORK_KEYWORDS: readonly string[] = [
 const VALIDATION_KEYWORDS: readonly string[] = [
   'parse', 'invalid', 'validation', 'malformed', 'syntax',
   'type error', 'format error', 'schema', '400', '422'
-] as const;
+] as const satisfies readonly string[];
 
 /**
- * Categorizes an error based on its message or type
+ * Categorizes error by checking for explicit category in custom error objects
  * 
- * First checks if the error is a custom error class with a category,
- * then falls back to analyzing the error message.
- * 
- * @param error - The error to categorize
- * @returns The error category
+ * @param error - The error to check
+ * @returns Error category if found, undefined otherwise
  */
-export function categorizeError(error: unknown): ErrorCategory {
-  // First check if error is a custom AppError with explicit category
+function getErrorCategoryFromCustomError(error: unknown): ErrorCategory | undefined {
   if (error instanceof Error) {
-    const category = getErrorCategoryFromObject(error);
-    if (category !== undefined) {
-      return category;
-    }
+    return getErrorCategoryFromObject(error);
   }
-  
-  // Fallback: Analyze error message for keywords
-  const errorMessage: string = extractErrorMessage(error).toLowerCase();
-  
-  // Check HTTP status codes in error message
+  return undefined;
+}
+
+/**
+ * Categorizes error by analyzing HTTP status codes in error message
+ * 
+ * @param errorMessage - The error message to analyze
+ * @returns Error category if status code found, undefined otherwise
+ */
+function categorizeErrorByHttpStatus(errorMessage: string): ErrorCategory | undefined {
   const httpStatus: number | undefined = parseHttpStatusFromMessage(errorMessage);
   if (httpStatus !== undefined) {
-    const category = categorizeByHttpStatus(httpStatus);
-    if (category !== undefined) {
-      return category;
-    }
+    return categorizeByHttpStatus(httpStatus);
   }
-  
-  // Check keyword matches
+  return undefined;
+}
+
+/**
+ * Categorizes error by matching keywords in error message
+ * 
+ * @param errorMessage - The error message to analyze
+ * @returns Error category if keywords match, undefined otherwise
+ */
+function categorizeErrorByKeywords(errorMessage: string): ErrorCategory | undefined {
+  // Check keyword matches in priority order
   if (matchErrorKeywords(errorMessage, PERMISSION_KEYWORDS)) {
     return ErrorCategory.PERMISSION;
   }
@@ -567,6 +605,63 @@ export function categorizeError(error: unknown): ErrorCategory {
   
   if (matchErrorKeywords(errorMessage, VALIDATION_KEYWORDS)) {
     return ErrorCategory.VALIDATION;
+  }
+  
+  return undefined;
+}
+
+/**
+ * Categorizes an error based on its message or type
+ * 
+ * First checks if the error is a custom error class with a category,
+ * then falls back to analyzing the error message.
+ * 
+ * Categorization priority:
+ * 1. Custom error classes (ApiError, PermissionError, ValidationError) with explicit category
+ * 2. HTTP status codes in error message (401/403 = PERMISSION, 4xx = VALIDATION, 5xx = NETWORK)
+ * 3. Keyword matching in error message (permission, network, validation keywords)
+ * 4. Default: UNKNOWN
+ * 
+ * @param error - The error to categorize
+ * @returns The error category
+ * 
+ * @example
+ * ```typescript
+ * // Custom error with explicit category
+ * const apiError = new ApiError('Network error');
+ * categorizeError(apiError); // Returns: ErrorCategory.NETWORK
+ * 
+ * // Error message with status code
+ * const httpError = new Error('Request failed with status 403');
+ * categorizeError(httpError); // Returns: ErrorCategory.PERMISSION
+ * 
+ * // Error message with keywords
+ * const networkError = new Error('Network timeout occurred');
+ * categorizeError(networkError); // Returns: ErrorCategory.NETWORK
+ * 
+ * // Unknown error
+ * const unknownError = new Error('Something went wrong');
+ * categorizeError(unknownError); // Returns: ErrorCategory.UNKNOWN
+ * ```
+ */
+export function categorizeError(error: unknown): ErrorCategory {
+  // Priority 1: Check if error is a custom AppError with explicit category
+  const customCategory = getErrorCategoryFromCustomError(error);
+  if (customCategory !== undefined) {
+    return customCategory;
+  }
+  
+  // Priority 2: Analyze error message for HTTP status codes
+  const errorMessage: string = extractErrorMessage(error).toLowerCase();
+  const httpStatusCategory = categorizeErrorByHttpStatus(errorMessage);
+  if (httpStatusCategory !== undefined) {
+    return httpStatusCategory;
+  }
+  
+  // Priority 3: Check keyword matches in error message
+  const keywordCategory = categorizeErrorByKeywords(errorMessage);
+  if (keywordCategory !== undefined) {
+    return keywordCategory;
   }
   
   // Default: unknown error type

@@ -53,19 +53,27 @@ export function useSites(context: ApplicationCustomizerContext): IUseSitesReturn
   const [error, setError] = React.useState<string | undefined>();
   const siteServiceRef = React.useRef<SiteService | null>(null);
 
+  // Store context in ref to avoid dependency on context object (which may change reference)
+  const contextRef = React.useRef<ApplicationCustomizerContext>(context);
+  React.useEffect((): void => {
+    contextRef.current = context;
+  }, [context]);
+
   // Initialize site service
+  // Use contextRef to track context changes and reinitialize service if needed
   React.useEffect((): void => {
     try {
-      siteServiceRef.current = new SiteService(context);
+      siteServiceRef.current = new SiteService(contextRef.current);
     } catch (err: unknown) {
       logError(LOG_SOURCE, err, 'Error initializing SiteService - sites will not be available');
       // Set error state so UI can handle gracefully
       setError('Failed to initialize site service');
       setIsLoading(false);
     }
-  }, [context]);
+  }, [context]); // Keep context dependency to reinitialize if context changes
 
   // Fetch sites function - reusable for both initial load and refresh
+  // Use contextRef to avoid dependency on context object
   const fetchSites = React.useCallback(async (): Promise<void> => {
     if (!siteServiceRef.current) {
       const errorMessage: string = 'SiteService not initialized';
@@ -94,7 +102,8 @@ export function useSites(context: ApplicationCustomizerContext): IUseSitesReturn
         }
         
         // Set current site as selected using functional update to avoid stale closure
-        const currentWebUrl: string = context.pageContext.web.absoluteUrl.toLowerCase();
+        // Use contextRef to get latest context without dependency
+        const currentWebUrl: string = contextRef.current.pageContext.web.absoluteUrl.toLowerCase();
         const currentSite: ISite | undefined = fetchedSites.find(
           (site: ISite): boolean => 
             isValidSite(site) &&
@@ -127,7 +136,7 @@ export function useSites(context: ApplicationCustomizerContext): IUseSitesReturn
     );
     
     setIsLoading(false);
-  }, [context]);
+  }, []); // Empty deps - use contextRef to access latest context
 
   // Fetch sites on mount - delay significantly to ensure page is fully loaded and not blocking
   React.useEffect((): (() => void) => {

@@ -124,3 +124,58 @@ export function validateServiceInput<T>(
   logWarning(logSource, errorMessage, operationName);
   return { isValid: false };
 }
+
+/**
+ * Validates and handles invalid input with consistent error handling pattern
+ * 
+ * Common pattern used across services for validating inputs, logging errors,
+ * and returning early on validation failure. This reduces code duplication
+ * in service methods.
+ * 
+ * @param isValid - Whether the input is valid
+ * @param logSource - Source identifier for logging
+ * @param operationName - Name of the operation (for error messages)
+ * @param valueName - Name of the value (for error messages)
+ * @param value - The invalid value (optional, for logging)
+ * @returns true if input is valid, false otherwise
+ * 
+ * @example
+ * ```typescript
+ * // In FavoriteService.addFavorite
+ * const validationResult = validateAndNormalizeUrl(url);
+ * if (!validateAndHandleInvalidInput(
+ *   validationResult.isValid,
+ *   'FavoriteService',
+ *   'addFavorite',
+ *   'URL',
+ *   url
+ * )) {
+ *   return; // Early return on invalid input
+ * }
+ * 
+ * // In SettingsService.updateSettings
+ * if (!validateAndHandleInvalidInput(
+ *   isPlainObject(updates),
+ *   'SettingsService',
+ *   'updateSettings',
+ *   'updates object'
+ * )) {
+ *   return; // Early return on invalid input
+ * }
+ * ```
+ */
+export function validateAndHandleInvalidInput(
+  isValid: boolean,
+  logSource: string,
+  operationName: string,
+  valueName: string,
+  value?: unknown
+): boolean {
+  if (isValid) {
+    return true;
+  }
+  
+  const errorMessage: string = formatValidationErrorMessage(valueName, operationName, value);
+  logWarning(logSource, errorMessage, operationName);
+  return false;
+}

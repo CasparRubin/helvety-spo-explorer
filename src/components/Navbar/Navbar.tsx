@@ -90,6 +90,7 @@ export const Navbar: React.FC<INavbarProps> = React.memo(({ context }) => {
 
   // Get favorite sites for menu (sorted alphabetically)
   // Optimized: Early return for empty favorites, memoized to avoid recalculation
+  // Use sites.length and favoriteSites.size as dependencies to avoid deep comparison
   const favoriteSitesList = React.useMemo((): ISite[] => {
     if (favoriteSites.size === 0 || sites.length === 0) {
       return [];
@@ -105,7 +106,7 @@ export const Navbar: React.FC<INavbarProps> = React.memo(({ context }) => {
     
     // Sort alphabetically by title (case-insensitive)
     return sortSitesAlphabetically(favoriteList);
-  }, [sites, favoriteSites]);
+  }, [sites, favoriteSites.size]); // Use size instead of Set reference to reduce re-renders
 
   // Build menu items for split button dropdown
   const menuItems = React.useMemo((): IContextualMenuItem[] => {

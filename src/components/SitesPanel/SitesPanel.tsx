@@ -88,31 +88,51 @@ export const SitesPanel: React.FC<ISitesPanelProps> = React.memo(({
   //
   // Implementation details:
   // - Uses refs to track previous state without causing re-renders
-  // - Snapshot updates only when: (1) panel just opened, or (2) user switched to Sites tab
+  // - Snapshot updates only when: (1) panel just opened, or (2) user switched to Sites tab, or (3) favorites changed
   // - This ensures favorites list remains stable while browsing Settings
+  // - We track favoriteSites.size separately to detect changes without deep Set comparison (performance optimization)
+  const favoriteSitesSizeRef = React.useRef<number>(favoriteSites.size);
+  const favoriteSitesSize = favoriteSites.size;
+  
   const displayFavoriteSites = React.useMemo((): Set<string> => {
-    // Detect if panel transitioned from closed to open
+    // Detection logic for when to update the snapshot:
+    
+    // 1. Detect if panel transitioned from closed to open
+    //    This ensures we capture the current favorites state when user first opens the panel
     const panelJustOpened: boolean = !prevIsOpenRef.current && isOpen;
     
-    // Detect if user switched from Settings tab to Sites tab (while panel is open)
+    // 2. Detect if user switched from Settings tab to Sites tab (while panel is open)
+    //    This captures favorites when user returns to Sites tab, ensuring they see current favorites
+    //    but with stable sorting (won't jump around while they were on Settings tab)
     const switchedToSitesTab: boolean = 
       prevSelectedKeyRef.current !== UI_MESSAGES.SITES_TAB && 
       selectedKey === UI_MESSAGES.SITES_TAB && 
       isOpen;
+    
+    // 3. Detect if favorites changed (size changed indicates additions/removals)
+    //    We use size comparison instead of Set reference comparison for performance
+    //    This allows us to update snapshot when favorites change, but only when necessary
+    const favoritesChanged: boolean = favoriteSitesSizeRef.current !== favoriteSitesSize;
 
     // Update snapshot only at specific moments to ensure stable sorting
-    if (panelJustOpened || switchedToSitesTab) {
+    // We create a new Set (not reference to original) to ensure immutability
+    if (panelJustOpened || switchedToSitesTab || favoritesChanged) {
       // Create new Set to capture current favorites state
+      // This creates a snapshot that won't change even if favoriteSites prop changes
       favoriteSitesSnapshotRef.current = new Set(favoriteSites);
+      // Update size ref for next comparison
+      favoriteSitesSizeRef.current = favoriteSitesSize;
     }
 
     // Update refs for next comparison (these don't trigger re-renders)
+    // These refs are used in the next render cycle to detect state transitions
     prevIsOpenRef.current = isOpen;
     prevSelectedKeyRef.current = selectedKey;
 
     // Return the snapshot (stable reference unless snapshot was updated above)
+    // This Set reference remains stable between renders unless one of the update conditions was met
     return favoriteSitesSnapshotRef.current;
-  }, [isOpen, selectedKey, favoriteSites]);
+  }, [isOpen, selectedKey, favoriteSites, favoriteSitesSize]);
 
   // Focus management: focus search input when panel opens or Sites tab is selected
   // This improves accessibility by ensuring keyboard users can immediately interact with the search

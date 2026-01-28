@@ -2,8 +2,7 @@ import { STORAGE_KEYS } from '../utils/constants';
 import { validateAndNormalizeUrl } from '../utils/urlUtils';
 import { getStorageItem, setStorageItem, removeStorageItem } from '../utils/storageUtils';
 import { isValidStringArray } from '../utils/validationUtils';
-import { logWarning } from '../utils/errorUtils';
-import { normalizeUserId, generateStorageKey, formatValidationErrorMessage } from '../utils/serviceUtils';
+import { normalizeUserId, generateStorageKey, validateAndHandleInvalidInput } from '../utils/serviceUtils';
 
 
 /**
@@ -98,9 +97,8 @@ export class FavoriteService {
   public addFavorite(url: string): void {
     const validationResult = validateAndNormalizeUrl(url);
     
-    if (!validationResult.isValid) {
-      const errorMessage: string = formatValidationErrorMessage('URL', 'addFavorite', url);
-      logWarning('FavoriteService', errorMessage, 'addFavorite');
+    // Use shared validation pattern for consistent error handling
+    if (!validateAndHandleInvalidInput(validationResult.isValid, 'FavoriteService', 'addFavorite', 'URL', url)) {
       return;
     }
 
@@ -130,9 +128,8 @@ export class FavoriteService {
   public removeFavorite(url: string): void {
     const validationResult = validateAndNormalizeUrl(url);
     
-    if (!validationResult.isValid) {
-      const errorMessage: string = formatValidationErrorMessage('URL', 'removeFavorite', url);
-      logWarning('FavoriteService', errorMessage, 'removeFavorite');
+    // Use shared validation pattern for consistent error handling
+    if (!validateAndHandleInvalidInput(validationResult.isValid, 'FavoriteService', 'removeFavorite', 'URL', url)) {
       return;
     }
 
@@ -226,10 +223,8 @@ export class FavoriteService {
    * @throws Never throws - errors are caught and logged by storage utility
    */
   private saveFavorites(favorites: string[]): void {
-    // Validate input
-    if (!isValidStringArray(favorites)) {
-      const errorMessage: string = formatValidationErrorMessage('favorites array', 'saveFavorites');
-      logWarning('FavoriteService', errorMessage, 'saveFavorites');
+    // Use shared validation pattern for consistent error handling
+    if (!validateAndHandleInvalidInput(isValidStringArray(favorites), 'FavoriteService', 'saveFavorites', 'favorites array')) {
       return;
     }
 

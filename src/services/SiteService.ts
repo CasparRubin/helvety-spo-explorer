@@ -6,7 +6,7 @@ import { ApplicationCustomizerContext } from "@microsoft/sp-application-base";
 import { ISite, ISiteSearchResultRow, SiteId, WebId } from "../types/Site";
 
 // Utils
-import { logError, extractErrorMessage, logInfo, logWarning } from '../utils/errorUtils';
+import { logError, extractErrorMessage, logInfo, logWarning, isApiError } from '../utils/errorUtils';
 import { ValidationError, ApiError, PermissionError } from '../utils/errors';
 import { navigateToSite as navigateToSiteUtil } from '../utils/navigationUtils';
 import { isValidSitesArray, createSiteId, createWebId } from '../utils/validationUtils';
@@ -115,7 +115,7 @@ export class SiteService {
       return cachedSites;
     }
 
-    // Fetch from SharePoint Search API
+    // Fetch from SharePoint Search API with error recovery
     try {
       const sites: ISite[] = await withTimeout(
         this.getSitesFromSearch(),
@@ -138,6 +138,28 @@ export class SiteService {
       this.validateAndCacheSites(sites, now);
       return sites;
     } catch (searchError: unknown) {
+      // Error recovery strategy: If it's a timeout or network error, try returning cached data
+      // even if expired, as stale data is better than no data for user experience
+      // Only use stale cache if we have valid cached data available
+      const staleCachedSites: ISite[] | null = this.cache && isValidSitesArray(this.cache) ? this.cache : null;
+      if (staleCachedSites && staleCachedSites.length > 0) {
+        const errorMessage: string = extractErrorMessage(searchError);
+        // Check if it's a timeout or network error (not permission/validation)
+        // Permission and validation errors should not use stale cache
+        const isNetworkError: boolean = 
+          isApiError(searchError) ||
+          errorMessage.includes('timeout') || 
+          errorMessage.includes('network') || 
+          errorMessage.includes('connection') ||
+          errorMessage.includes('fetch');
+        
+        if (isNetworkError) {
+          logWarning(LOG_SOURCE, `Returning stale cached data due to network error: ${errorMessage}`, 'getSites - error recovery');
+          // Return stale cache as fallback for network errors
+          return staleCachedSites;
+        }
+      }
+      
       // Search API failed - throw appropriate error type
       const searchUrl: string = `${this.context.pageContext.web.absoluteUrl}${API_ENDPOINTS.SEARCH_POSTQUERY}`;
       handleSharePointApiError(searchError, this.context, LOG_SOURCE, searchUrl, ERROR_MESSAGES.FETCH_SITES_FAILED);
@@ -172,21 +194,77 @@ export class SiteService {
     if (response.status === 401 || response.status === 403) {
       logError(LOG_SOURCE, new Error(errorText), `SharePoint Search API permission error (${response.status}). URL: ${searchUrl}`);
       throw new PermissionError(
-        `Unable to fetch sites from SharePoint Search API. Please check your permissions and try again.`,
+        ERROR_MESSAGES.FETCH_SITES_PERMISSIONS,
         new Error(errorText),
         'getSitesFromSearch - permission denied'
       );
     }
     
-    // Other API errors
+    // Other API errors - use standardized error message with additional context
     logError(LOG_SOURCE, new Error(errorText), `SharePoint Search API request failed (${response.status}). URL: ${searchUrl}`);
     throw new ApiError(
-      `Failed to fetch sites from SharePoint Search API: ${errorMessage}`,
+      `${ERROR_MESSAGES.FETCH_SITES_FAILED}: ${errorMessage}`,
       response.status,
       searchUrl,
       new Error(errorText),
       'getSitesFromSearch - API error'
     );
+  }
+
+  /**
+   * Filters search result rows to only include valid rows with required structure
+   * 
+   * @param rows - Raw search result rows from SharePoint Search API
+   * @returns Array of valid search result rows
+   */
+  private filterValidSearchResults(rows: readonly ISiteSearchResultRow[]): ISiteSearchResultRow[] {
+    return rows.filter((row: ISiteSearchResultRow): boolean => {
+      return this.isValidSearchResult(row);
+    });
+  }
+
+  /**
+   * Maps search result rows to ISite objects
+   * 
+   * @param validRows - Validated search result rows
+   * @returns Array of ISite objects
+   */
+  private mapSearchResultsToSites(validRows: readonly ISiteSearchResultRow[]): ISite[] {
+    return validRows.map((row: ISiteSearchResultRow): ISite => this.mapSearchResultToSite(row));
+  }
+
+  /**
+   * Filters sites to only include those with valid URL and ID
+   * 
+   * @param sites - Sites to validate
+   * @returns Array of fully valid sites
+   */
+  private filterValidSites(sites: readonly ISite[]): ISite[] {
+    return sites.filter((site: ISite): boolean => {
+      const isValid: boolean = Boolean(site.url && site.id);
+      if (!isValid) {
+        logWarning(LOG_SOURCE, `Site filtered out at final validation stage`, `ID: ${site.id || 'missing'}, URL: ${site.url || 'missing'}, Title: ${site.title || 'missing'}`);
+      }
+      return isValid;
+    });
+  }
+
+  /**
+   * Logs processing summary statistics for debugging and monitoring
+   * 
+   * @param rawCount - Original count of rows from API
+   * @param finalCount - Final count of valid sites after processing
+   */
+  private logProcessingSummary(rawCount: number, finalCount: number): void {
+    // Alert if all sites were filtered (indicates potential API or validation issue)
+    if (finalCount === 0 && rawCount > 0) {
+      const warningDetails: string = `All ${rawCount} sites from API were filtered out. Check validation logic.`;
+      logError(LOG_SOURCE, new Error(warningDetails), 'getSitesFromSearch - all sites filtered out');
+    } else if (finalCount < rawCount) {
+      // Log when some sites were filtered (normal if API returns invalid data)
+      const filteredCount: number = rawCount - finalCount;
+      logWarning(LOG_SOURCE, `${filteredCount} sites were filtered out during processing`, `from ${rawCount} total to ${finalCount} valid`);
+    }
   }
 
   /**
@@ -213,33 +291,25 @@ export class SiteService {
     const rawSiteCount: number = rows.length;
     
     // Stage 1: Filter by isValidSearchResult
-    const validSearchResults: ISiteSearchResultRow[] = rows.filter((row: ISiteSearchResultRow): boolean => {
-      return this.isValidSearchResult(row);
-    });
+    // This stage validates that each row has the required structure (Cells array with Path and Title)
+    // We filter early to avoid processing invalid rows in subsequent stages
+    const validSearchResults: ISiteSearchResultRow[] = this.filterValidSearchResults(rows);
     logInfo(LOG_SOURCE, `${validSearchResults.length} sites passed isValidSearchResult validation`, `out of ${rawSiteCount} total`);
     
     // Stage 2: Map to ISite format
-    const mappedSites: ISite[] = validSearchResults.map((row: ISiteSearchResultRow): ISite => this.mapSearchResultToSite(row));
+    // Transform valid search result rows into ISite objects by extracting values from Cells array
+    // Each row's Cells array contains key-value pairs (e.g., {Key: 'Path', Value: 'https://...'})
+    const mappedSites: ISite[] = this.mapSearchResultsToSites(validSearchResults);
     logInfo(LOG_SOURCE, `${mappedSites.length} sites mapped to ISite format`, '');
     
     // Stage 3: Final filter for sites with valid url and id
-    const finalSites: ISite[] = mappedSites.filter((site: ISite): boolean => {
-      const isValid: boolean = Boolean(site.url && site.id);
-      if (!isValid) {
-        logWarning(LOG_SOURCE, `Site filtered out at final validation stage`, `ID: ${site.id || 'missing'}, URL: ${site.url || 'missing'}, Title: ${site.title || 'missing'}`);
-      }
-      return isValid;
-    });
+    // Even after mapping, we need to ensure the resulting ISite objects have required properties
+    // This catches cases where mapping might have produced incomplete objects (e.g., empty URLs)
+    const finalSites: ISite[] = this.filterValidSites(mappedSites);
     logInfo(LOG_SOURCE, `${finalSites.length} sites passed final validation`, `out of ${mappedSites.length} mapped sites`);
     
-    // Log summary
-    if (finalSites.length === 0 && rawSiteCount > 0) {
-      const warningDetails: string = `All ${rawSiteCount} sites from API were filtered out. Check validation logic.`;
-      logError(LOG_SOURCE, new Error(warningDetails), 'getSitesFromSearch - all sites filtered out');
-    } else if (finalSites.length < rawSiteCount) {
-      const filteredCount: number = rawSiteCount - finalSites.length;
-      logWarning(LOG_SOURCE, `${filteredCount} sites were filtered out during processing`, `from ${rawSiteCount} total to ${finalSites.length} valid`);
-    }
+    // Log summary for debugging and monitoring
+    this.logProcessingSummary(rawSiteCount, finalSites.length);
     
     return finalSites;
   }
@@ -317,16 +387,16 @@ export class SiteService {
       )) {
         logError(LOG_SOURCE, apiError, `SharePoint Search API permission error (401/403). URL: ${searchUrl}`);
         throw new PermissionError(
-          `Unable to fetch sites from SharePoint Search API. Please check your permissions and try again.`,
+          ERROR_MESSAGES.FETCH_SITES_PERMISSIONS,
           apiError,
           'getSitesFromSearch - permission denied'
         );
       }
       
-      // Check if it's a network/API error
+      // Check if it's a network/API error - use standardized error message
       logError(LOG_SOURCE, apiError, errorDetails);
       throw new ApiError(
-        `Failed to fetch sites from SharePoint Search API: ${errorMessage}`,
+        `${ERROR_MESSAGES.FETCH_SITES_FAILED}: ${errorMessage}`,
         undefined,
         searchUrl,
         apiError instanceof Error ? apiError : new Error(String(apiError)),

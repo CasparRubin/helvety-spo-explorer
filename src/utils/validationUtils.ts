@@ -95,32 +95,65 @@ export function isNonEmptyStringUntrimmed(value: unknown): value is string {
  * Performs runtime validation to ensure the object has the required properties
  * of an ISite interface with correct types.
  * 
+ * Required properties:
+ * - id: non-empty string
+ * - title: string (can be empty)
+ * - url: non-empty string
+ * 
+ * Optional properties (not validated):
+ * - description: string | undefined
+ * - iconUrl: string | undefined
+ * - webId: WebId | undefined
+ * - siteCollectionUrl: string | undefined
+ * 
  * @param site - The value to validate
  * @returns true if the value is a valid site object, false otherwise
  * 
  * @example
  * ```typescript
- * const site = { id: '123', title: 'My Site', url: 'https://...' };
+ * // Valid site
+ * const site = { id: '123', title: 'My Site', url: 'https://contoso.sharepoint.com' };
  * isValidSite(site); // Returns: true
+ * 
+ * // Missing required properties
  * isValidSite({}); // Returns: false
+ * isValidSite({ id: '123' }); // Returns: false (missing title and url)
+ * 
+ * // Invalid types
+ * isValidSite({ id: 123, title: 'Site', url: 'https://...' }); // Returns: false (id must be string)
+ * isValidSite({ id: '', title: 'Site', url: 'https://...' }); // Returns: false (id must be non-empty)
+ * 
+ * // Edge cases
+ * isValidSite(null); // Returns: false
+ * isValidSite(undefined); // Returns: false
+ * isValidSite('not an object'); // Returns: false
  * ```
  */
 export function isValidSite(site: unknown): site is ISite {
-  // Consistent validation pattern: early return for invalid input
+  // Guard clause: early return for invalid input
   if (!site || typeof site !== 'object' || site === null) {
     return false;
   }
   
   const siteObj = site as Record<string, unknown>;
   
-  // Check required properties exist and have correct types
-  return (
-    typeof siteObj.id === 'string' &&
-    siteObj.id.length > 0 &&
-    typeof siteObj.title === 'string' &&
-    typeof siteObj.url === 'string' &&
-    siteObj.url.length > 0
-  );
+  // Guard clause: validate required properties exist and have correct types
+  // Check id first (most likely to be missing or invalid)
+  if (typeof siteObj.id !== 'string' || siteObj.id.length === 0) {
+    return false;
+  }
+  
+  // Check title (required but can be empty string)
+  if (typeof siteObj.title !== 'string') {
+    return false;
+  }
+  
+  // Check url (required and must be non-empty)
+  if (typeof siteObj.url !== 'string' || siteObj.url.length === 0) {
+    return false;
+  }
+  
+  return true;
 }
 
 /**

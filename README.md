@@ -7,6 +7,35 @@
 ![Fluent UI](https://img.shields.io/badge/Fluent%20UI-8.125.0-purple)
 ![Heft](https://img.shields.io/badge/Heft-1.1.2-orange)
 
+## Screenshots
+
+### Light Theme
+
+![SplitButton - Light Theme](public/screenshots/1 - SplitButton.png)
+*Navigation bar with split button in light theme*
+
+![Panel - Light Theme](public/screenshots/2 - Panel.png)
+*Sites panel displaying available sites in light theme*
+
+![Settings](public/screenshots/3 - Settings.png)
+*Settings panel for customizing display preferences*
+
+![Search](public/screenshots/4 - Search.png)
+*Search functionality with highlighted matches*
+
+![Quick Access Favorites](public/screenshots/5 - QuickAccessFavorites.png)
+*Quick access dropdown menu showing favorite sites*
+
+### Dark Theme
+
+![SplitButton - Dark Theme](public/screenshots/6 - DarkThemeSplitButton.png)
+*Navigation bar with split button in dark theme*
+
+![Panel - Dark Theme](public/screenshots/7 - DarkThemePanel.png)
+*Sites panel displaying available sites in dark theme*
+
+---
+
 A SharePoint Framework (SPFx) application customizer that provides a navigation bar for exploring and accessing SharePoint sites. The extension displays a "Sites you have access to" button in the top placeholder, which opens a panel with a searchable list of all SharePoint sites the current user can access.
 
 **Privacy First** - All data processing happens client-side. User preferences (favorites and settings) are stored locally in the browser's localStorage. The application does not collect or transmit user data to external servers (SharePoint Search API is used for site discovery only).
@@ -205,6 +234,7 @@ This repository is public for transparency purposes only—all code is open for 
 | 0.0.1   | January 27, 2026 | Initial release with comprehensive code quality improvements: reduced duplication, simplified complex functions, improved type safety, unified error handling, and optimized performance |
 | 0.0.1   | January 28, 2026 | Fixed SharePoint packaging issues: removed invalid JSON comments from manifest, removed ClientSideInstance.xml from elementManifests for site-level deployment |
 | 1.0.0.3 | January 28, 2026 | Version bump to 1.0.0.3 - build verification and code quality improvements |
+| 1.0.0.3 | January 28, 2026 | Added screenshots section to README showcasing application features in both light and dark themes |
 
 ## Disclaimer
 
