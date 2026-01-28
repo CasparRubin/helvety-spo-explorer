@@ -3,6 +3,21 @@
  * 
  * This module re-exports utilities from their respective modules for convenient importing.
  * Import utilities from this file to maintain clean imports.
+ * 
+ * Organization:
+ * - Constants: Application-wide constants (API endpoints, UI messages, layout values)
+ * - Error utilities: Error types, type guards, logging, categorization
+ * - Storage utilities: localStorage operations with error handling
+ * - URL utilities: URL validation, normalization, and parsing
+ * - Navigation utilities: Site navigation helpers
+ * - Site utilities: Site data manipulation (sorting, filtering)
+ * - Component utilities: React component helpers (memoization, highlighting)
+ * - DOM utilities: DOM queries and focus management
+ * - Validation utilities: Type guards and runtime validation
+ * - Error handling utilities: Error recovery patterns and safe execution wrappers
+ * - Service utilities: Shared service patterns (user ID normalization, storage keys)
+ * - Custom hooks: React hooks for sites, favorites, and settings
+ * - Styles: Style definitions for components
  */
 
 // Constants
@@ -31,9 +46,8 @@ export * from './componentUtils';
 export * from './domUtils';
 
 // Validation utilities
+// Note: createSiteId and createWebId are included in the wildcard export above
 export * from './validationUtils';
-// Export branded type helpers
-export { createSiteId, createWebId } from './validationUtils';
 
 // Error handling utilities
 export * from './errorHandlingUtils';

@@ -57,11 +57,24 @@ export interface IUseServiceInitializationReturn<TService> {
  * - Fallback handling if initialization fails
  * - Consistent error logging
  * 
+ * Key features:
+ * - Automatic user ID normalization (invalid IDs fall back to DEFAULT_USER_ID)
+ * - Service lifecycle management via refs (service persists across renders)
+ * - Callback refs prevent infinite loops (callbacks can change without re-initializing)
+ * - Error handling with safeExecuteSync (never throws, always logs errors)
+ * 
+ * Edge cases handled:
+ * - Invalid user IDs are normalized to DEFAULT_USER_ID
+ * - Service creation errors are caught and logged (serviceRef remains undefined)
+ * - Callback errors are caught and logged (don't break initialization)
+ * - Callbacks can be updated without re-initializing the service
+ * 
  * @param options - Initialization options
  * @returns Object containing service ref and normalized user ID
  * 
  * @example
  * ```typescript
+ * // Basic usage with SettingsService
  * const { serviceRef, normalizedUserId } = useServiceInitialization({
  *   createService: (userId) => new SettingsService(userId),
  *   userId: currentUserId,
@@ -75,6 +88,22 @@ export interface IUseServiceInitializationReturn<TService> {
  *     setSettings(DEFAULT_SETTINGS);
  *   }
  * });
+ * 
+ * // Using the service ref (service may be undefined if initialization failed)
+ * const updateSettings = useCallback((newSettings: IUserSettings) => {
+ *   if (serviceRef.current) {
+ *     serviceRef.current.updateSettings(newSettings);
+ *   }
+ * }, []);
+ * 
+ * // Edge case: Invalid user ID (normalized to DEFAULT_USER_ID)
+ * const { normalizedUserId } = useServiceInitialization({
+ *   createService: (userId) => new FavoriteService(userId),
+ *   userId: '', // Invalid - will be normalized
+ *   logSource: 'useFavorites',
+ *   serviceName: 'FavoriteService',
+ * });
+ * // normalizedUserId === DEFAULT_USER_ID
  * ```
  */
 export function useServiceInitialization<TService>(

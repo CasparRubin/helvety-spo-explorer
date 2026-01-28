@@ -16,6 +16,7 @@ import { useSites } from '../../utils/customHooks/useSites';
 import { useFavorites } from '../../utils/customHooks/useFavorites';
 import { useSettings } from '../../utils/customHooks/useSettings';
 import { sortSitesAlphabetically } from '../../utils/siteUtils';
+import { logError } from '../../utils/errorUtils';
 
 // Constants
 import { DEFAULT_USER_ID, UI_MESSAGES } from '../../utils/constants';
@@ -43,6 +44,25 @@ import { navbarStyles, navbarInnerStyles, navbarContentStyles, srOnlyStyles } fr
  * <Navbar context={applicationCustomizerContext} />
  * ```
  */
+/**
+ * Custom comparison function for Navbar React.memo
+ * 
+ * Optimizes re-renders by comparing only the essential context properties
+ * that affect the component's behavior, rather than the entire context object.
+ * 
+ * @param prevProps - Previous component props
+ * @param nextProps - Next component props
+ * @returns true if props are equal (skip re-render), false if different (re-render)
+ */
+function compareNavbarProps(prevProps: INavbarProps, nextProps: INavbarProps): boolean {
+  // Compare only the essential context properties that affect component behavior
+  const prevUser = prevProps.context.pageContext.user;
+  const nextUser = nextProps.context.pageContext.user;
+  
+  // Only re-render if user login name changes (affects userId)
+  return prevUser.loginName === nextUser.loginName;
+}
+
 export const Navbar: React.FC<INavbarProps> = React.memo(({ context }) => {
   // Memoize userId to avoid recalculation on every render
   const userId = React.useMemo((): string => {
@@ -58,9 +78,17 @@ export const Navbar: React.FC<INavbarProps> = React.memo(({ context }) => {
 
   // Handle refresh - clears cache and re-fetches sites and favorites
   // Optimized: use stable references, avoid unnecessary dependencies
+  // Includes error handling to prevent unhandled promise rejections
   const handleRefresh = React.useCallback(async (): Promise<void> => {
-    refreshFavorites();
-    await refreshSites();
+    try {
+      refreshFavorites();
+      await refreshSites();
+    } catch (error: unknown) {
+      // refreshSites already handles errors internally via withErrorBoundary
+      // This catch serves as a final safety net for unexpected promise rejections
+      // Log error but don't break the UI - errors are already handled by hooks
+      logError('Navbar', error, 'Error in handleRefresh - this should not happen as errors are handled by hooks');
+    }
   }, [refreshFavorites, refreshSites]);
 
   // Handle site selection - uses current settings value to ensure latest preference
@@ -191,6 +219,6 @@ export const Navbar: React.FC<INavbarProps> = React.memo(({ context }) => {
       />
     </div>
   );
-});
+}, compareNavbarProps);
 
 Navbar.displayName = 'Navbar';

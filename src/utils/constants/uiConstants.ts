@@ -44,7 +44,7 @@ export const UI_MESSAGES = {
   SITES_TAB: 'Sites',
   SETTINGS_TAB: 'Settings',
   SETTINGS_DESCRIPTION: 'Customize your site explorer preferences',
-  SITES_DESCRIPTION: 'Browse and search through your SharePoint sites',
+  SITES_DESCRIPTION: 'Browse and search through all SharePoint Online sites you have access to',
   SHOW_FULL_URL: 'Show Full URL',
   SHOW_PARTIAL_URL: 'Show Partial URL',
   SHOW_DESCRIPTION: 'Show Description',

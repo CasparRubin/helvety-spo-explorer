@@ -91,9 +91,11 @@ export function useFavorites(userId: string): IUseFavoritesReturn {
           return newFavoriteSet;
         }
         
-        // If sizes are same, check if content is different
+        // If sizes are same, check if content is different using optimized comparison
+        // Strategy: Check if all items in new set exist in previous set
+        // If any item is missing, sets are different
+        // This is O(n) but only runs when sizes match (optimization)
         // Use Array.from for ES5 compatibility (SPFx targets ES5)
-        // Check if any item in new set is missing from previous set
         const newFavoriteArray = Array.from(newFavoriteSet);
         for (let i = 0; i < newFavoriteArray.length; i++) {
           const url = newFavoriteArray[i];

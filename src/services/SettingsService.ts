@@ -26,11 +26,52 @@ export interface IUserSettings {
  * Settings are stored per user in the browser's localStorage and merged with default values
  * to ensure all properties are always present.
  * 
+ * Features:
+ * - Per-user storage (isolated by user ID)
+ * - Automatic merging with default values
+ * - Partial updates supported (only update specified properties)
+ * - Type-safe settings interface
+ * - Graceful error handling (never throws, logs errors)
+ * 
+ * Edge cases handled:
+ * - Invalid settings: Logged and ignored (operation continues)
+ * - Corrupted storage data: Validated and filtered (invalid data replaced with defaults)
+ * - Partial settings: Merged with defaults (missing properties added)
+ * - localStorage errors: Logged but operation continues (graceful degradation)
+ * - Empty user ID: Normalized to DEFAULT_USER_ID
+ * 
  * @example
  * ```typescript
+ * // Basic usage
  * const settingsService = new SettingsService(userId);
  * const settings = settingsService.getSettings();
+ * // Returns: IUserSettings with all properties (merged with defaults if needed)
+ * 
+ * // Update single setting
  * settingsService.updateSettings({ showFullUrl: false });
+ * // Only showFullUrl is updated, other settings remain unchanged
+ * 
+ * // Update multiple settings
+ * settingsService.updateSettings({
+ *   showFullUrl: true,
+ *   showPartialUrl: false,
+ *   openInNewTab: true
+ * });
+ * 
+ * // Get specific setting
+ * const openInNewTab = settingsService.getSetting('openInNewTab');
+ * 
+ * // Reset to defaults
+ * settingsService.resetSettings();
+ * // All custom settings removed, getSettings() will return defaults
+ * 
+ * // Edge case: Partial settings in storage (merged with defaults)
+ * // If storage has: { showFullUrl: true }
+ * // getSettings() returns: { showFullUrl: true, showPartialUrl: false, showDescription: true, openInNewTab: false }
+ * // Missing properties are filled from defaults
+ * 
+ * // Edge case: Invalid settings object (logged but ignored)
+ * settingsService.updateSettings({ invalid: true } as any); // Logs warning, no error thrown
  * ```
  */
 export class SettingsService {

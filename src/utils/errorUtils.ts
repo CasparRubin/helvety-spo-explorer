@@ -131,10 +131,11 @@ export function isApiError(error: unknown): error is ApiError {
   }
   
   // Type-safe property access with runtime validation
+  // Narrow type to Error with ApiError-like properties
   const errorWithProps = error as Error & { 
-    category?: unknown;
-    statusCode?: unknown;
-    apiEndpoint?: unknown;
+    category?: ErrorCategory | unknown;
+    statusCode?: number | unknown;
+    apiEndpoint?: string | unknown;
   };
   
   // ApiError must have NETWORK category (primary indicator)
@@ -147,11 +148,14 @@ export function isApiError(error: unknown): error is ApiError {
     return error.name === 'ApiError';
   }
   
-  // Category matches - validate ApiError-specific properties
-  const hasValidStatusCode: boolean = isValidHttpStatusCode(errorWithProps.statusCode);
+  // Category matches - validate ApiError-specific properties with type narrowing
+  const statusCode: unknown = errorWithProps.statusCode;
+  const apiEndpoint: unknown = errorWithProps.apiEndpoint;
+  
+  const hasValidStatusCode: boolean = isValidHttpStatusCode(statusCode);
   const hasValidApiEndpoint: boolean = 
-    typeof errorWithProps.apiEndpoint === 'string' && 
-    errorWithProps.apiEndpoint.length > 0;
+    typeof apiEndpoint === 'string' && 
+    apiEndpoint.length > 0;
   const hasApiErrorProperties: boolean = hasValidStatusCode || hasValidApiEndpoint;
   
   // Check error name as additional validation
@@ -197,7 +201,8 @@ export function isPermissionError(error: unknown): error is PermissionError {
     return false;
   }
   
-  const errorWithCategory = error as Error & { category?: unknown };
+  // Narrow type to Error with PermissionError-like properties
+  const errorWithCategory = error as Error & { category?: ErrorCategory | unknown };
   
   // PermissionError must have PERMISSION category OR matching name
   return (
@@ -245,9 +250,10 @@ export function isValidationError(error: unknown): error is ValidationError {
   }
   
   // Type-safe property access with runtime validation
+  // Narrow type to Error with ValidationError-like properties
   const errorWithProps = error as Error & { 
-    category?: unknown;
-    field?: unknown;
+    category?: ErrorCategory | unknown;
+    field?: string | unknown;
     value?: unknown;
   };
   
@@ -261,11 +267,14 @@ export function isValidationError(error: unknown): error is ValidationError {
     return error.name === 'ValidationError';
   }
   
-  // Category matches - validate ValidationError-specific properties
+  // Category matches - validate ValidationError-specific properties with type narrowing
+  const field: unknown = errorWithProps.field;
+  const value: unknown = errorWithProps.value;
+  
   const hasValidField: boolean = 
-    typeof errorWithProps.field === 'string' && 
-    errorWithProps.field.length > 0;
-  const hasValue: boolean = errorWithProps.value !== undefined && errorWithProps.value !== null;
+    typeof field === 'string' && 
+    field.length > 0;
+  const hasValue: boolean = value !== undefined && value !== null;
   const hasValidationProperties: boolean = hasValidField || hasValue;
   
   // Check error name as additional validation
@@ -487,6 +496,9 @@ function isValidErrorCategory(category: unknown): category is ErrorCategory {
 
 /**
  * Extracts error category from custom error object if present
+ * 
+ * @param error - The error object to extract category from
+ * @returns Error category if found, undefined otherwise
  */
 function getErrorCategoryFromObject(error: Error): ErrorCategory | undefined {
   if ('category' in error) {
@@ -500,6 +512,11 @@ function getErrorCategoryFromObject(error: Error): ErrorCategory | undefined {
 
 /**
  * Parses HTTP status code from error message
+ * 
+ * Extracts HTTP status codes (400-499, 500-599) from error messages.
+ * 
+ * @param message - The error message to parse
+ * @returns HTTP status code if found, undefined otherwise
  */
 function parseHttpStatusFromMessage(message: string): number | undefined {
   const httpStatusMatch: RegExpMatchArray | null = message.match(/\b(40[0-9]|50[0-9])\b/);
@@ -514,6 +531,14 @@ function parseHttpStatusFromMessage(message: string): number | undefined {
 
 /**
  * Categorizes error based on HTTP status code
+ * 
+ * Maps HTTP status codes to error categories:
+ * - 401, 403: PERMISSION
+ * - 408, 500-599, 504: NETWORK
+ * - 400-499 (except 401, 403): VALIDATION
+ * 
+ * @param statusCode - The HTTP status code to categorize
+ * @returns Error category if status code matches known patterns, undefined otherwise
  */
 function categorizeByHttpStatus(statusCode: number): ErrorCategory | undefined {
   if (statusCode === 401 || statusCode === 403) {
@@ -530,6 +555,12 @@ function categorizeByHttpStatus(statusCode: number): ErrorCategory | undefined {
 
 /**
  * Checks if error message matches any keywords in the provided list
+ * 
+ * Performs case-insensitive substring matching to find error keywords.
+ * 
+ * @param message - The error message to check
+ * @param keywords - Array of keywords to search for
+ * @returns true if any keyword is found in the message, false otherwise
  */
 function matchErrorKeywords(message: string, keywords: readonly string[]): boolean {
   return keywords.some((keyword: string): boolean => message.includes(keyword));

@@ -235,6 +235,17 @@ export function safeExecuteSync<T>(
  * error category. This helps ensure consistent error handling throughout
  * the application.
  * 
+ * Error categorization:
+ * - Network errors (timeout, connection issues) → ApiError
+ * - Permission errors (401, 403) → PermissionError
+ * - Validation errors (400, 422, parsing errors) → ValidationError
+ * - Unknown errors → Generic Error
+ * 
+ * Edge cases handled:
+ * - Already standardized errors are returned as-is (no double-wrapping)
+ * - Errors without messages use the defaultMessage
+ * - Null/undefined errors are converted to Error with defaultMessage
+ * 
  * @param error - The error to standardize
  * @param defaultMessage - Default message if error message cannot be extracted
  * @param context - Additional context about where the error occurred
@@ -242,16 +253,34 @@ export function safeExecuteSync<T>(
  * 
  * @example
  * ```typescript
+ * // Network error example
  * try {
- *   // some operation
+ *   await fetchData();
  * } catch (err: unknown) {
  *   const standardizedError = createStandardizedError(
  *     err,
- *     'Operation failed',
- *     'Processing user data'
+ *     'Failed to fetch data',
+ *     'DataService.fetchData'
  *   );
- *   // Handle standardized error
+ *   // standardizedError is ApiError for network issues
  * }
+ * 
+ * // Permission error example
+ * try {
+ *   await accessProtectedResource();
+ * } catch (err: unknown) {
+ *   const standardizedError = createStandardizedError(
+ *     err,
+ *     'Access denied',
+ *     'ResourceService.accessProtectedResource'
+ *   );
+ *   // standardizedError is PermissionError for 401/403
+ * }
+ * 
+ * // Already standardized error (no double-wrapping)
+ * const apiError = new ApiError('Network error');
+ * const result = createStandardizedError(apiError, 'Default message');
+ * // result === apiError (same reference, not wrapped again)
  * ```
  */
 export function createStandardizedError(
@@ -303,6 +332,11 @@ export { executeWithRetry, withTimeout } from './errorRetryUtils';
  * Validates that the callback is a function before executing it.
  * Useful for optional callback props in React components.
  * 
+ * Edge cases handled:
+ * - Undefined/null callbacks return false (no error thrown)
+ * - Non-function values return false (no error thrown)
+ * - Callback execution errors are caught and logged (never thrown)
+ * 
  * @param callback - The callback function to execute
  * @param args - Arguments to pass to the callback
  * @returns true if callback was executed successfully, false otherwise
@@ -310,7 +344,20 @@ export { executeWithRetry, withTimeout } from './errorRetryUtils';
  * 
  * @example
  * ```typescript
- * safeCallback(onClick, event); // Executes onClick(event) if it's a function
+ * // Safe execution of optional callback
+ * const handleClick = (e: React.MouseEvent) => {
+ *   console.log('Clicked');
+ * };
+ * safeCallback(handleClick, event); // Returns: true, executes callback
+ * 
+ * // Undefined callback (common in optional props)
+ * safeCallback(undefined, event); // Returns: false, no error thrown
+ * 
+ * // Callback that throws (error is caught and logged)
+ * const errorCallback = () => {
+ *   throw new Error('Callback error');
+ * };
+ * safeCallback(errorCallback); // Returns: false, error logged but not thrown
  * ```
  */
 export function safeCallback<T extends unknown[]>(

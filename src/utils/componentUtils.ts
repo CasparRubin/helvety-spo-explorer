@@ -85,13 +85,29 @@ export function shallowEqual<T extends object>(
  * string operations. Useful when the URL needs to be compared multiple times
  * (e.g., checking favorite status).
  * 
+ * Performance benefits:
+ * - Avoids repeated toLowerCase() calls on the same URL
+ * - Memoization ensures the same reference is returned if URL hasn't changed
+ * - Reduces string allocation and garbage collection pressure
+ * 
+ * Edge cases:
+ * - Empty strings return empty string (no error)
+ * - Null/undefined URLs should be handled by caller (hook doesn't validate)
+ * 
  * @param siteUrl - The site URL to memoize
  * @returns Memoized lowercase URL string
  * 
  * @example
  * ```typescript
+ * // In a component that checks favorite status multiple times
  * const siteUrlLower = useSiteUrlLower(site.url);
  * const isFavorite = favoriteSites.has(siteUrlLower);
+ * const isInQuickAccess = quickAccessSites.has(siteUrlLower);
+ * // siteUrlLower is only computed once per render, even if used multiple times
+ * 
+ * // Without memoization (inefficient):
+ * const isFavorite = favoriteSites.has(site.url.toLowerCase()); // toLowerCase() called
+ * const isInQuickAccess = quickAccessSites.has(site.url.toLowerCase()); // toLowerCase() called again
  * ```
  */
 export function useSiteUrlLower(siteUrl: string): string {

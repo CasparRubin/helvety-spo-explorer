@@ -53,6 +53,83 @@ import { pivotStyles, tabDescriptionStyles, pivotItemContentStyles, srOnlyStyles
  * />
  * ```
  */
+/**
+ * Custom comparison function for SitesPanel React.memo
+ * 
+ * Optimizes re-renders by comparing props strategically:
+ * - Primitives (isOpen, booleans, strings) - value comparison
+ * - Objects (sites, selectedSite, settings) - reference or ID comparison
+ * - Callbacks - reference comparison
+ * - Sets - reference comparison
+ * 
+ * @param prevProps - Previous component props
+ * @param nextProps - Next component props
+ * @returns true if props are equal (skip re-render), false if different (re-render)
+ */
+function compareSitesPanelProps(prevProps: ISitesPanelProps, nextProps: ISitesPanelProps): boolean {
+  // Fast path: reference equality for callbacks
+  if (
+    prevProps.onDismiss !== nextProps.onDismiss ||
+    prevProps.onSiteSelect !== nextProps.onSiteSelect ||
+    prevProps.onToggleFavorite !== nextProps.onToggleFavorite ||
+    prevProps.onSettingsChange !== nextProps.onSettingsChange ||
+    prevProps.onRefresh !== nextProps.onRefresh
+  ) {
+    return false;
+  }
+  
+  // Compare primitives (cheap comparisons)
+  if (
+    prevProps.isOpen !== nextProps.isOpen ||
+    prevProps.isLoading !== nextProps.isLoading ||
+    prevProps.error !== nextProps.error ||
+    prevProps.showFullUrl !== nextProps.showFullUrl ||
+    prevProps.showPartialUrl !== nextProps.showPartialUrl ||
+    prevProps.showDescription !== nextProps.showDescription
+  ) {
+    return false;
+  }
+  
+  // Compare selected site by ID (cheap string comparison)
+  if (prevProps.selectedSite?.id !== nextProps.selectedSite?.id) {
+    return false;
+  }
+  
+  // Compare Sets by reference (very fast)
+  // Note: displayFavoriteSites is computed internally, not a prop, so we don't compare it here
+  if (prevProps.favoriteSites !== nextProps.favoriteSites) {
+    return false;
+  }
+  
+  // Compare settings object by reference (settings object is stable)
+  if (prevProps.settings !== nextProps.settings) {
+    return false;
+  }
+  
+  // Compare sites array by reference (if same reference, skip deep comparison)
+  if (prevProps.sites === nextProps.sites) {
+    return true;
+  }
+  
+  // If sites array changed, check length first (cheap)
+  if (prevProps.sites.length !== nextProps.sites.length) {
+    return false;
+  }
+  
+  // If lengths match, check first and last items (strategic sampling)
+  const sitesLength = prevProps.sites.length;
+  if (sitesLength > 0) {
+    if (prevProps.sites[0]?.id !== nextProps.sites[0]?.id) {
+      return false;
+    }
+    if (sitesLength > 1 && prevProps.sites[sitesLength - 1]?.id !== nextProps.sites[sitesLength - 1]?.id) {
+      return false;
+    }
+  }
+  
+  return true;
+}
+
 export const SitesPanel: React.FC<ISitesPanelProps> = React.memo(({
   isOpen,
   onDismiss,
@@ -278,6 +355,6 @@ export const SitesPanel: React.FC<ISitesPanelProps> = React.memo(({
       </div>
     </Panel>
   );
-});
+}, compareSitesPanelProps);
 
 SitesPanel.displayName = 'SitesPanel';

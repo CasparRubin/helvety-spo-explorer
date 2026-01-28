@@ -13,11 +13,43 @@ import { normalizeUserId, generateStorageKey, validateAndHandleInvalidInput } fr
  * consistent comparison. URLs are normalized (lowercased, trailing slashes removed) before
  * storage and comparison.
  * 
+ * Features:
+ * - Per-user storage (isolated by user ID)
+ * - URL normalization for consistent comparison
+ * - Automatic validation of URLs before storage
+ * - Graceful error handling (never throws, logs errors)
+ * 
+ * Edge cases handled:
+ * - Invalid URLs: Logged and ignored (operation continues)
+ * - Duplicate favorites: Automatically prevented (no duplicates stored)
+ * - localStorage errors: Logged but operation continues (graceful degradation)
+ * - Corrupted storage data: Validated and filtered (invalid entries removed)
+ * - Empty user ID: Normalized to DEFAULT_USER_ID
+ * 
  * @example
  * ```typescript
+ * // Basic usage
  * const favoriteService = new FavoriteService(userId);
  * favoriteService.addFavorite('https://contoso.sharepoint.com/sites/mysite');
  * const favorites = favoriteService.getFavorites();
+ * 
+ * // Toggle favorite status
+ * const wasAdded = favoriteService.toggleFavorite('https://contoso.sharepoint.com/sites/mysite');
+ * // Returns: true if added, false if removed
+ * 
+ * // Check if site is favorited
+ * const isFavorite = favoriteService.isFavorite('https://contoso.sharepoint.com/sites/mysite');
+ * 
+ * // URL normalization example
+ * favoriteService.addFavorite('https://contoso.sharepoint.com/sites/mysite/');
+ * favoriteService.isFavorite('https://contoso.sharepoint.com/sites/mysite'); // Returns: true
+ * // Trailing slash is normalized, so both URLs match
+ * 
+ * // Clear all favorites
+ * favoriteService.clearFavorites();
+ * 
+ * // Edge case: Invalid URL (logged but ignored)
+ * favoriteService.addFavorite('not-a-valid-url'); // Logs warning, no error thrown
  * ```
  */
 export class FavoriteService {

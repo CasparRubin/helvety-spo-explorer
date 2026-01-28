@@ -23,10 +23,49 @@ const LOG_SOURCE = 'SiteService';
  * This service provides methods to retrieve SharePoint sites that the current user has access to.
  * It uses the SharePoint Search API to fetch sites. Results are cached for 5 minutes to improve performance.
  * 
+ * Features:
+ * - 5-minute in-memory cache to reduce API calls
+ * - Automatic error recovery with stale cache fallback for network errors
+ * - Comprehensive validation of API responses
+ * - User-friendly error messages
+ * 
+ * Edge cases handled:
+ * - Network errors: Returns stale cache if available (better UX than error)
+ * - Permission errors: Throws PermissionError (never uses stale cache)
+ * - Validation errors: Throws ValidationError (never uses stale cache)
+ * - Timeout errors: Returns stale cache if available
+ * - Invalid API responses: Validates and filters invalid sites
+ * - Empty results: Returns empty array (valid state)
+ * 
  * @example
  * ```typescript
+ * // Basic usage
  * const siteService = new SiteService(context);
  * const sites = await siteService.getSites();
+ * 
+ * // Error handling
+ * try {
+ *   const sites = await siteService.getSites();
+ *   // Use sites array
+ * } catch (error) {
+ *   if (error instanceof PermissionError) {
+ *     // Handle permission error - user needs to check access
+ *     showPermissionError();
+ *   } else if (error instanceof ApiError) {
+ *     // Handle API error - network or server issue
+ *     showApiError();
+ *   } else if (error instanceof ValidationError) {
+ *     // Handle validation error - API returned invalid data
+ *     showValidationError();
+ *   }
+ * }
+ * 
+ * // Cache management
+ * siteService.clearCache(); // Force fresh data on next getSites() call
+ * 
+ * // Navigation
+ * siteService.navigateToSite('https://contoso.sharepoint.com/sites/mysite', true);
+ * // Opens site in new tab
  * ```
  */
 export class SiteService {
@@ -142,25 +181,39 @@ export class SiteService {
       // even if expired, as stale data is better than no data for user experience
       // Only use stale cache if we have valid cached data available
       const staleCachedSites: ISite[] | null = this.cache && isValidSitesArray(this.cache) ? this.cache : null;
-      if (staleCachedSites && staleCachedSites.length > 0) {
+      
+      // Determine error category for better recovery decision
+      // Permission and validation errors should not use stale cache
+      const isPermissionError: boolean = searchError instanceof PermissionError;
+      const isValidationError: boolean = searchError instanceof ValidationError;
+      
+      // Only attempt stale cache recovery for network/timeout errors, not permission/validation errors
+      if (staleCachedSites && staleCachedSites.length > 0 && !isPermissionError && !isValidationError) {
         const errorMessage: string = extractErrorMessage(searchError);
-        // Check if it's a timeout or network error (not permission/validation)
-        // Permission and validation errors should not use stale cache
+        
+        // Check if it's a timeout or network error using multiple indicators
         const isNetworkError: boolean = 
           isApiError(searchError) ||
-          errorMessage.includes('timeout') || 
-          errorMessage.includes('network') || 
-          errorMessage.includes('connection') ||
-          errorMessage.includes('fetch');
+          errorMessage.toLowerCase().includes('timeout') || 
+          errorMessage.toLowerCase().includes('network') || 
+          errorMessage.toLowerCase().includes('connection') ||
+          errorMessage.toLowerCase().includes('fetch') ||
+          errorMessage.toLowerCase().includes('econnrefused') ||
+          errorMessage.toLowerCase().includes('enotfound');
         
         if (isNetworkError) {
-          logWarning(LOG_SOURCE, `Returning stale cached data due to network error: ${errorMessage}`, 'getSites - error recovery');
+          logWarning(
+            LOG_SOURCE, 
+            `Returning stale cached data (${staleCachedSites.length} sites) due to network error: ${errorMessage}`, 
+            'getSites - error recovery with stale cache'
+          );
           // Return stale cache as fallback for network errors
+          // This provides better UX than showing an error when network is temporarily unavailable
           return staleCachedSites;
         }
       }
       
-      // Search API failed - throw appropriate error type
+      // Search API failed - throw appropriate error type with user-friendly message
       const searchUrl: string = `${this.context.pageContext.web.absoluteUrl}${API_ENDPOINTS.SEARCH_POSTQUERY}`;
       handleSharePointApiError(searchError, this.context, LOG_SOURCE, searchUrl, ERROR_MESSAGES.FETCH_SITES_FAILED);
     }
