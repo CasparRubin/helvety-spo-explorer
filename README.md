@@ -31,7 +31,7 @@ A SharePoint Framework (SPFx) application customizer that provides a navigation 
 ## How It Works
 
 1. **Installation** - Deploy the SPFx solution package to your SharePoint App Catalog
-2. **Activation** - Add the application customizer to your site(s) via Site Settings
+2. **Activation** - Install the app on your site(s) via "Add an app" (the extension activates automatically via Feature Framework)
 3. **Usage** - Click the "Sites you have access to" button in the top navigation bar
 4. **Explore** - Browse, search, and favorite sites from the panel
 5. **Customize** - Adjust display preferences in the Settings tab
@@ -159,8 +159,10 @@ The solution package will be created at: `sharepoint/solution/helvety-spo-explor
 ### Deployment
 
 1. Upload the `.sppkg` file to your SharePoint App Catalog
-2. Add the application customizer to your site(s) via Site Settings > Site App Permissions
-3. The navigation bar will appear in the top placeholder
+2. Enable the app in the app catalog (select "Only enable this app" and click "Enable app")
+3. Go to your target site, click the gear icon, and select "Add an app"
+4. Search for and install the "helvety-spo-explorer-client-side-solution" app
+5. The navigation bar will appear in the top placeholder automatically (Feature Framework-based activation)
 
 ## SharePoint Framework Concepts
 
@@ -201,6 +203,7 @@ This repository is public for transparency purposes only—all code is open for 
 | Version | Date             | Comments                    |
 | ------- | ---------------- | --------------------------- |
 | 0.0.1   | January 27, 2026 | Initial release with comprehensive code quality improvements: reduced duplication, simplified complex functions, improved type safety, unified error handling, and optimized performance |
+| 0.0.1   | January 28, 2026 | Fixed SharePoint packaging issues: removed invalid JSON comments from manifest, removed ClientSideInstance.xml from elementManifests for site-level deployment |
 
 ## Disclaimer
 

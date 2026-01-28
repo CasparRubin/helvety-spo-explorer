@@ -146,7 +146,7 @@ export function useSites(context: ApplicationCustomizerContext): IUseSitesReturn
           // Ensure loading state is cleared even on error to prevent UI freeze
           setIsLoading(false);
         });
-      }, 1000); // Longer delay to ensure page is fully loaded and interactive
+      }, 100); // Delay to ensure page is fully loaded and interactive
     };
 
     // Wait for document to be ready

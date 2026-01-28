@@ -10,8 +10,8 @@
     "developer": {
       "name": "Helvety",
       "websiteUrl": "https://helvety.com",
-      "privacyUrl": "",
-      "termsOfUseUrl": "",
+      "privacyUrl": "https://helvety.com/privacy",
+      "termsOfUseUrl": "https://helvety.com/terms",
       "mpnId": "Undefined-1.22.1"
     },
     "metadata": {
@@ -30,8 +30,7 @@
         "version": "1.0.0.1",
         "assets": {
           "elementManifests": [
-            "elements.xml",
-            "ClientSideInstance.xml"
+            "elements.xml"
           ]
         }
       }

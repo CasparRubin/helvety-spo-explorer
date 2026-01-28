@@ -47,16 +47,19 @@ export function useFavorites(userId: string): IUseFavoritesReturn {
     logSource: LOG_SOURCE,
     serviceName: 'FavoriteService',
     onInitialized: (service: FavoriteService): void => {
-      // Load favorite sites with error handling
-      const favoriteUrls: string[] = service.getFavorites();
-      
-      // Validate favorite URLs array before creating Set
-      if (isValidStringArray(favoriteUrls)) {
-        setFavoriteSites(new Set(favoriteUrls));
-      } else {
-        // Set empty set if validation fails
-        setFavoriteSites(new Set());
-      }
+      // Defer localStorage read to avoid blocking React render
+      setTimeout((): void => {
+        // Load favorite sites with error handling
+        const favoriteUrls: string[] = service.getFavorites();
+        
+        // Validate favorite URLs array before creating Set
+        if (isValidStringArray(favoriteUrls)) {
+          setFavoriteSites(new Set(favoriteUrls));
+        } else {
+          // Set empty set if validation fails
+          setFavoriteSites(new Set());
+        }
+      }, 0);
     },
     onInitializationFailed: (): void => {
       // Set empty set as fallback if initialization failed

@@ -48,30 +48,33 @@ export function useSettings(userId: string): IUseSettingsReturn {
     logSource: LOG_SOURCE,
     serviceName: 'SettingsService',
     onInitialized: (service: SettingsService): void => {
-      // Load settings with error handling
-      const userSettings: IUserSettings = service.getSettings();
-      
-      // Validate loaded settings before updating state
-      if (!isValidUserSettings(userSettings)) {
-        logError(LOG_SOURCE, new Error('Invalid settings loaded from storage'), `User: ${userId}`);
-        setSettings({ ...DEFAULT_SETTINGS });
-        return;
-      }
-      
-      // Only update state if settings have actually changed
-      // Use functional update to compare with previous state and prevent unnecessary re-renders
-      setSettings((prevSettings: IUserSettings): IUserSettings => {
-        // Fast path: same reference means no change
-        if (prevSettings === userSettings) {
-          return prevSettings;
+      // Defer localStorage read to avoid blocking React render
+      setTimeout((): void => {
+        // Load settings with error handling
+        const userSettings: IUserSettings = service.getSettings();
+        
+        // Validate loaded settings before updating state
+        if (!isValidUserSettings(userSettings)) {
+          logError(LOG_SOURCE, new Error('Invalid settings loaded from storage'), `User: ${userId}`);
+          setSettings({ ...DEFAULT_SETTINGS });
+          return;
         }
         
-        // Deep comparison using shallowEqual (settings object is shallow)
-        if (shallowEqual(prevSettings, userSettings)) {
-          return prevSettings; // Return previous state to prevent re-render
-        }
-        return userSettings;
-      });
+        // Only update state if settings have actually changed
+        // Use functional update to compare with previous state and prevent unnecessary re-renders
+        setSettings((prevSettings: IUserSettings): IUserSettings => {
+          // Fast path: same reference means no change
+          if (prevSettings === userSettings) {
+            return prevSettings;
+          }
+          
+          // Deep comparison using shallowEqual (settings object is shallow)
+          if (shallowEqual(prevSettings, userSettings)) {
+            return prevSettings; // Return previous state to prevent re-render
+          }
+          return userSettings;
+        });
+      }, 0);
     },
     onInitializationFailed: (): void => {
       // Use default settings as fallback if initialization failed

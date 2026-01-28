@@ -1,17 +1,10 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-extension-manifest.schema.json",
-
   "id": "3f9d14c6-c154-4aaf-bcb9-b1f3c064fd4c",
   "alias": "HelvetySpoExplorerApplicationCustomizer",
   "componentType": "Extension",
   "extensionType": "ApplicationCustomizer",
-
-  // Explicit version matching package.json
   "version": "0.0.1",
   "manifestVersion": 2,
-
-  // If true, the component can only be installed on sites where Custom Script is allowed.
-  // Components that allow authors to embed arbitrary script code should set this to true.
-  // https://support.office.com/en-us/article/Turn-scripting-capabilities-on-or-off-1f2c515f-5d7e-448a-9fd7-835da935584f
   "requiresCustomScript": false
 }
