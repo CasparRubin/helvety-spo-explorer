@@ -11,27 +11,27 @@
 
 ### Light Theme
 
-![SplitButton - Light Theme](public/screenshots/1 - SplitButton.png)
+![SplitButton - Light Theme](https://raw.githubusercontent.com/CasparRubin/helvety-spo-explorer/main/public/screenshots/1%20-%20SplitButton.png)
 *Navigation bar with split button in light theme*
 
-![Panel - Light Theme](public/screenshots/2 - Panel.png)
+![Panel - Light Theme](https://raw.githubusercontent.com/CasparRubin/helvety-spo-explorer/main/public/screenshots/2%20-%20Panel.png)
 *Sites panel displaying available sites in light theme*
 
-![Settings](public/screenshots/3 - Settings.png)
+![Settings](https://raw.githubusercontent.com/CasparRubin/helvety-spo-explorer/main/public/screenshots/3%20-%20Settings.png)
 *Settings panel for customizing display preferences*
 
-![Search](public/screenshots/4 - Search.png)
+![Search](https://raw.githubusercontent.com/CasparRubin/helvety-spo-explorer/main/public/screenshots/4%20-%20Search.png)
 *Search functionality with highlighted matches*
 
-![Quick Access Favorites](public/screenshots/5 - QuickAccessFavorites.png)
+![Quick Access Favorites](https://raw.githubusercontent.com/CasparRubin/helvety-spo-explorer/main/public/screenshots/5%20-%20QuickAccessFavorites.png)
 *Quick access dropdown menu showing favorite sites*
 
 ### Dark Theme
 
-![SplitButton - Dark Theme](public/screenshots/6 - DarkThemeSplitButton.png)
+![SplitButton - Dark Theme](https://raw.githubusercontent.com/CasparRubin/helvety-spo-explorer/main/public/screenshots/6%20-%20DarkThemeSplitButton.png)
 *Navigation bar with split button in dark theme*
 
-![Panel - Dark Theme](public/screenshots/7 - DarkThemePanel.png)
+![Panel - Dark Theme](https://raw.githubusercontent.com/CasparRubin/helvety-spo-explorer/main/public/screenshots/7%20-%20DarkThemePanel.png)
 *Sites panel displaying available sites in dark theme*
 
 ---
