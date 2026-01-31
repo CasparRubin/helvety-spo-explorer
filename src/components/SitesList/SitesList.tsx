@@ -34,7 +34,7 @@ import {
 /**
  * Number of sites to show when tenant is unlicensed
  */
-const UNLICENSED_SITES_LIMIT = 2;
+const UNLICENSED_SITES_LIMIT = 0;
 
 // Styles
 import {
@@ -146,7 +146,7 @@ export const SitesList: React.FC<ISitesListProps> = React.memo(
      *
      * - Until license check completes: show ALL sites (core functionality first)
      * - After check, if licensed: show ALL sites
-     * - After check, if unlicensed: show only first 2 sites
+     * - After check, if unlicensed: show NO sites (blocked until licensed)
      */
     const { visibleSites, hiddenSitesCount } = React.useMemo((): {
       visibleSites: ISite[];
@@ -392,6 +392,7 @@ export const SitesList: React.FC<ISitesListProps> = React.memo(
               placeholder={UI_MESSAGES.SEARCH_PLACEHOLDER}
               value={searchText}
               onChange={handleSearchChange}
+              disabled={isLicenseChecked && !isLicensed}
               styles={{
                 root: {
                   marginTop: 0,
@@ -426,7 +427,35 @@ export const SitesList: React.FC<ISitesListProps> = React.memo(
           {UI_MESSAGES.SEARCH_DESCRIPTION}
         </span>
 
-        {sortedSites.length === 0 && searchText.trim() ? (
+        {/* License required message when unlicensed */}
+        {isLicenseChecked && !isLicensed ? (
+          <div
+            style={{
+              ...emptyStateStyles,
+              padding: `${SPACING.LG} ${SPACING.MD}`,
+              textAlign: "center",
+            }}
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            <div
+              style={{
+                fontSize: "16px",
+                fontWeight: 500,
+                color: CSS_VARIABLES.NEUTRAL_PRIMARY,
+                marginBottom: SPACING.MD,
+              }}
+            >
+              {UI_MESSAGES.LICENSE_REQUIRED_MESSAGE}
+            </div>
+            <PrimaryButton
+              text={UI_MESSAGES.LICENSE_BANNER_GET_LICENSE}
+              onClick={handleUpgradeClick}
+              iconProps={{ iconName: "Shop" }}
+            />
+          </div>
+        ) : sortedSites.length === 0 && searchText.trim() ? (
           <div
             style={emptyStateStyles}
             role="status"

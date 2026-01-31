@@ -105,11 +105,12 @@ The extension is designed for **enterprise reliability**:
 
 ### Unlicensed Behavior
 
-Without a valid license, the extension operates in a limited demo mode:
+Without a valid license, the extension displays a clear licensing prompt:
 
-* Site list is limited to 2 sites
-* A "Get License" button appears in the navigation bar linking to the store
-* All other features (favorites, search, settings) remain functional
+* A full-width warning banner with "Unlicensed Product" text replaces the navigation button
+* A "Visit the Helvety Store to get a license" button links directly to the store
+* The "Sites you have access to" button is hidden until licensed
+* If the panel is accessed, no sites are displayed and search is disabled
 
 ### Tenant Limits
 
@@ -291,7 +292,8 @@ See [LICENSE](./LICENSE) for full terms.
 | 1.0.0.3 | January 28, 2026 | Version bump to 1.0.0.3 - build verification and code quality improvements |
 | 1.0.0.3 | January 28, 2026 | Added screenshots section to README showcasing application features in both light and dark themes |
 | 1.0.0.3 | January 28, 2026 | Comprehensive code quality improvements: enhanced type safety with improved type guards and narrowing, optimized React.memo with custom comparison functions, improved error recovery logic, enhanced documentation with examples and edge cases, and updated UI text for clarity |
-| 1.0.0.4 | January 31, 2026 | Added subscription-based licensing: tenant registration via store.helvety.com, non-blocking license validation with fail-open behavior, 7-day grace period, "Get License" button for unlicensed users, 24-hour license caching for enterprise reliability |
+| 1.0.0.4 | January 31, 2026 | Added subscription-based licensing: tenant registration via store.helvety.com, non-blocking license validation with fail-open behavior, 7-day grace period, 24-hour license caching for enterprise reliability |
+| 1.0.0.4 | January 31, 2026 | Improved unlicensed UX: full-width warning banner replaces navigation button, "Visit the Helvety Store to get a license" button with shop icon, sites and search completely blocked when unlicensed |
 
 ## Disclaimer
 

@@ -77,8 +77,9 @@ export const UI_MESSAGES = {
   LICENSE_GET_STARTED: "Get started",
   LICENSE_RENEW: "Renew subscription",
   // New license messages for non-blocking implementation
-  LICENSE_BANNER_UNLICENSED: "Unlicensed Product",
-  LICENSE_BANNER_GET_LICENSE: "Get License",
+  LICENSE_BANNER_UNLICENSED: "Unlicensed Product: Helvety SPO Explorer",
+  LICENSE_BANNER_GET_LICENSE: "Visit the Helvety Store to get a license",
   LICENSE_SITES_HIDDEN: "Upgrade to view all {count} sites",
   LICENSE_UPGRADE_BUTTON: "Upgrade Now",
+  LICENSE_REQUIRED_MESSAGE: "A license is required to view sites",
 } as const;

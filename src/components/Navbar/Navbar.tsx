@@ -5,7 +5,6 @@ import {
   IContextualMenuItem,
   ContextualMenuItemType,
 } from "@fluentui/react/lib/ContextualMenu";
-import { MessageBar, MessageBarType } from "@fluentui/react/lib/MessageBar";
 
 // Internal components
 import { SitesPanel } from "../SitesPanel/SitesPanel";
@@ -45,10 +44,11 @@ import {
  * This component serves as the main entry point for the site explorer functionality.
  *
  * Features:
- * - Displays a button to open the sites panel
+ * - Displays a button to open the sites panel (hidden when unlicensed)
  * - Shows a dropdown menu with favorite sites for quick access
  * - Manages site fetching, favorites, and settings
  * - Handles error states and loading indicators
+ * - Shows full-width warning banner when unlicensed with link to store
  *
  * @component
  * @param props - Component props containing the SharePoint context
@@ -242,20 +242,20 @@ export const Navbar: React.FC<INavbarProps> = React.memo(({ context }) => {
       role="navigation"
       aria-label="Site navigation"
     >
-      {/* Unlicensed Product banner - permanent, non-dismissable */}
+      {/* Unlicensed Product banner - permanent, non-dismissable, full-width */}
       {showUnlicensedBanner && (
-        <MessageBar
-          messageBarType={MessageBarType.warning}
-          isMultiline={false}
-          styles={{
-            root: {
-              marginBottom: "4px",
-            },
-            text: {
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-            },
+        <div
+          style={{
+            backgroundColor: "#FFF4CE",
+            padding: "8px 16px",
+            marginLeft: "-16px",
+            marginRight: "-16px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "flex-start",
+            gap: "12px",
+            width: "calc(100% + 32px)",
+            boxSizing: "border-box",
           }}
         >
           <span style={{ fontWeight: 600 }}>
@@ -264,42 +264,35 @@ export const Navbar: React.FC<INavbarProps> = React.memo(({ context }) => {
           <PrimaryButton
             text={UI_MESSAGES.LICENSE_BANNER_GET_LICENSE}
             onClick={handleGetLicense}
-            styles={{
-              root: {
-                marginLeft: "8px",
-                minWidth: "auto",
-                padding: "0 12px",
-                height: "24px",
-              },
-              label: {
-                fontSize: "12px",
-              },
-            }}
+            iconProps={{ iconName: "Shop" }}
           />
-        </MessageBar>
-      )}
-      <div style={navbarInnerStyles}>
-        <div style={navbarContentStyles}>
-          <DefaultButton
-            text={UI_MESSAGES.SITES_YOU_HAVE_ACCESS_TO}
-            iconProps={{ iconName: "SecondaryNav" }}
-            onClick={handleOpenPanel}
-            split={true}
-            menuProps={{
-              items: menuItems,
-              ariaLabel: UI_MESSAGES.FAVORITES_QUICK_ACCESS_MENU,
-            }}
-            ariaLabel={UI_MESSAGES.OPEN_SITES_PANEL}
-            aria-describedby="sites-button-description"
-            aria-expanded={isPanelOpen}
-            aria-controls="helvety-spo-sites-panel"
-            title={UI_MESSAGES.OPEN_SITES_PANEL_DESCRIPTION}
-          />
-          <span id="sites-button-description" style={srOnlyStyles}>
-            {UI_MESSAGES.OPEN_SITES_PANEL_DESCRIPTION}
-          </span>
         </div>
-      </div>
+      )}
+      {/* Sites button - hidden when unlicensed */}
+      {!showUnlicensedBanner && (
+        <div style={navbarInnerStyles}>
+          <div style={navbarContentStyles}>
+            <DefaultButton
+              text={UI_MESSAGES.SITES_YOU_HAVE_ACCESS_TO}
+              iconProps={{ iconName: "SecondaryNav" }}
+              onClick={handleOpenPanel}
+              split={true}
+              menuProps={{
+                items: menuItems,
+                ariaLabel: UI_MESSAGES.FAVORITES_QUICK_ACCESS_MENU,
+              }}
+              ariaLabel={UI_MESSAGES.OPEN_SITES_PANEL}
+              aria-describedby="sites-button-description"
+              aria-expanded={isPanelOpen}
+              aria-controls="helvety-spo-sites-panel"
+              title={UI_MESSAGES.OPEN_SITES_PANEL_DESCRIPTION}
+            />
+            <span id="sites-button-description" style={srOnlyStyles}>
+              {UI_MESSAGES.OPEN_SITES_PANEL_DESCRIPTION}
+            </span>
+          </div>
+        </div>
+      )}
       <SitesPanel
         isOpen={isPanelOpen}
         onDismiss={handleClosePanel}
