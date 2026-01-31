@@ -1,4 +1,4 @@
-import { CSS_VARIABLES, LAYOUT, TYPOGRAPHY, SPACING } from '../constants';
+import { CSS_VARIABLES, LAYOUT, TYPOGRAPHY, SPACING } from "../constants";
 
 /**
  * Common/shared style objects used across multiple components
@@ -8,11 +8,11 @@ import { CSS_VARIABLES, LAYOUT, TYPOGRAPHY, SPACING } from '../constants';
  * Option container styles
  */
 export const optionContainerStyles: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
+  display: "flex",
+  alignItems: "center",
   padding: LAYOUT.OPTION_PADDING,
   minHeight: LAYOUT.OPTION_MIN_HEIGHT,
-  cursor: 'pointer',
+  cursor: "pointer",
 } as const;
 
 /**
@@ -21,10 +21,10 @@ export const optionContainerStyles: React.CSSProperties = {
 export const siteInfoStyles: React.CSSProperties = {
   flex: 1,
   minWidth: 0,
-  display: 'flex',
-  flexDirection: 'column',
+  display: "flex",
+  flexDirection: "column",
   gap: 0, // Gap handled by individual element margins
-  justifyContent: 'center',
+  justifyContent: "center",
 } as const;
 
 /**
@@ -34,9 +34,9 @@ export const siteTitleStyles: React.CSSProperties = {
   fontSize: TYPOGRAPHY.FONT_SIZE_LARGE,
   fontWeight: 500,
   color: CSS_VARIABLES.NEUTRAL_PRIMARY,
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
 } as const;
 
 /**
@@ -46,9 +46,9 @@ export const siteDescriptionStyles: React.CSSProperties = {
   fontSize: TYPOGRAPHY.FONT_SIZE_XSMALL,
   color: CSS_VARIABLES.NEUTRAL_TERTIARY,
   opacity: 0.85,
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
   marginTop: SPACING.SM, // Add spacing between title and description (bigger than description to URL)
 } as const;
 
@@ -59,10 +59,11 @@ export const siteUrlStyles: React.CSSProperties = {
   fontSize: TYPOGRAPHY.FONT_SIZE_XXSMALL,
   color: CSS_VARIABLES.NEUTRAL_TERTIARY,
   opacity: 0.7,
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
-  fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace',
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
+  fontFamily:
+    'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace',
   fontWeight: 400,
   marginTop: SPACING.XS, // Add spacing between description and URL
 } as const;
@@ -72,11 +73,11 @@ export const siteUrlStyles: React.CSSProperties = {
  */
 export const followIconContainerStyles: React.CSSProperties = {
   marginLeft: 0, // Margin handled by parent container
-  cursor: 'pointer',
+  cursor: "pointer",
   padding: SPACING.XS,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
 } as const;
 
 /**
@@ -87,7 +88,7 @@ export const followingHeaderStyles: React.CSSProperties = {
   fontSize: TYPOGRAPHY.FONT_SIZE_XSMALL,
   fontWeight: 600,
   color: CSS_VARIABLES.NEUTRAL_SECONDARY,
-  textTransform: 'uppercase',
+  textTransform: "uppercase",
   letterSpacing: SPACING.LETTER_SPACING_HEADER,
 } as const;
 
@@ -107,15 +108,15 @@ export const emptyStateStyles: React.CSSProperties = {
   padding: `${SPACING.XL} ${SPACING.LG}`,
   fontSize: TYPOGRAPHY.FONT_SIZE_MEDIUM,
   color: CSS_VARIABLES.NEUTRAL_SECONDARY,
-  textAlign: 'center',
+  textAlign: "center",
 } as const;
 
 /**
  * Loading container styles
  */
 export const loadingContainerStyles: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
+  display: "flex",
+  alignItems: "center",
   gap: LAYOUT.COMBOBOX_GAP,
 } as const;
 
@@ -132,13 +133,13 @@ export const emptySitesStyles: React.CSSProperties = {
  * Hides content visually but keeps it accessible to screen readers
  */
 export const srOnlyStyles: React.CSSProperties = {
-  position: 'absolute',
+  position: "absolute",
   width: SPACING.SR_ONLY_SIZE,
   height: SPACING.SR_ONLY_SIZE,
   padding: 0,
   margin: SPACING.SR_ONLY_MARGIN,
-  overflow: 'hidden',
-  clip: 'rect(0, 0, 0, 0)',
-  whiteSpace: 'nowrap',
+  overflow: "hidden",
+  clip: "rect(0, 0, 0, 0)",
+  whiteSpace: "nowrap",
   borderWidth: 0,
 } as const;

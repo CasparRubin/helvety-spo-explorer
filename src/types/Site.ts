@@ -1,12 +1,12 @@
 /**
  * Branded type for Site ID to prevent mixing with Web ID
  */
-export type SiteId = string & { readonly __brand: 'SiteId' };
+export type SiteId = string & { readonly __brand: "SiteId" };
 
 /**
  * Branded type for Web ID to prevent mixing with Site ID
  */
-export type WebId = string & { readonly __brand: 'WebId' };
+export type WebId = string & { readonly __brand: "WebId" };
 
 /**
  * SharePoint site information
@@ -38,7 +38,7 @@ export interface ISearchResultCell {
 
 /**
  * SharePoint search result row
- * 
+ *
  * This interface represents a single row from the SharePoint Search API response.
  * The Cells array contains key-value pairs for each property returned by the search query.
  */
@@ -49,7 +49,7 @@ export interface ISiteSearchResultRow {
 
 /**
  * SharePoint search result for sites
- * 
+ *
  * Note: This interface is not currently used in the codebase.
  * The Search API returns results in ISiteSearchResultRow format instead.
  */
@@ -70,7 +70,7 @@ export interface ISiteSearchResult {
 
 /**
  * SharePoint REST API response for web infos
- * 
+ *
  * Represents web information returned by the SharePoint WebInfos API endpoint.
  */
 export interface IWebInfo {
@@ -92,7 +92,7 @@ export interface IWebInfo {
 
 /**
  * SharePoint REST API response wrapper
- * 
+ *
  * Standard response format for SharePoint REST API endpoints that return collections.
  */
 export interface ISPRestResponse<T> {
@@ -112,4 +112,3 @@ export interface ISPApiError {
     };
   };
 }
-

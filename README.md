@@ -39,7 +39,7 @@
 
 A SharePoint Framework (SPFx) application customizer that provides a navigation bar for exploring and accessing SharePoint sites. The extension displays a "Sites you have access to" button in the top placeholder, which opens a panel with a searchable list of all SharePoint sites the current user can access.
 
-**Privacy First** - All data processing happens client-side. User preferences (favorites and settings) are stored locally in the browser's localStorage. The application does not collect or transmit user data to external servers (SharePoint Search API is used for site discovery only).
+**Privacy First** - All data processing happens client-side. User preferences (favorites and settings) are stored locally in the browser's localStorage. The extension makes two types of external calls: (1) SharePoint Search API for site discovery, and (2) store.helvety.com API for license validation (only your tenant ID is transmitted, no personal data). See our [Privacy Policy](https://helvety.com/privacy) for details.
 
 ## Features
 
@@ -68,7 +68,7 @@ A SharePoint Framework (SPFx) application customizer that provides a navigation 
 
 ## Pricing
 
-Helvety SPO Explorer is available via subscription:
+Helvety SPO Explorer is available via subscription at [store.helvety.com](https://store.helvety.com/products/helvety-spo-explorer):
 
 | Feature | Basic (CHF 250/month) | Enterprise (CHF 500/month) |
 |---------|----------------------|---------------------------|
@@ -77,10 +77,44 @@ Helvety SPO Explorer is available via subscription:
 | Favorites and quick access | Yes | Yes |
 | Settings customization | Yes | Yes |
 | Updates included | Yes | Yes |
+| Tenants per subscription | 1 | Up to 5 |
 | Priority support | - | Yes |
 | Dedicated setup assistance | - | Yes |
 
-Contact us at [contact@helvety.com](mailto:contact@helvety.com) for pricing inquiries.
+**[Subscribe Now](https://store.helvety.com/products/helvety-spo-explorer)** | Contact us at [contact@helvety.com](mailto:contact@helvety.com) for enterprise inquiries.
+
+## Licensing
+
+Helvety SPO Explorer uses a **tenant-based licensing model**. After purchasing a subscription at [store.helvety.com](https://store.helvety.com), you register your SharePoint tenant ID(s) in your account dashboard.
+
+### How It Works
+
+1. **Purchase** - Subscribe to Basic or Enterprise at [store.helvety.com](https://store.helvety.com/products/helvety-spo-explorer)
+2. **Register Tenant** - Add your SharePoint tenant ID (e.g., "contoso" from contoso.sharepoint.com) in your store account
+3. **Deploy** - Install the extension on your SharePoint sites as described in the Deployment section
+4. **Automatic Validation** - The extension validates your license in the background without blocking functionality
+
+### License Validation
+
+The extension is designed for **enterprise reliability**:
+
+* **Non-blocking** - Core functionality (site navigation, favorites, search) loads immediately while license validation happens in the background
+* **Fail-open** - If the license server is temporarily unreachable, the extension continues working normally
+* **Grace period** - If your subscription lapses, you have a 7-day grace period before features are restricted
+* **Caching** - Valid licenses are cached for 24 hours to minimize API calls and ensure offline resilience
+
+### Unlicensed Behavior
+
+Without a valid license, the extension operates in a limited demo mode:
+
+* Site list is limited to 2 sites
+* A "Get License" button appears in the navigation bar linking to the store
+* All other features (favorites, search, settings) remain functional
+
+### Tenant Limits
+
+* **Basic** - 1 tenant per subscription
+* **Enterprise** - Up to 5 tenants per subscription
 
 ## Tech Stack
 
@@ -110,14 +144,17 @@ helvety-spo-explorer/
 │   ├── services/           # Business logic services
 │   │   ├── SiteService.ts      # SharePoint site fetching
 │   │   ├── FavoriteService.ts  # Favorites management
-│   │   └── SettingsService.ts  # User settings management
+│   │   ├── SettingsService.ts  # User settings management
+│   │   └── LicenseService.ts   # License validation
 │   ├── types/              # TypeScript type definitions
 │   │   ├── ComponentProps.ts
 │   │   ├── Site.ts
+│   │   ├── License.ts          # License types
 │   │   └── JSOM.d.ts
 │   └── utils/              # Utility functions
 │       ├── constants/      # Application constants
 │       ├── customHooks/    # Custom React hooks
+│       │   └── useLicense.ts   # License validation hook
 │       ├── styles/         # Style definitions
 │       ├── componentUtils.ts
 │       ├── errorUtils.ts
@@ -129,9 +166,6 @@ helvety-spo-explorer/
 │       ├── urlUtils.ts
 │       └── validationUtils.ts
 ├── config/                 # Build configuration files
-├── docs/                   # Documentation
-│   ├── ARCHITECTURE.md
-│   └── DESIGN_DECISIONS.md
 ├── sharepoint/             # SharePoint solution assets
 │   └── assets/
 │       ├── ClientSideInstance.xml
@@ -240,9 +274,13 @@ For questions or inquiries, please contact us at contact@helvety.com.
 
 ## License & Usage
 
-This repository is public for transparency purposes only—all code is open for inspection so users can verify its behavior.
+This repository is public for transparency purposes only. All code is open for inspection so users can verify its behavior.
 
-**No license is granted; this is the default "All rights reserved" status.** You may view the code, but you cannot reuse, redistribute, or sell it without explicit permission. All rights are retained by the author.
+**All Rights Reserved.** No license is granted. You may view the code, but you may not copy, reuse, redistribute, modify, or sell it without explicit written permission.
+
+Purchasing a subscription grants access to use the hosted service only—subscriptions do not grant any rights to the source code.
+
+See [LICENSE](./LICENSE) for full terms.
 
 ## Version History
 
@@ -253,6 +291,7 @@ This repository is public for transparency purposes only—all code is open for 
 | 1.0.0.3 | January 28, 2026 | Version bump to 1.0.0.3 - build verification and code quality improvements |
 | 1.0.0.3 | January 28, 2026 | Added screenshots section to README showcasing application features in both light and dark themes |
 | 1.0.0.3 | January 28, 2026 | Comprehensive code quality improvements: enhanced type safety with improved type guards and narrowing, optimized React.memo with custom comparison functions, improved error recovery logic, enhanced documentation with examples and edge cases, and updated UI text for clarity |
+| 1.0.0.4 | January 31, 2026 | Added subscription-based licensing: tenant registration via store.helvety.com, non-blocking license validation with fail-open behavior, 7-day grace period, "Get License" button for unlicensed users, 24-hour license caching for enterprise reliability |
 
 ## Disclaimer
 

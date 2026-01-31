@@ -1,23 +1,23 @@
 /**
  * Application Customizer Styles
- * 
+ *
  * Contains CSS styles injected into the document head for the SharePoint
  * Application Customizer. These styles override default SharePoint styles
  * to ensure proper integration with the SharePoint theme and UI.
- * 
+ *
  * These styles are injected dynamically when the Application Customizer initializes.
  */
 
 /**
  * CSS styles for the Application Customizer
- * 
+ *
  * Includes:
  * - Navbar border overrides
  * - Panel positioning and animation overrides
  * - Split button styling
  * - Scrollbar styling for sites list
  * - Refresh button animation
- * 
+ *
  * @returns CSS string to be injected into document head
  */
 export function getApplicationCustomizerStyles(): string {
@@ -128,4 +128,4 @@ export function getApplicationCustomizerStyles(): string {
 /**
  * Style ID used for the injected style element
  */
-export const APPLICATION_CUSTOMIZER_STYLE_ID = 'helvety-spo-overrides';
+export const APPLICATION_CUSTOMIZER_STYLE_ID = "helvety-spo-overrides";

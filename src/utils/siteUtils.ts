@@ -1,4 +1,4 @@
-import { ISite } from '../types/Site';
+import { ISite } from "../types/Site";
 
 /**
  * Site utility functions
@@ -6,20 +6,20 @@ import { ISite } from '../types/Site';
 
 /**
  * Sort sites alphabetically by title (case-insensitive)
- * 
+ *
  * Sorts an array of sites by their title using locale-aware comparison.
  * Uses case-insensitive comparison to ensure consistent ordering regardless of capitalization.
  * Creates a new array to avoid mutating the input.
- * 
+ *
  * Defensive checks:
  * - Validates input is an array
  * - Handles null/undefined titles safely
  * - Validates title is a string before comparison
- * 
+ *
  * @param sites - Array of sites to sort
  * @returns New array with sites sorted alphabetically by title
  * @throws Never throws - localeCompare is safe, defensive checks prevent errors
- * 
+ *
  * @example
  * ```typescript
  * const sorted = sortSitesAlphabetically(sites);
@@ -40,11 +40,11 @@ export function sortSitesAlphabetically(sites: ISite[]): ISite[] {
       return 0; // Keep order if either site is invalid
     }
 
-    const titleA = typeof a.title === 'string' ? a.title : '';
-    const titleB = typeof b.title === 'string' ? b.title : '';
+    const titleA = typeof a.title === "string" ? a.title : "";
+    const titleB = typeof b.title === "string" ? b.title : "";
 
     // Use 'base' sensitivity for case-insensitive comparison
     // This treats 'A' and 'a' as equivalent for sorting purposes
-    return titleA.localeCompare(titleB, undefined, { sensitivity: 'base' });
+    return titleA.localeCompare(titleB, undefined, { sensitivity: "base" });
   });
 }

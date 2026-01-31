@@ -1,19 +1,24 @@
 /**
  * Common error handling patterns and utilities
- * 
+ *
  * Provides reusable error handling functions and patterns used throughout
  * the application. These utilities help standardize error handling and
  * provide consistent error recovery strategies.
  */
 
 // Utils
-import { logError, extractErrorMessage, ErrorCategory, categorizeError } from './errorUtils';
-import { isValidFunction } from './validationUtils';
+import {
+  logError,
+  extractErrorMessage,
+  ErrorCategory,
+  categorizeError,
+} from "./errorUtils";
+import { isValidFunction } from "./validationUtils";
 
 // Types
-import { ApiError, PermissionError, ValidationError } from './errors';
+import { ApiError, PermissionError, ValidationError } from "./errors";
 
-const LOG_SOURCE = 'errorHandlingUtils';
+const LOG_SOURCE = "errorHandlingUtils";
 
 /**
  * Options for error handling behavior
@@ -33,26 +38,26 @@ export interface IErrorHandlingOptions {
 
 /**
  * Formats error context consistently across the application
- * 
+ *
  * Creates a standardized error context string that includes operation name,
  * user identifier (if provided), and additional details. This ensures consistent
  * error message formatting throughout the application.
- * 
+ *
  * @param operation - Name of the operation that failed
  * @param userId - Optional user ID for user-specific operations
  * @param details - Optional additional details about the error context
  * @returns Formatted error context string
- * 
+ *
  * @example
  * ```typescript
  * // Basic usage with operation name only
  * const context1 = formatErrorContext('Initializing SettingsService');
  * // Returns: "Initializing SettingsService"
- * 
+ *
  * // With user ID
  * const context2 = formatErrorContext('Initializing SettingsService', 'user@domain.com');
  * // Returns: "Initializing SettingsService for user: user@domain.com"
- * 
+ *
  * // With all parameters
  * const context3 = formatErrorContext('Initializing SettingsService', 'user@domain.com', 'Failed to load settings');
  * // Returns: "Initializing SettingsService for user: user@domain.com - Failed to load settings"
@@ -64,34 +69,34 @@ export function formatErrorContext(
   details?: string
 ): string {
   const parts: string[] = [operation];
-  
+
   if (userId) {
     parts.push(`for user: ${userId}`);
   }
-  
+
   if (details) {
     parts.push(`- ${details}`);
   }
-  
-  return parts.join(' ');
+
+  return parts.join(" ");
 }
 
 /**
  * Formats error messages consistently across the application
- * 
+ *
  * Creates a standardized error message format that includes the base message
  * and optional details. This ensures consistent error message structure.
- * 
+ *
  * @param baseMessage - Base error message
  * @param details - Optional additional details
  * @param statusCode - Optional HTTP status code
  * @returns Formatted error message
- * 
+ *
  * @example
  * ```typescript
  * formatErrorMessage('Failed to fetch sites', 'Network timeout', 408);
  * // Returns: "Failed to fetch sites (408): Network timeout"
- * 
+ *
  * formatErrorMessage('Operation failed');
  * // Returns: "Operation failed"
  * ```
@@ -102,29 +107,29 @@ export function formatErrorMessage(
   statusCode?: number
 ): string {
   const parts: string[] = [baseMessage];
-  
+
   if (statusCode !== undefined && Number.isFinite(statusCode)) {
     parts.push(`(${statusCode})`);
   }
-  
+
   if (details) {
     parts.push(`: ${details}`);
   }
-  
-  return parts.join(' ');
+
+  return parts.join(" ");
 }
 
 /**
  * Safely executes an async function with error handling
- * 
+ *
  * Wraps an async function to catch and handle errors consistently.
  * Returns a default value on error if rethrow is false, otherwise rethrows.
- * 
+ *
  * @param fn - The async function to execute
  * @param options - Error handling options
  * @returns The result of the function or default value on error
  * @throws Re-throws the error if rethrow is true and an error occurs
- * 
+ *
  * @example
  * ```typescript
  * // With default value (never throws)
@@ -132,7 +137,7 @@ export function formatErrorMessage(
  *   async () => await fetchData(),
  *   { defaultValue: [], logError: true, context: 'Fetching data' }
  * );
- * 
+ *
  * // With rethrow enabled (may throw)
  * try {
  *   const result = await safeExecuteAsync(
@@ -173,15 +178,15 @@ export async function safeExecuteAsync<T>(
 
 /**
  * Safely executes a synchronous function with error handling
- * 
+ *
  * Wraps a synchronous function to catch and handle errors consistently.
  * Returns a default value on error if rethrow is false, otherwise rethrows.
- * 
+ *
  * @param fn - The function to execute
  * @param options - Error handling options
  * @returns The result of the function or default value on error
  * @throws Re-throws the error if rethrow is true and an error occurs
- * 
+ *
  * @example
  * ```typescript
  * // With default value (never throws)
@@ -189,7 +194,7 @@ export async function safeExecuteAsync<T>(
  *   () => parseData(data),
  *   { defaultValue: null, logError: true, context: 'Parsing data' }
  * );
- * 
+ *
  * // With rethrow enabled (may throw)
  * try {
  *   const result = safeExecuteSync(
@@ -230,27 +235,27 @@ export function safeExecuteSync<T>(
 
 /**
  * Creates a standardized error from an unknown error type
- * 
+ *
  * Converts various error types into a standardized error format based on
  * error category. This helps ensure consistent error handling throughout
  * the application.
- * 
+ *
  * Error categorization:
  * - Network errors (timeout, connection issues) → ApiError
  * - Permission errors (401, 403) → PermissionError
  * - Validation errors (400, 422, parsing errors) → ValidationError
  * - Unknown errors → Generic Error
- * 
+ *
  * Edge cases handled:
  * - Already standardized errors are returned as-is (no double-wrapping)
  * - Errors without messages use the defaultMessage
  * - Null/undefined errors are converted to Error with defaultMessage
- * 
+ *
  * @param error - The error to standardize
  * @param defaultMessage - Default message if error message cannot be extracted
  * @param context - Additional context about where the error occurred
  * @returns A standardized error (ApiError, PermissionError, ValidationError, or Error)
- * 
+ *
  * @example
  * ```typescript
  * // Network error example
@@ -264,7 +269,7 @@ export function safeExecuteSync<T>(
  *   );
  *   // standardizedError is ApiError for network issues
  * }
- * 
+ *
  * // Permission error example
  * try {
  *   await accessProtectedResource();
@@ -276,7 +281,7 @@ export function safeExecuteSync<T>(
  *   );
  *   // standardizedError is PermissionError for 401/403
  * }
- * 
+ *
  * // Already standardized error (no double-wrapping)
  * const apiError = new ApiError('Network error');
  * const result = createStandardizedError(apiError, 'Default message');
@@ -324,24 +329,24 @@ export function createStandardizedError(
 }
 
 // Re-export retry utilities for backward compatibility
-export { executeWithRetry, withTimeout } from './errorRetryUtils';
+export { executeWithRetry, withTimeout } from "./errorRetryUtils";
 
 /**
  * Validates and executes a callback function safely
- * 
+ *
  * Validates that the callback is a function before executing it.
  * Useful for optional callback props in React components.
- * 
+ *
  * Edge cases handled:
  * - Undefined/null callbacks return false (no error thrown)
  * - Non-function values return false (no error thrown)
  * - Callback execution errors are caught and logged (never thrown)
- * 
+ *
  * @param callback - The callback function to execute
  * @param args - Arguments to pass to the callback
  * @returns true if callback was executed successfully, false otherwise
  * @throws Never throws - errors are caught and logged
- * 
+ *
  * @example
  * ```typescript
  * // Safe execution of optional callback
@@ -349,10 +354,10 @@ export { executeWithRetry, withTimeout } from './errorRetryUtils';
  *   console.log('Clicked');
  * };
  * safeCallback(handleClick, event); // Returns: true, executes callback
- * 
+ *
  * // Undefined callback (common in optional props)
  * safeCallback(undefined, event); // Returns: false, no error thrown
- * 
+ *
  * // Callback that throws (error is caught and logged)
  * const errorCallback = () => {
  *   throw new Error('Callback error');
@@ -372,26 +377,26 @@ export function safeCallback<T extends unknown[]>(
     callback(...args);
     return true;
   } catch (error: unknown) {
-    logError(LOG_SOURCE, error, 'Error executing callback');
+    logError(LOG_SOURCE, error, "Error executing callback");
     return false;
   }
 }
 
 /**
  * Creates an error boundary handler for async operations
- * 
+ *
  * Wraps an async operation to ensure errors are properly caught and handled.
  * Useful for operations that should never throw unhandled errors.
- * 
+ *
  * @param operation - The async operation to execute
  * @param errorHandler - Optional error handler function
  * @param defaultValue - Default value to return on error
  * @returns The result of the operation or default value on error
- * 
+ *
  * @example
  * ```typescript
  * import { logError } from './errorUtils';
- * 
+ *
  * const data = await withErrorBoundary(
  *   async () => await fetchData(),
  *   (error) => logError('DataService', error, 'Failed to fetch data'),
@@ -410,7 +415,7 @@ export async function withErrorBoundary<T>(
     if (isValidFunction(errorHandler)) {
       errorHandler(error);
     } else {
-      logError(LOG_SOURCE, error, 'Unhandled error in async operation');
+      logError(LOG_SOURCE, error, "Unhandled error in async operation");
     }
 
     if (defaultValue !== undefined) {
@@ -433,4 +438,4 @@ export {
   createApiErrorHandler,
   type IApiErrorOptions,
   type IApiErrorHandlerOptions,
-} from './errorHandlerFactories';
+} from "./errorHandlerFactories";

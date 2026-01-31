@@ -1,5 +1,11 @@
-import { CSS_VARIABLES, LAYOUT, ANIMATION, EFFECTS, SPACING } from '../constants';
-import { siteUrlStyles } from './commonStyles';
+import {
+  CSS_VARIABLES,
+  LAYOUT,
+  ANIMATION,
+  EFFECTS,
+  SPACING,
+} from "../constants";
+import { siteUrlStyles } from "./commonStyles";
 
 /**
  * Sites list component styles
@@ -9,11 +15,11 @@ import { siteUrlStyles } from './commonStyles';
  * Sites list container styles
  */
 export const sitesListContainerStyles: React.CSSProperties = {
-  display: 'flex',
-  flexDirection: 'column',
-  width: '100%',
-  maxWidth: '100%',
-  boxSizing: 'border-box',
+  display: "flex",
+  flexDirection: "column",
+  width: "100%",
+  maxWidth: "100%",
+  boxSizing: "border-box",
 } as const;
 
 /**
@@ -31,8 +37,8 @@ export const searchInputStyles = {
  */
 export const sitesListStyles: React.CSSProperties = {
   flex: 1,
-  overflowY: 'auto',
-  overflowX: 'hidden',
+  overflowY: "auto",
+  overflowX: "hidden",
   padding: `${SPACING.XS} 0`,
 } as const;
 
@@ -42,17 +48,17 @@ export const sitesListStyles: React.CSSProperties = {
  * Height is set to viewport height minus 250px
  */
 export const scrollableContainerStyles: React.CSSProperties = {
-  height: 'calc(100vh - 250px)',
-  overflowY: 'auto',
-  overflowX: 'hidden',
-  width: '100%',
-  maxWidth: '100%',
-  boxSizing: 'border-box',
+  height: "calc(100vh - 250px)",
+  overflowY: "auto",
+  overflowX: "hidden",
+  width: "100%",
+  maxWidth: "100%",
+  boxSizing: "border-box",
   // Ensure scrollbar is visible
-  scrollbarWidth: 'thin', // Firefox
+  scrollbarWidth: "thin", // Firefox
   scrollbarColor: `${CSS_VARIABLES.NEUTRAL_5} transparent`, // Firefox
   // Webkit scrollbar styling
-  WebkitOverflowScrolling: 'touch', // Smooth scrolling on iOS
+  WebkitOverflowScrolling: "touch", // Smooth scrolling on iOS
 } as const;
 
 /**
@@ -60,18 +66,19 @@ export const scrollableContainerStyles: React.CSSProperties = {
  * Note: backgroundColor is set by getSiteItemBackgroundStyles for alternating rows
  */
 export const siteItemStyles: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  padding: '6px 12px',
-  cursor: 'pointer',
+  display: "flex",
+  alignItems: "center",
+  padding: "6px 12px",
+  cursor: "pointer",
   border: `1px solid ${CSS_VARIABLES.NEUTRAL_6}`,
   borderRadius: LAYOUT.SITE_ITEM_BORDER_RADIUS,
   marginBottom: SPACING.XS,
-  transition: 'background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease',
-  width: '100%',
-  maxWidth: '100%',
-  boxSizing: 'border-box',
-  overflow: 'hidden',
+  transition:
+    "background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease",
+  width: "100%",
+  maxWidth: "100%",
+  boxSizing: "border-box",
+  overflow: "hidden",
 } as const;
 
 /**
@@ -79,13 +86,15 @@ export const siteItemStyles: React.CSSProperties = {
  * @param index - Optional index of the row (0-based)
  * @returns Style object with appropriate background color
  */
-export function getSiteItemBackgroundStyles(index?: number): React.CSSProperties {
+export function getSiteItemBackgroundStyles(
+  index?: number
+): React.CSSProperties {
   const isEven: boolean = index === undefined ? true : index % 2 === 0;
-  
+
   return {
-    backgroundColor: isEven 
-      ? CSS_VARIABLES.BACKGROUND 
-      : 'rgba(128, 128, 128, 0.04)',
+    backgroundColor: isEven
+      ? CSS_VARIABLES.BACKGROUND
+      : "rgba(128, 128, 128, 0.04)",
   };
 }
 
@@ -94,14 +103,14 @@ export function getSiteItemBackgroundStyles(index?: number): React.CSSProperties
  * Creates a gradient fade effect at the bottom to indicate more content
  */
 export const bottomFadeOverlayStyles: React.CSSProperties = {
-  position: 'absolute',
+  position: "absolute",
   bottom: 0,
   left: 0,
   right: 0,
-  height: '48px',
+  height: "48px",
   background: `linear-gradient(to bottom, transparent, ${CSS_VARIABLES.BACKGROUND})`,
-  pointerEvents: 'none',
-  transition: 'opacity 0.2s ease',
+  pointerEvents: "none",
+  transition: "opacity 0.2s ease",
   zIndex: 1,
 } as const;
 
@@ -110,9 +119,9 @@ export const bottomFadeOverlayStyles: React.CSSProperties = {
  * Provides relative positioning context for absolute fade overlay
  */
 export const scrollableContainerWrapperStyles: React.CSSProperties = {
-  position: 'relative',
-  width: '100%',
-  maxWidth: '100%',
+  position: "relative",
+  width: "100%",
+  maxWidth: "100%",
 } as const;
 
 /**
@@ -120,12 +129,16 @@ export const scrollableContainerWrapperStyles: React.CSSProperties = {
  * @param isHovered - Whether the item is currently hovered
  * @returns Style object with hover-specific properties
  */
-export function getSiteItemHoverStyles(isHovered: boolean): React.CSSProperties {
+export function getSiteItemHoverStyles(
+  isHovered: boolean
+): React.CSSProperties {
   return {
-    ...(isHovered && { backgroundColor: 'rgba(128, 128, 128, 0.12)' }),
+    ...(isHovered && { backgroundColor: "rgba(128, 128, 128, 0.12)" }),
     borderColor: isHovered ? CSS_VARIABLES.NEUTRAL_10 : CSS_VARIABLES.NEUTRAL_6,
-    boxShadow: isHovered ? EFFECTS.BOX_SHADOW_HOVER : 'none',
-    transform: isHovered ? `scale(${LAYOUT.SITE_ITEM_SCALE_HOVER})` : `scale(${LAYOUT.SITE_ITEM_SCALE_NORMAL})`,
+    boxShadow: isHovered ? EFFECTS.BOX_SHADOW_HOVER : "none",
+    transform: isHovered
+      ? `scale(${LAYOUT.SITE_ITEM_SCALE_HOVER})`
+      : `scale(${LAYOUT.SITE_ITEM_SCALE_NORMAL})`,
     transition: `background-color ${ANIMATION.TRANSITION_DURATION} ${ANIMATION.TRANSITION_EASING}, border-color ${ANIMATION.TRANSITION_DURATION} ${ANIMATION.TRANSITION_EASING}, box-shadow ${ANIMATION.TRANSITION_DURATION} ${ANIMATION.TRANSITION_EASING}, transform ${ANIMATION.TRANSITION_DURATION} ${ANIMATION.TRANSITION_EASING}`,
   };
 }
@@ -138,7 +151,9 @@ export function getSiteItemHoverStyles(isHovered: boolean): React.CSSProperties 
 export function getSiteUrlStyles(hasDescription: boolean): React.CSSProperties {
   return {
     ...siteUrlStyles,
-    marginTop: hasDescription ? LAYOUT.SITE_URL_MARGIN_WITH_DESCRIPTION : LAYOUT.SITE_URL_MARGIN_WITHOUT_DESCRIPTION,
+    marginTop: hasDescription
+      ? LAYOUT.SITE_URL_MARGIN_WITH_DESCRIPTION
+      : LAYOUT.SITE_URL_MARGIN_WITHOUT_DESCRIPTION,
   };
 }
 
@@ -147,13 +162,17 @@ export function getSiteUrlStyles(hasDescription: boolean): React.CSSProperties {
  * @param isHovered - Whether the parent item is hovered
  * @returns Style object for the action buttons container
  */
-export function getActionButtonsContainerStyles(isHovered: boolean): React.CSSProperties {
+export function getActionButtonsContainerStyles(
+  isHovered: boolean
+): React.CSSProperties {
   return {
-    display: 'flex',
-    alignItems: 'center',
+    display: "flex",
+    alignItems: "center",
     gap: LAYOUT.ACTION_BUTTON_GAP,
     marginLeft: LAYOUT.ACTION_BUTTON_MARGIN_LEFT,
-    opacity: isHovered ? EFFECTS.ACTION_BUTTON_OPACITY_HOVER : EFFECTS.ACTION_BUTTON_OPACITY_NORMAL,
+    opacity: isHovered
+      ? EFFECTS.ACTION_BUTTON_OPACITY_HOVER
+      : EFFECTS.ACTION_BUTTON_OPACITY_NORMAL,
     transition: `opacity ${ANIMATION.TRANSITION_DURATION} ${ANIMATION.TRANSITION_EASING}`,
   };
 }
@@ -162,8 +181,8 @@ export function getActionButtonsContainerStyles(isHovered: boolean): React.CSSPr
  * Search container styles
  */
 export const searchContainerStyles: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
+  display: "flex",
+  alignItems: "center",
   gap: LAYOUT.SEARCH_CONTAINER_GAP,
   marginTop: LAYOUT.SEARCH_CONTAINER_MARGIN,
   marginBottom: LAYOUT.SEARCH_CONTAINER_MARGIN,
@@ -173,7 +192,7 @@ export const searchContainerStyles: React.CSSProperties = {
  * Separator container styles
  */
 export const separatorContainerStyles: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
+  display: "flex",
+  alignItems: "center",
   padding: LAYOUT.SEPARATOR_PADDING,
 } as const;

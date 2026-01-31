@@ -1,9 +1,9 @@
 /**
  * Utils module - centralized export point for all utility functions
- * 
+ *
  * This module re-exports utilities from their respective modules for convenient importing.
  * Import utilities from this file to maintain clean imports.
- * 
+ *
  * Organization:
  * - Constants: Application-wide constants (API endpoints, UI messages, layout values)
  * - Error utilities: Error types, type guards, logging, categorization
@@ -21,48 +21,49 @@
  */
 
 // Constants
-export * from './constants/index';
+export * from "./constants/index";
 
 // Error utilities
-export * from './errorUtils';
-export * from './errors';
+export * from "./errorUtils";
+export * from "./errors";
 
 // Storage utilities
-export * from './storageUtils';
+export * from "./storageUtils";
 
 // URL utilities
-export * from './urlUtils';
+export * from "./urlUtils";
 
 // Navigation utilities
-export * from './navigationUtils';
+export * from "./navigationUtils";
 
 // Site utilities
-export * from './siteUtils';
+export * from "./siteUtils";
 
 // Component utilities
-export * from './componentUtils';
+export * from "./componentUtils";
 
 // DOM utilities
-export * from './domUtils';
+export * from "./domUtils";
 
 // Validation utilities
 // Note: createSiteId and createWebId are included in the wildcard export above
-export * from './validationUtils';
+export * from "./validationUtils";
 
 // Error handling utilities
-export * from './errorHandlingUtils';
-export * from './errorRetryUtils';
-export * from './errorHandlerFactories';
+export * from "./errorHandlingUtils";
+export * from "./errorRetryUtils";
+export * from "./errorHandlerFactories";
 
 // Service utilities
-export * from './serviceUtils';
+export * from "./serviceUtils";
 
 // Custom hooks
 // Note: useServiceInitialization is an internal utility hook and is not exported
-export * from './hooks';
-export * from './customHooks/useSites';
-export * from './customHooks/useFavorites';
-export * from './customHooks/useSettings';
+export * from "./hooks";
+export * from "./customHooks/useSites";
+export * from "./customHooks/useFavorites";
+export * from "./customHooks/useSettings";
+export * from "./customHooks/useLicense";
 
 // Styles
-export * from './styles';
+export * from "./styles";

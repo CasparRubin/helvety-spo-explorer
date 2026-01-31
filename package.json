@@ -1,7 +1,8 @@
 {
   "name": "helvety-spo-explorer",
-  "version": "1.0.0.3",
+  "version": "1.0.0.4",
   "private": true,
+  "license": "UNLICENSED",
   "engines": {
     "node": ">=22.14.0 < 23.0.0"
   },
@@ -9,37 +10,43 @@
     "build": "heft build --clean --production && heft package-solution --production",
     "start": "heft start --clean",
     "clean": "heft clean",
-    "eject-webpack": "heft eject-webpack"
+    "eject-webpack": "heft eject-webpack",
+    "lint": "eslint src --ext .ts,.tsx --max-warnings 0",
+    "lint:fix": "eslint src --ext .ts,.tsx --fix",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx}\""
   },
   "dependencies": {
-    "tslib": "2.3.1",
-    "@microsoft/sp-core-library": "1.22.1",
-    "@microsoft/decorators": "1.22.1",
-    "@microsoft/sp-dialog": "1.22.1",
-    "@microsoft/sp-application-base": "1.22.1",
-    "@microsoft/sp-http": "1.22.1",
     "@fluentui/react": "^8.125.0",
+    "@microsoft/decorators": "1.22.1",
+    "@microsoft/sp-application-base": "1.22.1",
+    "@microsoft/sp-core-library": "1.22.1",
+    "@microsoft/sp-dialog": "1.22.1",
+    "@microsoft/sp-http": "1.22.1",
+    "@tanstack/react-table": "^8.20.5",
     "react": "17.0.1",
     "react-dom": "17.0.1",
-    "@tanstack/react-table": "^8.20.5",
-    "react-window": "^1.8.10"
+    "react-window": "^1.8.10",
+    "tslib": "2.3.1"
   },
   "devDependencies": {
-    "@rushstack/eslint-config": "4.5.2",
-    "@microsoft/eslint-plugin-spfx": "1.22.1",
     "@microsoft/eslint-config-spfx": "1.22.1",
-    "@microsoft/spfx-web-build-rig": "1.22.1",
+    "@microsoft/eslint-plugin-spfx": "1.22.1",
+    "@microsoft/sp-module-interfaces": "1.22.1",
     "@microsoft/spfx-heft-plugins": "1.22.1",
+    "@microsoft/spfx-web-build-rig": "1.22.1",
+    "@rushstack/eslint-config": "4.5.2",
     "@rushstack/heft": "1.1.2",
-    "@types/webpack-env": "~1.15.2",
     "@types/react": "17.0.62",
     "@types/react-dom": "17.0.20",
     "@types/react-window": "^1.8.8",
+    "@types/webpack-env": "~1.15.2",
     "@typescript-eslint/parser": "8.46.2",
     "css-loader": "~7.1.2",
     "eslint": "8.57.1",
-    "typescript": "~5.8.0",
-    "@microsoft/sp-module-interfaces": "1.22.1"
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.8.1",
+    "typescript": "~5.8.0"
   },
   "overrides": {
     "@rushstack/heft": "1.1.2"

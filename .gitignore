@@ -3,6 +3,9 @@ logs
 *.log
 npm-debug.log*
 
+# Environment files
+.env*
+
 # Dependency directories
 node_modules
 
@@ -16,8 +19,11 @@ jest-output
 release
 solution
 temp
-*.sppkg
 .heft
+
+# SharePoint solution package (do not commit - distributed via store.helvety.com)
+sharepoint/solution/
+*.sppkg
 
 # Coverage directory used by tools like istanbul
 coverage

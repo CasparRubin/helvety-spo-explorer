@@ -1,11 +1,11 @@
 // External dependencies
-import * as React from 'react';
-import { MessageBar, MessageBarType } from '@fluentui/react/lib/MessageBar';
+import * as React from "react";
+import { MessageBar, MessageBarType } from "@fluentui/react/lib/MessageBar";
 
 // Utils
-import { logError } from '../../utils/errorUtils';
+import { logError } from "../../utils/errorUtils";
 
-const LOG_SOURCE = 'ErrorBoundary';
+const LOG_SOURCE = "ErrorBoundary";
 
 /**
  * Props for ErrorBoundary component
@@ -30,11 +30,11 @@ interface IErrorBoundaryState {
 
 /**
  * ErrorBoundary component - catches React component errors and displays a fallback UI
- * 
+ *
  * This component implements React's error boundary pattern to catch JavaScript errors
  * anywhere in the child component tree, log those errors, and display a fallback UI
  * instead of crashing the entire application.
- * 
+ *
  * @component
  * @example
  * ```tsx
@@ -43,7 +43,10 @@ interface IErrorBoundaryState {
  * </ErrorBoundary>
  * ```
  */
-export class ErrorBoundary extends React.Component<IErrorBoundaryProps, IErrorBoundaryState> {
+export class ErrorBoundary extends React.Component<
+  IErrorBoundaryProps,
+  IErrorBoundaryState
+> {
   constructor(props: IErrorBoundaryProps) {
     super(props);
     this.state = {
@@ -68,8 +71,12 @@ export class ErrorBoundary extends React.Component<IErrorBoundaryProps, IErrorBo
    */
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
     // Log the error
-    logError(LOG_SOURCE, error, 'React component error caught by ErrorBoundary');
-    
+    logError(
+      LOG_SOURCE,
+      error,
+      "React component error caught by ErrorBoundary"
+    );
+
     // Store error info in state for display
     this.setState({
       error,
@@ -105,31 +112,38 @@ export class ErrorBoundary extends React.Component<IErrorBoundaryProps, IErrorBo
         <MessageBar messageBarType={MessageBarType.error} isMultiline>
           <strong>Something went wrong</strong>
           <p>
-            An error occurred while rendering this component. Please try refreshing the page.
+            An error occurred while rendering this component. Please try
+            refreshing the page.
           </p>
-          <div style={{ marginTop: '10px' }}>
+          <div style={{ marginTop: "10px" }}>
             <button
               onClick={this.handleReset}
               style={{
-                padding: '8px 16px',
-                backgroundColor: 'var(--sp-color-themePrimary)',
-                color: 'var(--sp-color-white)',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '14px',
+                padding: "8px 16px",
+                backgroundColor: "var(--sp-color-themePrimary)",
+                color: "var(--sp-color-white)",
+                border: "none",
+                borderRadius: "4px",
+                cursor: "pointer",
+                fontSize: "14px",
               }}
               aria-label="Retry loading the component"
             >
               Try Again
             </button>
           </div>
-          {process.env.NODE_ENV === 'development' && this.state.error && (
-            <details style={{ marginTop: '10px' }}>
-              <summary style={{ cursor: 'pointer', fontWeight: 'bold' }}>
+          {process.env.NODE_ENV === "development" && this.state.error && (
+            <details style={{ marginTop: "10px" }}>
+              <summary style={{ cursor: "pointer", fontWeight: "bold" }}>
                 Error details (development only)
               </summary>
-              <pre style={{ marginTop: '10px', whiteSpace: 'pre-wrap', fontSize: '12px' }}>
+              <pre
+                style={{
+                  marginTop: "10px",
+                  whiteSpace: "pre-wrap",
+                  fontSize: "12px",
+                }}
+              >
                 {this.state.error.toString()}
                 {this.state.errorInfo?.componentStack}
               </pre>

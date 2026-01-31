@@ -6,8 +6,8 @@
  * Storage key prefixes for localStorage
  */
 export const STORAGE_KEYS = {
-  SETTINGS_PREFIX: 'helvety-spo-explorer-settings',
-  FAVORITES_PREFIX: 'helvety-spo-explorer-favorites',
+  SETTINGS_PREFIX: "helvety-spo-explorer-settings",
+  FAVORITES_PREFIX: "helvety-spo-explorer-favorites",
 } as const;
 
 /**
@@ -30,13 +30,13 @@ export const DEFAULT_SETTINGS = {
 /**
  * Default user ID fallback
  */
-export const DEFAULT_USER_ID = 'default';
+export const DEFAULT_USER_ID = "default";
 
 /**
  * Keyboard shortcuts
  */
 export const KEYBOARD_SHORTCUTS = {
-  OPEN_COMBOBOX: 'k',
+  OPEN_COMBOBOX: "k",
 } as const;
 
 /**
@@ -58,5 +58,5 @@ export const TIMEOUTS = {
  */
 export const URL_CONSTANTS = {
   /** Root URL path */
-  ROOT_PATH: '/',
+  ROOT_PATH: "/",
 } as const;

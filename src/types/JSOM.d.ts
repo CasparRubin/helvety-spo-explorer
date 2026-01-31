@@ -12,7 +12,7 @@ declare namespace SP {
       document = 1,
       site = 2,
       tag = 3,
-      user = 4
+      user = 4,
     }
 
     /**
@@ -22,7 +22,7 @@ declare namespace SP {
       ok = 0,
       alreadyFollowing = 1,
       limitReached = 2,
-      internalError = 3
+      internalError = 3,
     }
 
     /**
@@ -175,8 +175,14 @@ declare namespace SP {
      * @param failedCallback - Failure callback
      */
     executeQueryAsync(
-      succeededCallback: (sender: unknown, args: SP.ClientRequestSucceededEventArgs) => void,
-      failedCallback: (sender: unknown, args: SP.ClientRequestFailedEventArgs) => void
+      succeededCallback: (
+        sender: unknown,
+        args: SP.ClientRequestSucceededEventArgs
+      ) => void,
+      failedCallback: (
+        sender: unknown,
+        args: SP.ClientRequestFailedEventArgs
+      ) => void
     ): void;
 
     /**

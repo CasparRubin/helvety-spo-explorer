@@ -1,4 +1,4 @@
-import { CSS_VARIABLES, SPACING, TYPOGRAPHY } from '../constants';
+import { CSS_VARIABLES, SPACING, TYPOGRAPHY } from "../constants";
 
 /**
  * Panel component styles
@@ -8,7 +8,7 @@ import { CSS_VARIABLES, SPACING, TYPOGRAPHY } from '../constants';
  * Settings panel content styles
  */
 export const settingsPanelContentStyles: React.CSSProperties = {
-  padding: '16px 0',
+  padding: "16px 0",
 } as const;
 
 /**
@@ -19,7 +19,7 @@ export const settingsToggleStyles = {
     marginBottom: SPACING.MD,
   },
   label: {
-    display: 'block', // Ensure label is visible
+    display: "block", // Ensure label is visible
   },
 } as const;
 
@@ -54,11 +54,11 @@ export const tabDescriptionStyles: React.CSSProperties = {
  * PivotItem content wrapper styles - allows flex children to fill available height
  */
 export const pivotItemContentStyles: React.CSSProperties = {
-  display: 'flex',
-  flexDirection: 'column',
+  display: "flex",
+  flexDirection: "column",
   flex: 1,
   minHeight: 0, // Allow flex container to shrink
-  overflow: 'hidden',
+  overflow: "hidden",
 } as const;
 
 /**
@@ -86,5 +86,5 @@ export const settingsSectionDescriptionStyles: React.CSSProperties = {
   fontSize: TYPOGRAPHY.FONT_SIZE_SMALL,
   color: CSS_VARIABLES.NEUTRAL_SECONDARY,
   marginBottom: SPACING.LG,
-  lineHeight: '20px',
+  lineHeight: "20px",
 } as const;

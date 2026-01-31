@@ -16,10 +16,10 @@
     },
     "metadata": {
       "shortDescription": {
-        "default": "helvety-spo-explorer description"
+        "default": "Quick access to all SharePoint sites with search, favorites, and navigation"
       },
       "longDescription": {
-        "default": "helvety-spo-explorer description"
+        "default": "Helvety SPO Explorer provides a convenient navigation panel for SharePoint Online. Features include quick site access, favorites management, site search, and customizable settings. Appears as a floating button in the top navigation bar."
       }
     },
     "features": [

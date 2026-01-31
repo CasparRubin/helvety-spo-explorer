@@ -2,7 +2,7 @@ declare interface IHelvetySpoExplorerApplicationCustomizerStrings {
   Title: string;
 }
 
-declare module 'HelvetySpoExplorerApplicationCustomizerStrings' {
+declare module "HelvetySpoExplorerApplicationCustomizerStrings" {
   const strings: IHelvetySpoExplorerApplicationCustomizerStrings;
   export = strings;
 }

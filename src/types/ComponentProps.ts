@@ -44,6 +44,10 @@ export interface ISitesPanelProps {
   showDescription?: boolean;
   /** Callback to refresh the sites list */
   onRefresh?: () => void;
+  /** Whether the tenant has a valid license (default: true until checked) */
+  isLicensed?: boolean;
+  /** Whether the license check has completed */
+  isLicenseChecked?: boolean;
 }
 
 /**
@@ -82,6 +86,10 @@ export interface ISitesListProps {
   isActiveTab?: boolean;
   /** Callback to refresh the sites list */
   onRefresh?: () => void;
+  /** Whether the tenant has a valid license (default: true until checked) */
+  isLicensed?: boolean;
+  /** Whether the license check has completed */
+  isLicenseChecked?: boolean;
 }
 
 /**

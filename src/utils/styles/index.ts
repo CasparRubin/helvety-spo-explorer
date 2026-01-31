@@ -1,11 +1,11 @@
 /**
  * Style exports
- * 
+ *
  * Centralized export point for all style modules.
  * Import styles from this file to maintain clean imports.
  */
 
-import * as React from 'react';
+import * as React from "react";
 
 // Common styles
 export {
@@ -20,7 +20,7 @@ export {
   loadingContainerStyles,
   emptySitesStyles,
   srOnlyStyles,
-} from './commonStyles';
+} from "./commonStyles";
 
 // Navbar styles
 export {
@@ -30,7 +30,7 @@ export {
   settingsButtonContainerStyles,
   settingsButtonStyles,
   comboBoxStyles,
-} from './navbarStyles';
+} from "./navbarStyles";
 
 // Panel styles
 export {
@@ -42,7 +42,7 @@ export {
   settingsSectionStyles,
   settingsSectionHeaderStyles,
   settingsSectionDescriptionStyles,
-} from './panelStyles';
+} from "./panelStyles";
 
 // Sites list styles
 export {
@@ -59,14 +59,14 @@ export {
   getActionButtonsContainerStyles,
   searchContainerStyles,
   separatorContainerStyles,
-} from './sitesStyles';
+} from "./sitesStyles";
 
 /**
  * Style for highlighted text in search results
  */
 export const highlightMarkStyle: React.CSSProperties = {
-  backgroundColor: 'var(--sp-color-themePrimary)',
-  color: 'var(--sp-color-white)',
-  padding: '2px 0',
-  borderRadius: '2px',
+  backgroundColor: "var(--sp-color-themePrimary)",
+  color: "var(--sp-color-white)",
+  padding: "2px 0",
+  borderRadius: "2px",
 };

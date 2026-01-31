@@ -1,0 +1,10 @@
+node_modules
+lib
+dist
+temp
+release
+sharepoint
+*.sppkg
+*.min.js
+pnpm-lock.yaml
+package-lock.json
