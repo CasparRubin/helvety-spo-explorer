@@ -6,6 +6,7 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.8.0-blue)
 ![Fluent UI](https://img.shields.io/badge/Fluent%20UI-8.125.0-purple)
 ![Heft](https://img.shields.io/badge/Heft-1.1.2-orange)
+![License](https://img.shields.io/badge/License-All%20Rights%20Reserved-red)
 
 ## Screenshots
 
@@ -64,6 +65,22 @@ A SharePoint Framework (SPFx) application customizer that provides a navigation 
 3. **Usage** - Click the "Sites you have access to" button in the top navigation bar
 4. **Explore** - Browse, search, and favorite sites from the panel
 5. **Customize** - Adjust display preferences in the Settings tab
+
+## Pricing
+
+Helvety SPO Explorer is available via subscription:
+
+| Feature | Basic (CHF 250/month) | Enterprise (CHF 500/month) |
+|---------|----------------------|---------------------------|
+| Full extension features | Yes | Yes |
+| All sites navigation | Yes | Yes |
+| Favorites and quick access | Yes | Yes |
+| Settings customization | Yes | Yes |
+| Updates included | Yes | Yes |
+| Priority support | - | Yes |
+| Dedicated setup assistance | - | Yes |
+
+Contact us at [contact@helvety.com](mailto:contact@helvety.com) for pricing inquiries.
 
 ## Tech Stack
 
