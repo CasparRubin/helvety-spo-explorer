@@ -70,18 +70,18 @@ A SharePoint Framework (SPFx) application customizer that provides a navigation 
 
 Helvety SPO Explorer is available via subscription at [store.helvety.com](https://store.helvety.com/products/helvety-spo-explorer):
 
-| Feature | Basic (CHF 250/month) | Enterprise (CHF 500/month) |
+| Feature | Solo (CHF 750/month) | Supported (CHF 1'250/month) |
 |---------|----------------------|---------------------------|
 | Full extension features | Yes | Yes |
 | All sites navigation | Yes | Yes |
 | Favorites and quick access | Yes | Yes |
 | Settings customization | Yes | Yes |
 | Updates included | Yes | Yes |
-| Tenants per subscription | 1 | Up to 5 |
+| Tenants per subscription | Unlimited | Unlimited |
 | Priority support | - | Yes |
 | Dedicated setup assistance | - | Yes |
 
-**[Subscribe Now](https://store.helvety.com/products/helvety-spo-explorer)** | Contact us at [contact@helvety.com](mailto:contact@helvety.com) for enterprise inquiries.
+**[Subscribe Now](https://store.helvety.com/products/helvety-spo-explorer)** | Contact us at [contact@helvety.com](mailto:contact@helvety.com) for inquiries.
 
 ## Licensing
 
@@ -89,7 +89,7 @@ Helvety SPO Explorer uses a **tenant-based licensing model**. After purchasing a
 
 ### How It Works
 
-1. **Purchase** - Subscribe to Basic or Enterprise at [store.helvety.com](https://store.helvety.com/products/helvety-spo-explorer)
+1. **Purchase** - Subscribe to Solo or Supported at [store.helvety.com](https://store.helvety.com/products/helvety-spo-explorer)
 2. **Register Tenant** - Add your SharePoint tenant ID (e.g., "contoso" from contoso.sharepoint.com) in your store account
 3. **Deploy** - Install the extension on your SharePoint sites as described in the Deployment section
 4. **Automatic Validation** - The extension validates your license in the background without blocking functionality
@@ -114,8 +114,8 @@ Without a valid license, the extension displays a clear licensing prompt:
 
 ### Tenant Limits
 
-* **Basic** - 1 tenant per subscription
-* **Enterprise** - Up to 5 tenants per subscription
+* **Solo** - Unlimited tenants per subscription
+* **Supported** - Unlimited tenants per subscription
 
 ## Tech Stack
 

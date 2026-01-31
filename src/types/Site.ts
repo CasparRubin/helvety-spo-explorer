@@ -48,27 +48,6 @@ export interface ISiteSearchResultRow {
 }
 
 /**
- * SharePoint search result for sites
- *
- * Note: This interface is not currently used in the codebase.
- * The Search API returns results in ISiteSearchResultRow format instead.
- */
-export interface ISiteSearchResult {
-  /** Site title */
-  Title: string;
-  /** Site URL */
-  Path: string;
-  /** Site description */
-  Description?: string;
-  /** Site ID */
-  SiteId?: string;
-  /** Web ID */
-  WebId?: string;
-  /** Site collection URL */
-  SiteCollectionUrl?: string;
-}
-
-/**
  * SharePoint REST API response for web infos
  *
  * Represents web information returned by the SharePoint WebInfos API endpoint.
