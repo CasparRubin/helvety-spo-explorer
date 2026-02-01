@@ -123,7 +123,9 @@ export const SiteRow: React.FC<ISiteRowProps> = React.memo(
 
     const handleOpenInNewTabClick = React.useCallback((): void => {
       if (site.url) {
-        window.open(site.url, "_blank");
+        // Security: Use noopener,noreferrer to prevent the new page from
+        // accessing the opener's window object or referrer information
+        window.open(site.url, "_blank", "noopener,noreferrer");
       }
     }, [site.url]);
 

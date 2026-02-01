@@ -43,20 +43,20 @@ A SharePoint Framework (SPFx) application customizer that provides a navigation 
 
 ## Features
 
-* **Site Discovery** - Automatically fetches and displays all SharePoint sites the current user has access to
-* **Real-time Search** - Search across site titles, descriptions, and URLs with highlighted matches
-* **Favorites Management** - Mark frequently used sites as favorites for quick access
-* **Quick Access Menu** - Dropdown menu from the navbar button showing favorite sites
-* **Settings Panel** - Customize display preferences:
+- **Site Discovery** - Automatically fetches and displays all SharePoint sites the current user has access to
+- **Real-time Search** - Search across site titles, descriptions, and URLs with highlighted matches
+- **Favorites Management** - Mark frequently used sites as favorites for quick access
+- **Quick Access Menu** - Dropdown menu from the navbar button showing favorite sites
+- **Settings Panel** - Customize display preferences:
   - Show/hide full URLs
   - Show/hide partial URLs (path only)
   - Show/hide site descriptions
   - Open sites in new tab vs current tab
-* **SharePoint Search API** - Uses SharePoint Search API to fetch sites the user has access to (no additional permissions required)
-* **Performance Optimized** - 5-minute caching, React.memo optimizations, and efficient rendering
-* **Accessibility** - Full keyboard navigation support, ARIA labels, and screen reader support
-* **Theme Aware** - Automatically adapts to SharePoint light/dark themes
-* **Error Handling** - Comprehensive error handling with user-friendly messages
+- **SharePoint Search API** - Uses SharePoint Search API to fetch sites the user has access to (no additional permissions required)
+- **Performance Optimized** - 5-minute caching, React.memo optimizations, and efficient rendering
+- **Accessibility** - Full keyboard navigation support, ARIA labels, and screen reader support
+- **Theme Aware** - Automatically adapts to SharePoint light/dark themes
+- **Error Handling** - Comprehensive error handling with user-friendly messages
 
 ## How It Works
 
@@ -98,35 +98,85 @@ Helvety SPO Explorer uses a **tenant-based licensing model**. After purchasing a
 
 The extension is designed for **enterprise reliability**:
 
-* **Non-blocking** - Core functionality (site navigation, favorites, search) loads immediately while license validation happens in the background
-* **Fail-open** - If the license server is temporarily unreachable, the extension continues working normally
-* **Grace period** - If your subscription lapses, you have a 7-day grace period before features are restricted
-* **Caching** - Valid licenses are cached for 24 hours to minimize API calls and ensure offline resilience
+- **Non-blocking** - Core functionality (site navigation, favorites, search) loads immediately while license validation happens in the background
+- **Fail-open** - If the license server is temporarily unreachable, the extension continues working normally
+- **Grace period** - If your subscription lapses, you have a 7-day grace period before features are restricted
+- **Caching** - Valid licenses are cached for 24 hours to minimize API calls and ensure offline resilience
 
 ### Unlicensed Behavior
 
 Without a valid license, the extension displays a clear licensing prompt:
 
-* A full-width warning banner with "Unlicensed Product" text replaces the navigation button
-* A "Visit the Helvety Store to get a license" button links directly to the store
-* The "Sites you have access to" button is hidden until licensed
-* If the panel is accessed, no sites are displayed and search is disabled
+- A full-width warning banner with "Unlicensed Product" text replaces the navigation button
+- A "Visit the Helvety Store to get a license" button links directly to the store
+- The "Sites you have access to" button is hidden until licensed
+- If the panel is accessed, no sites are displayed and search is disabled
 
 ### Tenant Limits
 
-* **Solo** - Unlimited tenants per subscription
-* **Supported** - Unlimited tenants per subscription
+- **Solo** - Unlimited tenants per subscription
+- **Supported** - Unlimited tenants per subscription
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 22.14 or later (SPFx 1.22 requirement)
+- npm 9 or later
+- A SharePoint Online tenant with App Catalog access
+- An active Helvety SPO Explorer subscription (see [Pricing](#pricing))
+
+### Development Setup
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/helvety/helvety-spo-explorer.git
+   cd helvety-spo-explorer
+   ```
+
+2. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+
+3. Start the local workbench:
+
+   ```bash
+   npm run serve
+   ```
+
+4. Navigate to your SharePoint workbench:
+   `https://your-tenant.sharepoint.com/_layouts/15/workbench.aspx`
+
+### Deployment
+
+1. Build the solution package:
+
+   ```bash
+   npm run bundle
+   npm run package-solution
+   ```
+
+2. Upload the `.sppkg` file from `sharepoint/solution/` to your App Catalog
+
+3. Deploy and approve API permissions (if prompted)
+
+4. Add the app to your site(s) via "Add an app"
+
+5. Register your tenant ID at [store.helvety.com](https://store.helvety.com) under your subscription
 
 ## Tech Stack
 
 This project is built with modern web technologies:
 
-* **SharePoint Framework 1.22.1** - Microsoft's framework for building SharePoint extensions
-* **React 17.0.1** - UI library
-* **TypeScript 5.8.0** - Type-safe JavaScript
-* **Fluent UI 8.125.0** - Microsoft's design system (formerly Office UI Fabric)
-* **Heft 1.1.2** - Build system from Rush Stack
-* **SharePoint Search API** - For site discovery and data fetching
+- **SharePoint Framework 1.22.1** - Microsoft's framework for building SharePoint extensions
+- **React 17.0.1** - UI library
+- **TypeScript 5.8.0** - Type-safe JavaScript
+- **Fluent UI 8.125.0** - Microsoft's design system (formerly Office UI Fabric)
+- **Heft 1.1.2** - Build system from Rush Stack
+- **SharePoint Search API** - For site discovery and data fetching
 
 ## Project Structure
 
@@ -178,16 +228,16 @@ helvety-spo-explorer/
 
 This application is built with performance and code quality in mind:
 
-* **Service Layer Architecture** - Separated business logic into services for maintainability
-* **Custom Hooks** - Reusable React hooks for common patterns (sites, favorites, settings)
-* **Type Safety** - Comprehensive TypeScript types with explicit return types throughout
-* **Error Handling** - Centralized error handling with unified patterns, error categorization, and user-friendly messages
-* **Performance Optimizations** - React.memo with custom comparison functions, useCallback, and useMemo
-* **Caching Strategy** - 5-minute in-memory cache for site data to reduce API calls
-* **SharePoint Search Integration** - Uses SharePoint Search API for reliable and consistent site discovery across tenants
-* **Code Organization** - Modular architecture with extracted utilities, shared service patterns, and reusable components
-* **Accessibility** - Full keyboard navigation, ARIA labels, and screen reader support
-* **Code Quality** - Reduced duplication, simplified complex functions, improved type safety, and consistent patterns
+- **Service Layer Architecture** - Separated business logic into services for maintainability
+- **Custom Hooks** - Reusable React hooks for common patterns (sites, favorites, settings)
+- **Type Safety** - Comprehensive TypeScript types with explicit return types throughout
+- **Error Handling** - Centralized error handling with unified patterns, error categorization, and user-friendly messages
+- **Performance Optimizations** - React.memo with custom comparison functions, useCallback, and useMemo
+- **Caching Strategy** - 5-minute in-memory cache for site data to reduce API calls
+- **SharePoint Search Integration** - Uses SharePoint Search API for reliable and consistent site discovery across tenants
+- **Code Organization** - Modular architecture with extracted utilities, shared service patterns, and reusable components
+- **Accessibility** - Full keyboard navigation, ARIA labels, and screen reader support
+- **Code Quality** - Reduced duplication, simplified complex functions, improved type safety, and consistent patterns
 
 ## Developer
 
