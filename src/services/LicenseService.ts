@@ -6,8 +6,8 @@
  * the license status, caching results to minimize API calls.
  *
  * Features:
- * - 1-hour cache for license status to reduce API load
- * - Grace period support for expired subscriptions
+ * - 24-hour cache for valid licenses, 1-hour cache for invalid licenses
+ * - 7-day grace period support for expired subscriptions
  * - Offline fallback using cached data
  * - Automatic tenant ID extraction from SharePoint URL
  *
