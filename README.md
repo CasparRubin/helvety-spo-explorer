@@ -39,7 +39,7 @@
 
 A SharePoint Framework (SPFx) application customizer that provides a navigation bar for exploring and accessing SharePoint sites. The extension displays a "Sites you have access to" button in the top placeholder, which opens a panel with a searchable list of all SharePoint sites the current user can access.
 
-**Privacy First** - All data processing happens client-side. User preferences (favorites and settings) are stored locally in the browser's localStorage. The extension makes two types of external calls: (1) SharePoint Search API for site discovery, and (2) store.helvety.com API for license validation (only your tenant ID is transmitted, no personal data). See our [Privacy Policy](https://helvety.com/privacy) for details.
+**Privacy First** - All data processing happens client-side. User preferences (favorites and settings) are stored locally in the browser's localStorage. The extension makes two types of external calls: (1) SharePoint Search API for site discovery, and (2) store.helvety.com API for license validation (your tenant ID and product identifier are transmitted, no personal data). See our [Privacy Policy](https://helvety.com/privacy) for details.
 
 ## Features
 
@@ -189,84 +189,6 @@ This application is built with performance and code quality in mind:
 * **Accessibility** - Full keyboard navigation, ARIA labels, and screen reader support
 * **Code Quality** - Reduced duplication, simplified complex functions, improved type safety, and consistent patterns
 
-## Prerequisites
-
-- Node.js >=22.14.0 < 23.0.0
-- A Microsoft 365 developer tenant or SharePoint Online tenant
-- SharePoint Framework development environment set up
-
-## Getting Started
-
-### Installation
-
-1. Clone this repository
-2. Ensure that you are at the solution folder
-3. In the command-line run:
-   ```bash
-   npm install -g @rushstack/heft
-   npm install
-   ```
-
-### Development
-
-Start the local development server:
-
-```bash
-npm start
-```
-
-This will:
-- Build the project
-- Start the local workbench
-- Open your browser to the workbench URL
-
-### Build
-
-Build the production bundle:
-
-```bash
-npm run build
-```
-
-This will:
-- Clean previous builds
-- Compile TypeScript
-- Run ESLint
-- Bundle with Webpack
-- Create the SharePoint solution package (.sppkg)
-
-The solution package will be created at: `sharepoint/solution/helvety-spo-explorer.sppkg`
-
-### Deployment
-
-1. Upload the `.sppkg` file to your SharePoint App Catalog
-2. Enable the app in the app catalog (select "Only enable this app" and click "Enable app")
-3. Go to your target site, click the gear icon, and select "Add an app"
-4. Search for and install the "helvety-spo-explorer-client-side-solution" app
-5. The navigation bar will appear in the top placeholder automatically (Feature Framework-based activation)
-
-## SharePoint Framework Concepts
-
-This extension illustrates the following SharePoint Framework concepts:
-
-- Application Customizers and placeholders
-- SharePoint Search API integration for site discovery
-- React component development with SPFx
-- LocalStorage for user preferences
-- Fluent UI component usage
-- Error handling and logging in SPFx
-- TypeScript type safety
-- Performance optimization techniques
-
-## References
-
-- [Getting started with SharePoint Framework](https://docs.microsoft.com/sharepoint/dev/spfx/set-up-your-developer-tenant)
-- [Building for Microsoft teams](https://docs.microsoft.com/sharepoint/dev/spfx/build-for-teams-overview)
-- [SharePoint Search REST API](https://docs.microsoft.com/sharepoint/dev/general-development/sharepoint-search-rest-api-overview)
-- [Publish SharePoint Framework applications to the Marketplace](https://docs.microsoft.com/sharepoint/dev/spfx/publish-to-marketplace-overview)
-- [Microsoft 365 Patterns and Practices](https://aka.ms/m365pnp) - Guidance, tooling, samples and open-source controls for your Microsoft 365 development
-- [Heft Documentation](https://heft.rushstack.io/)
-
 ## Developer
 
 This application is developed and maintained by Helvety, a Swiss company committed to transparency, strong security, and respect for user privacy and data protection.
@@ -294,6 +216,7 @@ See [LICENSE](./LICENSE) for full terms.
 | 1.0.0.3 | January 28, 2026 | Comprehensive code quality improvements: enhanced type safety with improved type guards and narrowing, optimized React.memo with custom comparison functions, improved error recovery logic, enhanced documentation with examples and edge cases, and updated UI text for clarity |
 | 1.0.0.4 | January 31, 2026 | Added subscription-based licensing: tenant registration via store.helvety.com, non-blocking license validation with fail-open behavior, 7-day grace period, 24-hour license caching for enterprise reliability |
 | 1.0.0.4 | January 31, 2026 | Improved unlicensed UX: full-width warning banner replaces navigation button, "Visit the Helvety Store to get a license" button with shop icon, sites and search completely blocked when unlicensed |
+| 1.0.0.4 | February 1, 2026 | Added multi-product license support: license validation now includes product identifier for per-product licensing |
 
 ## Disclaimer
 

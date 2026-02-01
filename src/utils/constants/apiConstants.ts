@@ -44,6 +44,8 @@ export const LICENSE_API = {
   BASE_URL: "https://store.helvety.com/api",
   /** License validation endpoint */
   VALIDATE_ENDPOINT: "/license/validate",
+  /** Product identifier for this extension */
+  PRODUCT_ID: "helvety-spo-explorer",
 } as const;
 
 /**

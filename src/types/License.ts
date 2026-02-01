@@ -24,6 +24,8 @@ export interface ILicenseValidationResponse {
     | "subscription_inactive"
     | "missing_tenant_id"
     | "invalid_tenant_id"
+    | "missing_product_id"
+    | "invalid_product_id"
     | "rate_limit_exceeded"
     | "server_error";
 }

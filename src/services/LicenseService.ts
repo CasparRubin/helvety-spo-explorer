@@ -281,11 +281,11 @@ export class LicenseService {
     const client: HttpClient = this.context.httpClient;
     const url = `${LICENSE_API.BASE_URL}${LICENSE_API.VALIDATE_ENDPOINT}?tenant=${encodeURIComponent(
       this.tenantId || ""
-    )}`;
+    )}&product=${LICENSE_API.PRODUCT_ID}`;
 
     logInfo(
       LOG_SOURCE,
-      `Fetching license status for tenant: ${this.tenantId}`,
+      `Fetching license status for tenant: ${this.tenantId}, product: ${LICENSE_API.PRODUCT_ID}`,
       url
     );
 
@@ -447,6 +447,9 @@ export class LicenseService {
         return "Your subscription has been canceled. Please resubscribe at store.helvety.com";
       case "subscription_inactive":
         return "Your subscription is not active. Please contact support.";
+      case "missing_product_id":
+      case "invalid_product_id":
+        return "Invalid license configuration. Please update the extension.";
       case "rate_limit_exceeded":
         return "Too many license checks. Please try again later.";
       case "server_error":
