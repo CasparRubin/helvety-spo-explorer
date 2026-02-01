@@ -117,56 +117,6 @@ Without a valid license, the extension displays a clear licensing prompt:
 - **Solo** - Unlimited tenants per subscription
 - **Supported** - Unlimited tenants per subscription
 
-## Getting Started
-
-### Prerequisites
-
-- Node.js 22.14 or later (SPFx 1.22 requirement)
-- npm 9 or later
-- A SharePoint Online tenant with App Catalog access
-- An active Helvety SPO Explorer subscription (see [Pricing](#pricing))
-
-### Development Setup
-
-1. Clone the repository:
-
-   ```bash
-   git clone https://github.com/helvety/helvety-spo-explorer.git
-   cd helvety-spo-explorer
-   ```
-
-2. Install dependencies:
-
-   ```bash
-   npm install
-   ```
-
-3. Start the local workbench:
-
-   ```bash
-   npm run serve
-   ```
-
-4. Navigate to your SharePoint workbench:
-   `https://your-tenant.sharepoint.com/_layouts/15/workbench.aspx`
-
-### Deployment
-
-1. Build the solution package:
-
-   ```bash
-   npm run bundle
-   npm run package-solution
-   ```
-
-2. Upload the `.sppkg` file from `sharepoint/solution/` to your App Catalog
-
-3. Deploy and approve API permissions (if prompted)
-
-4. Add the app to your site(s) via "Add an app"
-
-5. Register your tenant ID at [store.helvety.com](https://store.helvety.com) under your subscription
-
 ## Tech Stack
 
 This project is built with modern web technologies:
@@ -177,52 +127,6 @@ This project is built with modern web technologies:
 - **Fluent UI 8.125.0** - Microsoft's design system (formerly Office UI Fabric)
 - **Heft 1.1.2** - Build system from Rush Stack
 - **SharePoint Search API** - For site discovery and data fetching
-
-## Project Structure
-
-```
-helvety-spo-explorer/
-├── src/
-│   ├── components/          # React components
-│   │   ├── ErrorBoundary/  # Error boundary component
-│   │   ├── Navbar/         # Main navigation bar component
-│   │   ├── SitesList/      # Sites list and site row components
-│   │   └── SitesPanel/     # Panel with sites and settings tabs
-│   ├── extensions/          # SPFx application customizer
-│   │   └── helvetySpoExplorer/
-│   │       ├── HelvetySpoExplorerApplicationCustomizer.ts
-│   │       └── loc/         # Localization files
-│   ├── services/           # Business logic services
-│   │   ├── SiteService.ts      # SharePoint site fetching
-│   │   ├── FavoriteService.ts  # Favorites management
-│   │   ├── SettingsService.ts  # User settings management
-│   │   └── LicenseService.ts   # License validation
-│   ├── types/              # TypeScript type definitions
-│   │   ├── ComponentProps.ts
-│   │   ├── Site.ts
-│   │   ├── License.ts          # License types
-│   │   └── JSOM.d.ts
-│   └── utils/              # Utility functions
-│       ├── constants/      # Application constants
-│       ├── customHooks/    # Custom React hooks
-│       │   └── useLicense.ts   # License validation hook
-│       ├── styles/         # Style definitions
-│       ├── componentUtils.ts
-│       ├── errorUtils.ts
-│       ├── errorHandlingUtils.ts
-│       ├── navigationUtils.ts
-│       ├── serviceUtils.ts
-│       ├── siteUtils.ts
-│       ├── storageUtils.ts
-│       ├── urlUtils.ts
-│       └── validationUtils.ts
-├── config/                 # Build configuration files
-├── sharepoint/             # SharePoint solution assets
-│   └── assets/
-│       ├── ClientSideInstance.xml
-│       └── elements.xml
-└── [config files]          # Configuration files (TypeScript, ESLint, etc.)
-```
 
 ## Architecture & Performance
 
@@ -247,13 +151,23 @@ For questions or inquiries, please contact us at contact@helvety.com.
 
 ## License & Usage
 
-This repository is public for transparency purposes only. All code is open for inspection so users can verify its behavior.
+> **This is NOT open source software.**
 
-**All Rights Reserved.** No license is granted. You may view the code, but you may not copy, reuse, redistribute, modify, or sell it without explicit written permission.
+This repository is public **for transparency purposes only** so users can verify the application's behavior and security.
 
-Purchasing a subscription grants access to use the hosted service only—subscriptions do not grant any rights to the source code.
+**All Rights Reserved.** No license is granted for any use of this code. You may:
+- View and inspect the code
 
-See [LICENSE](./LICENSE) for full terms.
+You may NOT:
+- Clone, copy, or download this code for any purpose
+- Modify, adapt, or create derivative works
+- Redistribute or share this code
+- Use this code in your own projects
+- Deploy this code to your own SharePoint environment
+
+**Purchasing a subscription grants access to download and use the official `.sppkg` package from [store.helvety.com](https://store.helvety.com/products/helvety-spo-explorer) only.** Subscriptions do not grant any rights to the source code.
+
+See [LICENSE](./LICENSE) for full legal terms.
 
 ## Version History
 
