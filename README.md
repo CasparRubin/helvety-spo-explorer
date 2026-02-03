@@ -78,6 +78,8 @@ A SharePoint Framework (SPFx) application customizer that provides a navigation 
 
 **Pre-deployment:** Run `npm run predeploy` to run format check, type check, lint, and production build (no test suite).
 
+**Development standards:** See `.cursor/rules/` for after-change checklist (tests, comments, README, legal/static docs), official-docs-first (SPFx, Fluent UI, Heft), and spo-explorer-stack conventions.
+
 ## Troubleshooting
 
 If the extension does not show on some sites:

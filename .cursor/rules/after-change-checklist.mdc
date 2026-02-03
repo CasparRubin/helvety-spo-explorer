@@ -1,0 +1,25 @@
+---
+description: After code changes, update tests, comments, README, and legal docs as needed
+alwaysApply: true
+---
+
+# After-Change Checklist
+
+After implementing or changing code, also do the following:
+
+## Tests
+
+- Add or update unit/integration tests for new or changed behavior.
+- Keep test structure and coverage in line with the project.
+
+## Comments / JSDoc
+
+- Update or add JSDoc/comments where behavior or public API changes.
+
+## README
+
+- Update `README.md` (and any app-specific docs) when setup, scripts, environment, or the surface area of the app changes.
+
+## Legal / static docs
+
+- If the change affects data handling, product behavior, or user-facing terms, consider updating any legal or static documentation in the repo.

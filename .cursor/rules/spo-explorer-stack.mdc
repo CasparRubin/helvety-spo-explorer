@@ -1,0 +1,11 @@
+---
+description: This repo is SPFx with Heft and Fluent UI; follow SPFx/Heft conventions
+globs: ["src/**/*.ts", "src/**/*.tsx", "config/**/*"]
+---
+
+# SPFx / helvety-spo-explorer Stack
+
+This repo is **SharePoint Framework (SPFx)** with Heft and Fluent UI. Structure and patterns follow SPFx/Heft conventions, not the Next.js layout used in other Helvety apps.
+
+- For patterns and best practices, use official **Microsoft SPFx** and **Fluent UI** documentation.
+- Do not apply Next.js-specific rules (e.g. App Router, server actions) here.

@@ -1,0 +1,21 @@
+---
+description: Consult official vendor docs for frameworks and libraries; avoid deprecated APIs and blog posts
+alwaysApply: true
+---
+
+# Official Documentation First
+
+When implementing or altering code that touches a framework, library, or service:
+
+1. Consult **official vendor documentation** first.
+2. Prefer current, vendor-recommended APIs and patterns.
+3. Avoid deprecated APIs.
+4. Do **not** rely on third-party blog posts or tutorials as the primary source.
+
+## This repo (SPFx)
+
+Use official docs for:
+
+- [SharePoint Framework (SPFx)](https://learn.microsoft.com/en-us/sharepoint/dev/spfx/sharepoint-framework-overview)
+- [Fluent UI React](https://react.fluentui.dev)
+- Build tooling (e.g. Heft, Rushstack) as applicable
