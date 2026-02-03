@@ -37,7 +37,6 @@ export {
   settingsPanelContentStyles,
   settingsToggleStyles,
   pivotStyles,
-  tabDescriptionStyles,
   pivotItemContentStyles,
   settingsSectionStyles,
   settingsSectionHeaderStyles,

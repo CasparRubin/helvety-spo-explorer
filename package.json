@@ -1,12 +1,14 @@
 {
   "name": "helvety-spo-explorer",
-  "version": "1.0.0.7",
+  "version": "1.0.1.3",
   "private": true,
   "license": "UNLICENSED",
   "engines": {
     "node": ">=22.14.0 < 23.0.0"
   },
   "scripts": {
+    "prebuild": "node scripts/inject-build-info.js",
+    "prestart": "node scripts/inject-build-info.js",
     "build": "heft build --clean --production && heft package-solution --production",
     "start": "heft start --clean",
     "clean": "heft clean",

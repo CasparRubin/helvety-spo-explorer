@@ -47,9 +47,6 @@ export const UI_MESSAGES = {
   SITES_PANEL: "Sites panel",
   SITES_TAB: "Sites",
   SETTINGS_TAB: "Settings",
-  SETTINGS_DESCRIPTION: "Customize your site explorer preferences",
-  SITES_DESCRIPTION:
-    "Browse and search through all SharePoint Online sites you have access to",
   SHOW_FULL_URL: "Show Full URL",
   SHOW_PARTIAL_URL: "Show Partial URL",
   SHOW_DESCRIPTION: "Show Description",
@@ -82,4 +79,15 @@ export const UI_MESSAGES = {
   LICENSE_SITES_HIDDEN: "Upgrade to view all {count} sites",
   LICENSE_UPGRADE_BUTTON: "Upgrade Now",
   LICENSE_REQUIRED_MESSAGE: "A license is required to view sites",
+  // About tab
+  ABOUT_TAB: "About",
+  ABOUT_APP_DESCRIPTION:
+    "Helvety SPO Explorer provides a convenient navigation panel for SharePoint Online. Quick access to all sites you have access to, with search, favorites, and customizable settings.",
+  ABOUT_CONTACT_LABEL: "Contact",
+  ABOUT_CONTACT_EMAIL: "contact@helvety.com",
+  ABOUT_LICENSE_TIER: "License tier",
+  ABOUT_TENANT: "Tenant",
+  ABOUT_SUBSCRIPTION_NOT_AVAILABLE: "—",
+  ABOUT_VERSION: "Version",
+  ABOUT_BUILT_ON: "Built on",
 } as const;

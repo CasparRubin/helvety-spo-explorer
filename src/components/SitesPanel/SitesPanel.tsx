@@ -6,6 +6,7 @@ import { Pivot, PivotItem } from "@fluentui/react/lib/Pivot";
 // Internal components
 import { SitesList } from "../SitesList/SitesList";
 import { SettingsContent } from "./SettingsContent";
+import { AboutContent } from "./AboutContent";
 
 // Types
 import { ISitesPanelProps } from "../../types/ComponentProps";
@@ -23,17 +24,17 @@ import {
 // Styles
 import {
   pivotStyles,
-  tabDescriptionStyles,
   pivotItemContentStyles,
   srOnlyStyles,
 } from "../../utils/styles";
 
 /**
- * SitesPanel component - displays a panel with tabs for Sites and Settings
+ * SitesPanel component - displays a panel with tabs for Sites, Settings, and About
  *
- * This component renders a side panel that slides in from the left, containing two tabs:
+ * This component renders a side panel that slides in from the left, containing three tabs:
  * - Sites: Displays the searchable sites list with favorites, search, and refresh functionality
  * - Settings: Displays user preference settings for customizing the site explorer
+ * - About: Displays app description, contact, license info, version and build date
  *
  * The panel manages favorite sites snapshots to ensure consistent sorting when switching
  * between tabs. The snapshot is updated when the panel opens or when switching to the Sites tab.
@@ -99,7 +100,9 @@ function compareSitesPanelProps(
     prevProps.showPartialUrl !== nextProps.showPartialUrl ||
     prevProps.showDescription !== nextProps.showDescription ||
     prevProps.isLicensed !== nextProps.isLicensed ||
-    prevProps.isLicenseChecked !== nextProps.isLicenseChecked
+    prevProps.isLicenseChecked !== nextProps.isLicenseChecked ||
+    prevProps.licenseTier !== nextProps.licenseTier ||
+    prevProps.tenantId !== nextProps.tenantId
   ) {
     return false;
   }
@@ -167,6 +170,8 @@ export const SitesPanel: React.FC<ISitesPanelProps> = React.memo(
     onRefresh,
     isLicensed = true,
     isLicenseChecked = false,
+    licenseTier,
+    tenantId,
   }) => {
     const [selectedKey, setSelectedKey] = React.useState<string>(
       UI_MESSAGES.SITES_TAB
@@ -270,13 +275,6 @@ export const SitesPanel: React.FC<ISitesPanelProps> = React.memo(
       }
     }, []); // Empty dependency array is intentional - this handler doesn't depend on any props or state
 
-    const getDescriptionText = React.useCallback((): string => {
-      if (selectedKey === UI_MESSAGES.SETTINGS_TAB) {
-        return UI_MESSAGES.SETTINGS_DESCRIPTION;
-      }
-      return UI_MESSAGES.SITES_DESCRIPTION;
-    }, [selectedKey]);
-
     // Handle refresh - updates favorite sites snapshot and calls refresh callback
     const handleRefresh = React.useCallback((): void => {
       // Update favorite sites snapshot to reflect current favorite sites state
@@ -333,7 +331,7 @@ export const SitesPanel: React.FC<ISitesPanelProps> = React.memo(
         }}
       >
         <span id="sites-panel-description" style={srOnlyStyles}>
-          Panel containing tabs for browsing sites and managing settings
+          Panel containing tabs for browsing sites, settings, and about
         </span>
         <div
           ref={contentContainerRef}
@@ -357,7 +355,6 @@ export const SitesPanel: React.FC<ISitesPanelProps> = React.memo(
                 itemKey={UI_MESSAGES.SITES_TAB}
               >
                 <div style={pivotItemContentStyles}>
-                  <div style={tabDescriptionStyles}>{getDescriptionText()}</div>
                   <SitesList
                     sites={sites}
                     selectedSite={selectedSite}
@@ -380,10 +377,18 @@ export const SitesPanel: React.FC<ISitesPanelProps> = React.memo(
                 headerText={UI_MESSAGES.SETTINGS_TAB}
                 itemKey={UI_MESSAGES.SETTINGS_TAB}
               >
-                <div style={tabDescriptionStyles}>{getDescriptionText()}</div>
                 <SettingsContent
                   settings={settings}
                   onSettingsChange={onSettingsChange}
+                />
+              </PivotItem>
+              <PivotItem
+                headerText={UI_MESSAGES.ABOUT_TAB}
+                itemKey={UI_MESSAGES.ABOUT_TAB}
+              >
+                <AboutContent
+                  licenseTier={licenseTier}
+                  tenantId={tenantId}
                 />
               </PivotItem>
             </Pivot>

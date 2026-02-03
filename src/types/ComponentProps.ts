@@ -48,6 +48,10 @@ export interface ISitesPanelProps {
   isLicensed?: boolean;
   /** Whether the license check has completed */
   isLicenseChecked?: boolean;
+  /** License tier for About tab (e.g. helvety-spo-explorer-basic-monthly) */
+  licenseTier?: string;
+  /** SharePoint tenant ID for About tab */
+  tenantId?: string;
 }
 
 /**

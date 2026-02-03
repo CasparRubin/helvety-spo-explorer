@@ -311,6 +311,8 @@ export const Navbar: React.FC<INavbarProps> = React.memo(({ context }) => {
         onRefresh={handleRefresh}
         isLicensed={license.isValid}
         isLicenseChecked={license.isChecked}
+        licenseTier={license.tier}
+        tenantId={tenantId}
       />
     </div>
   );

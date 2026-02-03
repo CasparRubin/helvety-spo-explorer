@@ -40,17 +40,6 @@ export const pivotStyles = {
 } as const;
 
 /**
- * Tab description text styles
- */
-export const tabDescriptionStyles: React.CSSProperties = {
-  fontSize: TYPOGRAPHY.FONT_SIZE_SMALL,
-  color: CSS_VARIABLES.NEUTRAL_SECONDARY,
-  marginTop: SPACING.MD,
-  marginBottom: SPACING.XL,
-  padding: `0 ${SPACING.XS}`,
-} as const;
-
-/**
  * PivotItem content wrapper styles - allows flex children to fill available height
  */
 export const pivotItemContentStyles: React.CSSProperties = {

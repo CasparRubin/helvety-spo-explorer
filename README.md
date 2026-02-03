@@ -52,6 +52,7 @@ A SharePoint Framework (SPFx) application customizer that provides a navigation 
   - Show/hide partial URLs (path only)
   - Show/hide site descriptions
   - Open sites in new tab vs current tab
+- **About Tab** - App description, contact (contact@helvety.com), license tier and tenant info, version and build date
 - **SharePoint Search API** - Uses SharePoint Search API to fetch sites the user has access to (no additional permissions required)
 - **Performance Optimized** - 5-minute caching, React.memo optimizations, and efficient rendering
 - **Accessibility** - Full keyboard navigation support, ARIA labels, and screen reader support
@@ -64,7 +65,7 @@ A SharePoint Framework (SPFx) application customizer that provides a navigation 
 2. **Add to all sites** - When prompted, select **"Enable this app and add it to all sites"** so the extension appears on every site in your tenant automatically (no per-site installation needed)
 3. **Usage** - On any SharePoint site, click the "Sites you have access to" button in the top navigation bar
 4. **Explore** - Browse, search, and favorite sites from the panel
-5. **Customize** - Adjust display preferences in the Settings tab
+5. **Customize** - Adjust display preferences in the Settings tab, or view app info and license details in the About tab
 
 **Note:** When deployed tenant-wide, the extension does **not** appear in "Add an app" / Site contents—it is activated on all sites by the Tenant Wide Extensions list. Allow up to ~20 minutes after first deployment for it to appear everywhere.
 
@@ -75,6 +76,8 @@ A SharePoint Framework (SPFx) application customizer that provides a navigation 
 - **First-time setup:** Upload the solution package to your **tenant** App Catalog (not a site collection app catalog). When enabling the app, check **"Enable this app and add it to all sites"** so the extension runs on all sites. Propagation can take up to about 20 minutes.
 - **Updates:** When deploying a newer package version, you can leave "Add to all sites" **unchecked** to avoid duplicate entries in Tenant Wide Extensions; the existing registration will continue to use the updated assets. If you see duplicate entries, remove them from the App Catalog → Site contents → **Tenant Wide Extensions** list.
 - **Verification:** In the App Catalog site, go to Site contents → **Tenant Wide Extensions** to confirm an entry for "HelvetySpoExplorer" exists.
+
+**App Catalog listing:** Title, icon, description, and screenshots in the App Catalog come from `config/package-solution.json` and assets in `sharepoint/assets/` (e.g. `appicon.png` 96×96, `screenshot1.png`–`screenshot5.png`). Place or replace `appicon.png` in `sharepoint/assets/` as needed. After uploading the `.sppkg`, set **Support URL** (and **Publisher** if it is still blank) once in the app’s details in the App Catalog UI—these are not in the manifest.
 
 **Pre-deployment:** Run `npm run predeploy` to run format check, type check, lint, and production build (no test suite).
 
@@ -88,6 +91,7 @@ If the extension does not show on some sites:
 - **Tenant Wide Extensions:** In App Catalog → Site contents → **Tenant Wide Extensions**, confirm there is exactly **one** entry for "HelvetySpoExplorer" (ComponentId `3f9d14c6-c154-4aaf-bcb9-b1f3c064fd4c`). Remove any duplicate or old entries.
 - **Page type:** The extension only runs on modern pages that provide the Top placeholder (e.g. site home). It does not run on classic pages or modern list/library views—see "Where the extension appears" under How It Works.
 - **Script loading:** On a site where the extension is missing, open **F12 → Network**, reload the page, and check that the extension’s script requests succeed (e.g. 200). Check **Console** for CSP or script errors. If you host assets on an external CDN, ensure that CDN is allowed in **SharePoint Admin Center → Advanced → Script sources** (or equivalent).
+- **Extension not loading / Script error for componentId / "spfx:" or "relative-path.invalid" in console:** If you are running `heft start`, open the site only via the URL provided by the dev server (with debug manifest). If you are testing the deployed app, upload the latest .sppkg to the App Catalog, update the app, wait a few minutes, and hard-refresh the site so the tenant uses the new version instead of an old one (e.g. 1.0.0.7).
 
 ## Pricing
 
@@ -208,6 +212,11 @@ See [LICENSE](./LICENSE) for full legal terms.
 | 1.0.0.6 | February 3, 2026 | Version bump; documentation updated for tenant-wide deployment (README How It Works, Deployment section, version history) |
 | 1.0.0.6 | February 3, 2026 | Documentation: clarified where extension appears (modern pages with Top placeholder only; not classic or list/library views); added Troubleshooting section (propagation, Tenant Wide Extensions, page type, script loading) |
 | 1.0.0.7 | February 3, 2026 | Version bump to 1.0.0.7 |
+| 1.0.0.8 | February 3, 2026 | App Catalog metadata: title, icon (96×96), screenshots, categories in package-solution.json; assets in sharepoint/assets |
+| 1.0.1.0 | February 3, 2026 | Version bump to 1.0.1.0; app icon from Helvety branding (96×96 PNG in sharepoint/assets); removed prepare-app-catalog-assets script; docs updated |
+| 1.0.1.1 | February 3, 2026 | About tab: app description, contact (contact@helvety.com), license tier and tenant, version and build date; build-info injection script (prebuild/prestart) |
+| 1.0.1.2 | February 3, 2026 | Version bump; app icon renamed to appicon-96.png (cache bust); screenshots removed from package |
+| 1.0.1.3 | February 3, 2026 | About tab simplified: license section shows tier and tenant only; removed subscription ID and refresh license button; docs and comments updated |
 
 ## Disclaimer
 
