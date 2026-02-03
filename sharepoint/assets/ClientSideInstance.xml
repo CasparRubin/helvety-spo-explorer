@@ -3,6 +3,7 @@
     <ClientSideComponentInstance
         Title="HelvetySpoExplorer"
         Location="ClientSideExtension.ApplicationCustomizer"
-        ComponentId="3f9d14c6-c154-4aaf-bcb9-b1f3c064fd4c">
+        ComponentId="3f9d14c6-c154-4aaf-bcb9-b1f3c064fd4c"
+        Properties="">
     </ClientSideComponentInstance>
 </Elements>

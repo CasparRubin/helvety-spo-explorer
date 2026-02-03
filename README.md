@@ -60,17 +60,38 @@ A SharePoint Framework (SPFx) application customizer that provides a navigation 
 
 ## How It Works
 
-1. **Installation** - Deploy the SPFx solution package to your SharePoint App Catalog
-2. **Activation** - Install the app on your site(s) via "Add an app" (the extension activates automatically via Feature Framework)
-3. **Usage** - Click the "Sites you have access to" button in the top navigation bar
+1. **Deployment** - Upload the `.sppkg` to your **tenant** App Catalog and enable the app
+2. **Add to all sites** - When prompted, select **"Enable this app and add it to all sites"** so the extension appears on every site in your tenant automatically (no per-site installation needed)
+3. **Usage** - On any SharePoint site, click the "Sites you have access to" button in the top navigation bar
 4. **Explore** - Browse, search, and favorite sites from the panel
 5. **Customize** - Adjust display preferences in the Settings tab
+
+**Note:** When deployed tenant-wide, the extension does **not** appear in "Add an app" / Site contents—it is activated on all sites by the Tenant Wide Extensions list. Allow up to ~20 minutes after first deployment for it to appear everywhere.
+
+**Where the extension appears:** "Add to all sites" means the extension is *registered* for all sites, but it **only renders** on pages that support the Top placeholder. It appears on **modern site home pages** and other modern pages that use the standard SharePoint shell (e.g. `https://tenant.sharepoint.com/sites/SiteName`). It does **not** appear on classic SharePoint pages, modern list or library views when opened directly, or some modern application pages (e.g. Site Contents). So the button shows on "all sites" when you are viewing such a supported page.
+
+## Deployment
+
+- **First-time setup:** Upload the solution package to your **tenant** App Catalog (not a site collection app catalog). When enabling the app, check **"Enable this app and add it to all sites"** so the extension runs on all sites. Propagation can take up to about 20 minutes.
+- **Updates:** When deploying a newer package version, you can leave "Add to all sites" **unchecked** to avoid duplicate entries in Tenant Wide Extensions; the existing registration will continue to use the updated assets. If you see duplicate entries, remove them from the App Catalog → Site contents → **Tenant Wide Extensions** list.
+- **Verification:** In the App Catalog site, go to Site contents → **Tenant Wide Extensions** to confirm an entry for "HelvetySpoExplorer" exists.
+
+**Pre-deployment:** Run `npm run predeploy` to run format check, type check, lint, and production build (no test suite).
+
+## Troubleshooting
+
+If the extension does not show on some sites:
+
+- **Propagation delay:** After first enabling "Add to all sites", wait up to **~20 minutes** for the Tenant Wide Extensions list to propagate before expecting the extension everywhere.
+- **Tenant Wide Extensions:** In App Catalog → Site contents → **Tenant Wide Extensions**, confirm there is exactly **one** entry for "HelvetySpoExplorer" (ComponentId `3f9d14c6-c154-4aaf-bcb9-b1f3c064fd4c`). Remove any duplicate or old entries.
+- **Page type:** The extension only runs on modern pages that provide the Top placeholder (e.g. site home). It does not run on classic pages or modern list/library views—see "Where the extension appears" under How It Works.
+- **Script loading:** On a site where the extension is missing, open **F12 → Network**, reload the page, and check that the extension’s script requests succeed (e.g. 200). Check **Console** for CSP or script errors. If you host assets on an external CDN, ensure that CDN is allowed in **SharePoint Admin Center → Advanced → Script sources** (or equivalent).
 
 ## Pricing
 
 Helvety SPO Explorer is available via subscription at [store.helvety.com](https://store.helvety.com/products/helvety-spo-explorer):
 
-| Feature | Solo (CHF 750/month) | Supported (CHF 1'250/month) |
+| Feature | Solo (CHF 450/month) | Supported (CHF 650/month) |
 |---------|----------------------|---------------------------|
 | Full extension features | Yes | Yes |
 | All sites navigation | Yes | Yes |
@@ -85,13 +106,13 @@ Helvety SPO Explorer is available via subscription at [store.helvety.com](https:
 
 ## Licensing
 
-Helvety SPO Explorer uses a **tenant-based licensing model**. After purchasing a subscription at [store.helvety.com](https://store.helvety.com), you register your SharePoint tenant ID(s) in your account dashboard.
+Helvety SPO Explorer uses a **tenant-based licensing model**. After purchasing a subscription at [store.helvety.com](https://store.helvety.com), you register your SharePoint tenant ID(s) on the **Tenants** page at the store.
 
 ### How It Works
 
 1. **Purchase** - Subscribe to Solo or Supported at [store.helvety.com](https://store.helvety.com/products/helvety-spo-explorer)
-2. **Register Tenant** - Add your SharePoint tenant ID (e.g., "contoso" from contoso.sharepoint.com) in your store account
-3. **Deploy** - Install the extension on your SharePoint sites as described in the Deployment section
+2. **Register Tenant** - Add your SharePoint tenant ID (e.g., "contoso" from contoso.sharepoint.com) on the store’s Tenants page
+3. **Deploy** - Upload the package to your tenant App Catalog and enable with "Add to all sites" as described in the Deployment section above
 4. **Automatic Validation** - The extension validates your license in the background without blocking functionality
 
 ### License Validation
@@ -174,13 +195,17 @@ See [LICENSE](./LICENSE) for full legal terms.
 | Version | Date             | Comments                    |
 | ------- | ---------------- | --------------------------- |
 | 0.0.1   | January 27, 2026 | Initial release with comprehensive code quality improvements: reduced duplication, simplified complex functions, improved type safety, unified error handling, and optimized performance |
-| 0.0.1   | January 28, 2026 | Fixed SharePoint packaging issues: removed invalid JSON comments from manifest, removed ClientSideInstance.xml from elementManifests for site-level deployment |
+| 0.0.1   | January 28, 2026 | Fixed SharePoint packaging issues: removed invalid JSON comments from manifest; ClientSideInstance.xml was temporarily removed from packaging (re-added in 1.0.0.5 for tenant-wide deployment) |
 | 1.0.0.3 | January 28, 2026 | Version bump to 1.0.0.3 - build verification and code quality improvements |
 | 1.0.0.3 | January 28, 2026 | Added screenshots section to README showcasing application features in both light and dark themes |
 | 1.0.0.3 | January 28, 2026 | Comprehensive code quality improvements: enhanced type safety with improved type guards and narrowing, optimized React.memo with custom comparison functions, improved error recovery logic, enhanced documentation with examples and edge cases, and updated UI text for clarity |
 | 1.0.0.4 | January 31, 2026 | Added subscription-based licensing: tenant registration via store.helvety.com, non-blocking license validation with fail-open behavior, 7-day grace period, 24-hour license caching for enterprise reliability |
 | 1.0.0.4 | January 31, 2026 | Improved unlicensed UX: full-width warning banner replaces navigation button, "Visit the Helvety Store to get a license" button with shop icon, sites and search completely blocked when unlicensed |
 | 1.0.0.4 | February 1, 2026 | Added multi-product license support: license validation now includes product identifier for per-product licensing |
+| 1.0.0.5 | February 3, 2026 | Tenant-wide deployment: added ClientSideInstance.xml to package so "Enable this app and add it to all sites" registers the extension on all sites automatically; extension no longer requires per-site installation |
+| 1.0.0.6 | February 3, 2026 | Version bump; documentation updated for tenant-wide deployment (README How It Works, Deployment section, version history) |
+| 1.0.0.6 | February 3, 2026 | Documentation: clarified where extension appears (modern pages with Top placeholder only; not classic or list/library views); added Troubleshooting section (propagation, Tenant Wide Extensions, page type, script loading) |
+| 1.0.0.7 | February 3, 2026 | Version bump to 1.0.0.7 |
 
 ## Disclaimer
 

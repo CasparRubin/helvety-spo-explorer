@@ -1,6 +1,6 @@
 {
   "name": "helvety-spo-explorer",
-  "version": "1.0.0.4",
+  "version": "1.0.0.7",
   "private": true,
   "license": "UNLICENSED",
   "engines": {
@@ -15,7 +15,8 @@
     "lint:fix": "eslint src --ext .ts,.tsx --fix",
     "format": "prettier --write \"src/**/*.{ts,tsx}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx}\"",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "predeploy": "npm run format:check && npm run type-check && npm run lint && npm run build"
   },
   "dependencies": {
     "@fluentui/react": "^8.125.0",

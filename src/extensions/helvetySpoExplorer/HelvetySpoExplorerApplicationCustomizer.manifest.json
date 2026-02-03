@@ -4,7 +4,7 @@
   "alias": "HelvetySpoExplorerApplicationCustomizer",
   "componentType": "Extension",
   "extensionType": "ApplicationCustomizer",
-  "version": "1.0.0.4",
+  "version": "1.0.0.7",
   "manifestVersion": 2,
   "requiresCustomScript": false
 }

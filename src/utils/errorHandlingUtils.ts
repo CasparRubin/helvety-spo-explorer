@@ -434,7 +434,6 @@ export {
   handleSearchApiError,
   handleWebInfosApiError,
   handleSharePointApiError,
-  handleGraphApiError,
   createApiErrorHandler,
   type IApiErrorOptions,
   type IApiErrorHandlerOptions,
