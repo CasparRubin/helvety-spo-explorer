@@ -217,6 +217,7 @@ See [LICENSE](./LICENSE) for full legal terms.
 | 1.0.1.1 | February 3, 2026 | About tab: app description, contact (contact@helvety.com), license tier and tenant, version and build date; build-info injection script (prebuild/prestart) |
 | 1.0.1.2 | February 3, 2026 | Version bump; app icon renamed to appicon-96.png (cache bust); screenshots removed from package |
 | 1.0.1.3 | February 3, 2026 | About tab simplified: license section shows tier and tenant only; removed subscription ID and refresh license button; docs and comments updated |
+| 1.0.1.4 | February 4, 2026 | Code cleanup: removed unused dependencies (@tanstack/react-table, react-window, @types/react-window) |
 
 ## Disclaimer
 
