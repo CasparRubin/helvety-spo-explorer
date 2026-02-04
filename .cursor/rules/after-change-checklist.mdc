@@ -1,16 +1,11 @@
 ---
-description: After code changes, update tests, comments, README, and legal docs as needed
+description: After code changes, update comments, README, and legal docs as needed
 alwaysApply: true
 ---
 
 # After-Change Checklist
 
 After implementing or changing code, also do the following:
-
-## Tests
-
-- Add or update unit/integration tests for new or changed behavior.
-- Keep test structure and coverage in line with the project.
 
 ## Comments / JSDoc
 

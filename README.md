@@ -81,7 +81,7 @@ A SharePoint Framework (SPFx) application customizer that provides a navigation 
 
 **Pre-deployment:** Run `npm run predeploy` to run format check, type check, lint, and production build (no test suite).
 
-**Development standards:** See `.cursor/rules/` for after-change checklist (tests, comments, README, legal/static docs), official-docs-first (SPFx, Fluent UI, Heft), and spo-explorer-stack conventions.
+**Development standards:** See `.cursor/rules/` for after-change checklist (comments, README, legal/static docs), official-docs-first (SPFx, Fluent UI, Heft), and spo-explorer-stack conventions.
 
 ## Troubleshooting
 
@@ -218,6 +218,7 @@ See [LICENSE](./LICENSE) for full legal terms.
 | 1.0.1.2 | February 3, 2026 | Version bump; app icon renamed to appicon-96.png (cache bust); screenshots removed from package |
 | 1.0.1.3 | February 3, 2026 | About tab simplified: license section shows tier and tenant only; removed subscription ID and refresh license button; docs and comments updated |
 | 1.0.1.4 | February 4, 2026 | Code cleanup: removed unused dependencies (@tanstack/react-table, react-window, @types/react-window) |
+| 1.0.1.5 | February 4, 2026 | Pre-deployment maintenance release |
 
 ## Disclaimer
 

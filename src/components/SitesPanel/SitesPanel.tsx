@@ -386,10 +386,7 @@ export const SitesPanel: React.FC<ISitesPanelProps> = React.memo(
                 headerText={UI_MESSAGES.ABOUT_TAB}
                 itemKey={UI_MESSAGES.ABOUT_TAB}
               >
-                <AboutContent
-                  licenseTier={licenseTier}
-                  tenantId={tenantId}
-                />
+                <AboutContent licenseTier={licenseTier} tenantId={tenantId} />
               </PivotItem>
             </Pivot>
           </div>

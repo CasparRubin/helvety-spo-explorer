@@ -8,4 +8,4 @@
 export const APP_VERSION = "1.0.1.3";
 
 /** Build date/time in format "DD.MM.YYYY at HH:mm:ss", empty if not injected */
-export const BUILD_DATE = "03.02.2026 at 17:30:38";
+export const BUILD_DATE = "04.02.2026 at 12:27:24";
