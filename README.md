@@ -150,7 +150,7 @@ This project is built with modern web technologies:
 
 - **SharePoint Framework 1.22.1** - Microsoft's framework for building SharePoint extensions
 - **React 17.0.1** - UI library
-- **TypeScript 5.8.0** - Type-safe JavaScript
+- **TypeScript 5.8.3** - Type-safe JavaScript
 - **Fluent UI 8.125.0** - Microsoft's design system (formerly Office UI Fabric)
 - **Heft 1.1.2** - Build system from Rush Stack
 - **SharePoint Search API** - For site discovery and data fetching
