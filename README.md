@@ -3,7 +3,7 @@
 ![Node.js](https://img.shields.io/badge/Node.js-22.14.0-green)
 ![SPFx](https://img.shields.io/badge/SPFx-1.22.1-blue)
 ![React](https://img.shields.io/badge/React-17.0.1-blue)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.8.0-blue)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.8.3-blue)
 ![Fluent UI](https://img.shields.io/badge/Fluent%20UI-8.125.0-purple)
 ![Heft](https://img.shields.io/badge/Heft-1.1.2-orange)
 ![License](https://img.shields.io/badge/License-All%20Rights%20Reserved-red)
