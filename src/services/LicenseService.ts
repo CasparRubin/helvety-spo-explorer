@@ -440,11 +440,11 @@ export class LicenseService {
   ): string {
     switch (reason) {
       case "tenant_not_registered":
-        return "This tenant is not registered. Please purchase a license at store.helvety.com";
+        return "This tenant is not registered. Please purchase a license at helvety.com/store";
       case "subscription_expired":
-        return "Your subscription has expired. Please renew at store.helvety.com";
+        return "Your subscription has expired. Please renew at helvety.com/store";
       case "subscription_canceled":
-        return "Your subscription has been canceled. Please resubscribe at store.helvety.com";
+        return "Your subscription has been canceled. Please resubscribe at helvety.com/store";
       case "subscription_inactive":
         return "Your subscription is not active. Please contact support.";
       case "missing_product_id":

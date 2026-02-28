@@ -39,7 +39,7 @@
 
 A SharePoint Framework (SPFx) application customizer that provides a navigation bar for exploring and accessing SharePoint sites. The extension displays a "Sites you have access to" button in the top placeholder, which opens a panel with a searchable list of all SharePoint sites the current user can access.
 
-**Privacy First** - All data processing happens client-side. User preferences (favorites and settings) are stored locally in the browser's localStorage. The extension makes two types of external calls: (1) SharePoint Search API for site discovery, and (2) store.helvety.com API for license validation (your tenant ID and product identifier are transmitted, no personal data). See our [Privacy Policy](https://helvety.com/privacy) for details.
+**Privacy First** - All data processing happens client-side. User preferences (favorites and settings) are stored locally in the browser's localStorage. The extension makes two types of external calls: (1) SharePoint Search API for site discovery, and (2) helvety.com/store API for license validation (your tenant ID and product identifier are transmitted, no personal data). See our [Privacy Policy](https://helvety.com/privacy) for details.
 
 ## Features
 
@@ -95,7 +95,7 @@ If the extension does not show on some sites:
 
 ## Pricing
 
-Helvety SPO Explorer is available via subscription at [store.helvety.com](https://store.helvety.com/products/helvety-spo-explorer):
+Helvety SPO Explorer is available via subscription at [helvety.com/store](https://helvety.com/store/products/helvety-spo-explorer):
 
 | Feature | Solo (CHF 450/month) | Supported (CHF 650/month) |
 |---------|----------------------|---------------------------|
@@ -108,15 +108,15 @@ Helvety SPO Explorer is available via subscription at [store.helvety.com](https:
 | Priority support | - | Yes |
 | Dedicated setup assistance | - | Yes |
 
-**[Subscribe Now](https://store.helvety.com/products/helvety-spo-explorer)** | Contact us at [contact@helvety.com](mailto:contact@helvety.com) for inquiries.
+**[Subscribe Now](https://helvety.com/store/products/helvety-spo-explorer)** | Contact us at [contact@helvety.com](mailto:contact@helvety.com) for inquiries.
 
 ## Licensing
 
-Helvety SPO Explorer uses a **tenant-based licensing model**. After purchasing a subscription at [store.helvety.com](https://store.helvety.com), you register your SharePoint tenant ID(s) on the **Tenants** page at the store.
+Helvety SPO Explorer uses a **tenant-based licensing model**. After purchasing a subscription at [helvety.com/store](https://helvety.com/store), you register your SharePoint tenant ID(s) on the **Tenants** page at the store.
 
 ### How It Works
 
-1. **Purchase** - Subscribe to Solo or Supported at [store.helvety.com](https://store.helvety.com/products/helvety-spo-explorer)
+1. **Purchase** - Subscribe to Solo or Supported at [helvety.com/store](https://helvety.com/store/products/helvety-spo-explorer)
 2. **Register Tenant** - Add your SharePoint tenant ID (e.g., "contoso" from contoso.sharepoint.com) on the store’s Tenants page
 3. **Deploy** - Upload the package to your tenant App Catalog and enable with "Add to all sites" as described in the Deployment section above
 4. **Automatic Validation** - The extension validates your license in the background without blocking functionality
@@ -192,7 +192,7 @@ You may NOT:
 - Use this code in your own projects
 - Deploy this code to your own SharePoint environment
 
-**Purchasing a subscription grants access to download and use the official `.sppkg` package from [store.helvety.com](https://store.helvety.com/products/helvety-spo-explorer) only.** Subscriptions do not grant any rights to the source code.
+**Purchasing a subscription grants access to download and use the official `.sppkg` package from [helvety.com/store](https://helvety.com/store/products/helvety-spo-explorer) only.** Subscriptions do not grant any rights to the source code.
 
 See [LICENSE](./LICENSE) for full legal terms.
 
@@ -205,7 +205,7 @@ See [LICENSE](./LICENSE) for full legal terms.
 | 1.0.0.3 | January 28, 2026 | Version bump to 1.0.0.3 - build verification and code quality improvements |
 | 1.0.0.3 | January 28, 2026 | Added screenshots section to README showcasing application features in both light and dark themes |
 | 1.0.0.3 | January 28, 2026 | Comprehensive code quality improvements: enhanced type safety with improved type guards and narrowing, optimized React.memo with custom comparison functions, improved error recovery logic, enhanced documentation with examples and edge cases, and updated UI text for clarity |
-| 1.0.0.4 | January 31, 2026 | Added subscription-based licensing: tenant registration via store.helvety.com, non-blocking license validation with fail-open behavior, 7-day grace period, 24-hour license caching for enterprise reliability |
+| 1.0.0.4 | January 31, 2026 | Added subscription-based licensing: tenant registration via helvety.com/store, non-blocking license validation with fail-open behavior, 7-day grace period, 24-hour license caching for enterprise reliability |
 | 1.0.0.4 | January 31, 2026 | Improved unlicensed UX: full-width warning banner replaces navigation button, "Visit the Helvety Store to get a license" button with shop icon, sites and search completely blocked when unlicensed |
 | 1.0.0.4 | February 1, 2026 | Added multi-product license support: license validation now includes product identifier for per-product licensing |
 | 1.0.0.5 | February 3, 2026 | Tenant-wide deployment: added ClientSideInstance.xml to package so "Enable this app and add it to all sites" registers the extension on all sites automatically; extension no longer requires per-site installation |

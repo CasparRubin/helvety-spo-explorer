@@ -5,7 +5,7 @@
  */
 
 /** Application version (from config/package-solution.json) */
-export const APP_VERSION = "1.0.1.5";
+export const APP_VERSION = "1.0.2.0";
 
 /** Build date/time in format "DD.MM.YYYY at HH:mm:ss", empty if not injected */
-export const BUILD_DATE = "04.02.2026 at 17:18:46";
+export const BUILD_DATE = "28.02.2026 at 18:26:48";

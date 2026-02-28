@@ -41,7 +41,7 @@ export const DEFAULT_SITE_TITLE = "Untitled Site";
  */
 export const LICENSE_API = {
   /** Base URL for the Helvety Store API */
-  BASE_URL: "https://store.helvety.com/api",
+  BASE_URL: "https://helvety.com/store/api",
   /** License validation endpoint */
   VALIDATE_ENDPOINT: "/license/validate",
   /** Product identifier for this extension */
