@@ -13,9 +13,6 @@ export const CSS_VARIABLES = {
   NEUTRAL_5: "var(--sp-color-neutral-5)",
   NEUTRAL_6: "var(--sp-color-neutral-6)",
   NEUTRAL_10: "var(--sp-color-neutral-10)",
-  THEME_LIGHT: "var(--sp-color-themeLight)",
-  THEME_PRIMARY: "var(--sp-color-themePrimary)",
-  YELLOW: "var(--sp-color-yellow)",
   // Additional theme-aware colors for better dark mode support
   NEUTRAL_PRIMARY: "var(--sp-color-neutralForeground1)",
   NEUTRAL_SECONDARY: "var(--sp-color-neutralForeground2)",
@@ -38,19 +35,10 @@ export const LAYOUT = {
   NAVBAR_PADDING: "0 16px",
   NAVBAR_GAP: "16px",
   COMBOBOX_GAP: "8px",
-  COMBOBOX_MIN_WIDTH: "600px",
-  DROPDOWN_MAX_HEIGHT: "400px",
-  DROPDOWN_WIDTH: 500,
-  OPTION_PADDING: "8px 12px",
-  OPTION_MIN_HEIGHT: "48px",
-  SETTINGS_PANEL_PADDING: "16px 0",
-  SETTINGS_TOGGLE_MARGIN: "20px",
   // Site item styles
-  SITE_ITEM_BORDER_LEFT_WIDTH: "3px",
   SITE_ITEM_BORDER_RADIUS: "4px",
   SITE_ITEM_SCALE_HOVER: 1.001,
   SITE_ITEM_SCALE_NORMAL: 1,
-  ACTION_BUTTON_MIN_SIZE: "28px",
   ACTION_BUTTON_GAP: "2px",
   ACTION_BUTTON_MARGIN_LEFT: "8px",
   // Spacing
@@ -96,8 +84,6 @@ export const TYPOGRAPHY = {
   FONT_SIZE_SMALL: "13px",
   FONT_SIZE_XSMALL: "12px",
   FONT_SIZE_XXSMALL: "11px",
-  LINE_HEIGHT_SMALL: "16px",
-  ICON_SIZE: "16px",
 } as const;
 
 /**
@@ -109,7 +95,6 @@ export const SPACING = {
   MD: "8px",
   LG: "12px",
   XL: "16px",
-  XXL: "20px",
   /** Screen reader only element dimensions */
   SR_ONLY_SIZE: "1px",
   SR_ONLY_MARGIN: "-1px",

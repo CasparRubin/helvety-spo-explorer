@@ -5,17 +5,6 @@ import { CSS_VARIABLES, LAYOUT, TYPOGRAPHY, SPACING } from "../constants";
  */
 
 /**
- * Option container styles
- */
-export const optionContainerStyles: React.CSSProperties = {
-  display: "flex",
-  alignItems: "center",
-  padding: LAYOUT.OPTION_PADDING,
-  minHeight: LAYOUT.OPTION_MIN_HEIGHT,
-  cursor: "pointer",
-} as const;
-
-/**
  * Site info container styles
  */
 export const siteInfoStyles: React.CSSProperties = {
@@ -69,39 +58,6 @@ export const siteUrlStyles: React.CSSProperties = {
 } as const;
 
 /**
- * Following icon container styles (for SharePoint Following feature)
- */
-export const followIconContainerStyles: React.CSSProperties = {
-  marginLeft: 0, // Margin handled by parent container
-  cursor: "pointer",
-  padding: SPACING.XS,
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-} as const;
-
-/**
- * Header styles for followed sites section (SharePoint Following)
- */
-export const followingHeaderStyles: React.CSSProperties = {
-  padding: LAYOUT.OPTION_PADDING,
-  fontSize: TYPOGRAPHY.FONT_SIZE_XSMALL,
-  fontWeight: 600,
-  color: CSS_VARIABLES.NEUTRAL_SECONDARY,
-  textTransform: "uppercase",
-  letterSpacing: SPACING.LETTER_SPACING_HEADER,
-} as const;
-
-/**
- * Divider styles
- */
-export const dividerStyles: React.CSSProperties = {
-  height: SPACING.DIVIDER_HEIGHT,
-  backgroundColor: CSS_VARIABLES.NEUTRAL_2,
-  margin: `${SPACING.XS} 0`,
-} as const;
-
-/**
  * Empty state message styles
  */
 export const emptyStateStyles: React.CSSProperties = {
@@ -118,14 +74,6 @@ export const loadingContainerStyles: React.CSSProperties = {
   display: "flex",
   alignItems: "center",
   gap: LAYOUT.COMBOBOX_GAP,
-} as const;
-
-/**
- * Empty sites message styles
- */
-export const emptySitesStyles: React.CSSProperties = {
-  color: CSS_VARIABLES.NEUTRAL_SECONDARY,
-  fontSize: TYPOGRAPHY.FONT_SIZE_MEDIUM,
 } as const;
 
 /**

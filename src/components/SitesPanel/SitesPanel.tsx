@@ -34,7 +34,7 @@ import {
  * This component renders a side panel that slides in from the left, containing three tabs:
  * - Sites: Displays the searchable sites list with favorites, search, and refresh functionality
  * - Settings: Displays user preference settings for customizing the site explorer
- * - About: Displays app description, contact, license info, version and build date
+ * - About: Displays app description, contact, version and build date
  *
  * The panel manages favorite sites snapshots to ensure consistent sorting when switching
  * between tabs. The snapshot is updated when the panel opens or when switching to the Sites tab.
@@ -98,11 +98,7 @@ function compareSitesPanelProps(
     prevProps.error !== nextProps.error ||
     prevProps.showFullUrl !== nextProps.showFullUrl ||
     prevProps.showPartialUrl !== nextProps.showPartialUrl ||
-    prevProps.showDescription !== nextProps.showDescription ||
-    prevProps.isLicensed !== nextProps.isLicensed ||
-    prevProps.isLicenseChecked !== nextProps.isLicenseChecked ||
-    prevProps.licenseTier !== nextProps.licenseTier ||
-    prevProps.tenantId !== nextProps.tenantId
+    prevProps.showDescription !== nextProps.showDescription
   ) {
     return false;
   }
@@ -123,29 +119,9 @@ function compareSitesPanelProps(
     return false;
   }
 
-  // Compare sites array by reference (if same reference, skip deep comparison)
-  if (prevProps.sites === nextProps.sites) {
-    return true;
-  }
-
-  // If sites array changed, check length first (cheap)
-  if (prevProps.sites.length !== nextProps.sites.length) {
+  // Compare sites array by reference; if changed, re-render to avoid stale UI.
+  if (prevProps.sites !== nextProps.sites) {
     return false;
-  }
-
-  // If lengths match, check first and last items (strategic sampling)
-  const sitesLength = prevProps.sites.length;
-  if (sitesLength > 0) {
-    if (prevProps.sites[0]?.id !== nextProps.sites[0]?.id) {
-      return false;
-    }
-    if (
-      sitesLength > 1 &&
-      prevProps.sites[sitesLength - 1]?.id !==
-        nextProps.sites[sitesLength - 1]?.id
-    ) {
-      return false;
-    }
   }
 
   return true;
@@ -168,10 +144,6 @@ export const SitesPanel: React.FC<ISitesPanelProps> = React.memo(
     showPartialUrl = false,
     showDescription = true,
     onRefresh,
-    isLicensed = true,
-    isLicenseChecked = false,
-    licenseTier,
-    tenantId,
   }) => {
     const [selectedKey, setSelectedKey] = React.useState<string>(
       UI_MESSAGES.SITES_TAB
@@ -181,8 +153,6 @@ export const SitesPanel: React.FC<ISitesPanelProps> = React.memo(
     const favoriteSitesSnapshotRef = React.useRef<Set<string>>(
       new Set(favoriteSites)
     );
-
-    const contentContainerRef = React.useRef<HTMLDivElement>(null);
 
     // Snapshot of favorite sites (URLs) for sorting - only updates when panel opens or Sites tab is selected
     //
@@ -334,7 +304,6 @@ export const SitesPanel: React.FC<ISitesPanelProps> = React.memo(
           Panel containing tabs for browsing sites, settings, and about
         </span>
         <div
-          ref={contentContainerRef}
           style={{
             display: "flex",
             flexDirection: "column",
@@ -368,8 +337,6 @@ export const SitesPanel: React.FC<ISitesPanelProps> = React.memo(
                     showPartialUrl={showPartialUrl}
                     showDescription={showDescription}
                     onRefresh={handleRefresh}
-                    isLicensed={isLicensed}
-                    isLicenseChecked={isLicenseChecked}
                   />
                 </div>
               </PivotItem>
@@ -386,7 +353,7 @@ export const SitesPanel: React.FC<ISitesPanelProps> = React.memo(
                 headerText={UI_MESSAGES.ABOUT_TAB}
                 itemKey={UI_MESSAGES.ABOUT_TAB}
               >
-                <AboutContent licenseTier={licenseTier} tenantId={tenantId} />
+                <AboutContent />
               </PivotItem>
             </Pivot>
           </div>

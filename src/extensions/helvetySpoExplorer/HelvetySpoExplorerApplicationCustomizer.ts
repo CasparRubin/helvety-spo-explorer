@@ -35,7 +35,7 @@ export interface IHelvetySpoExplorerApplicationCustomizerProperties {
  * Application Customizer that renders the SPO Explorer navbar in the Top placeholder.
  * Only runs on pages that provide the Top placeholder (e.g. modern site home); does not run
  * on classic pages, modern list/library views, or some application pages. See README
- * "Where the extension appears" and "Troubleshooting".
+ * for deployment and runtime behavior notes.
  */
 export default class HelvetySpoExplorerApplicationCustomizer extends BaseApplicationCustomizer<IHelvetySpoExplorerApplicationCustomizerProperties> {
   private _topPlaceholder: PlaceholderContent | undefined;

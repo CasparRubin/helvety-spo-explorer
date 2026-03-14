@@ -1,0 +1,15 @@
+---
+description: NEVER add AI co-author attribution to git commits
+alwaysApply: true
+---
+
+# No AI Co-Author Attribution
+
+NEVER add a Co-authored-by trailer, --trailer flag, or any other form of AI attribution to git commits.
+
+- Do NOT append `Co-authored-by: Cursor <cursoragent@cursor.com>` or any variant
+- Do NOT add `--trailer` flags to git commit commands
+- Do NOT add any AI tool or assistant as a co-author, contributor, or committer
+- Commit messages must only credit human authors
+
+This applies to ALL git operations: commits, amends, rebases, cherry-picks, and merge commits.

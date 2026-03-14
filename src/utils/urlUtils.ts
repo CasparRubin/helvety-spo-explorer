@@ -4,6 +4,16 @@
 
 import { isNonEmptyString } from "./validationUtils";
 
+const ALLOWED_SCHEME = "https:";
+
+function isAllowedSharePointHost(hostname: string): boolean {
+  const normalizedHost = hostname.toLowerCase();
+  return (
+    normalizedHost === "sharepoint.com" ||
+    normalizedHost.endsWith(".sharepoint.com")
+  );
+}
+
 /**
  * Result of URL validation and normalization
  */
@@ -65,8 +75,8 @@ export function getPartialUrl(fullUrl: string): string {
 /**
  * Normalize a URL for consistent storage and comparison
  *
- * Normalizes a URL by trimming whitespace, converting to lowercase, and removing trailing slashes
- * (except for root URLs). This ensures consistent comparison and storage of URLs across the application.
+ * Normalizes a URL by enforcing HTTPS + SharePoint host allowlist, converting to lowercase,
+ * and removing trailing slashes (except root URLs).
  *
  * Defensive checks:
  * - Validates input is a non-empty string
@@ -74,11 +84,11 @@ export function getPartialUrl(fullUrl: string): string {
  * - Handles edge cases (empty strings, single character strings)
  *
  * Handles errors from:
- * - String operations (trim, toLowerCase, endsWith, slice) - should not throw but caught for safety
+ * - URL parsing (`new URL`) and string operations; invalid URLs return empty string
  *
  * @param url - The URL to normalize
- * @returns Normalized URL (lowercase, trimmed, trailing slash removed if not root)
- * @throws Never throws - always returns a string (original trimmed if normalization fails)
+ * @returns Normalized URL, or empty string when URL is invalid/disallowed
+ * @throws Never throws - always returns a string
  *
  * @example
  * ```typescript
@@ -96,7 +106,15 @@ export function normalizeUrl(url: string): string {
   }
 
   try {
-    let normalized: string = url.trim().toLowerCase();
+    const parsed = new URL(url.trim());
+    if (parsed.protocol !== ALLOWED_SCHEME) {
+      return "";
+    }
+    if (!isAllowedSharePointHost(parsed.hostname)) {
+      return "";
+    }
+
+    let normalized: string = parsed.toString().toLowerCase();
 
     // Defensive check: validate length before slice operation
     // Remove trailing slash unless it's the root URL (length <= 1 means just "/")
@@ -107,16 +125,16 @@ export function normalizeUrl(url: string): string {
     // Defensive check: ensure result is still a valid string
     return typeof normalized === "string" ? normalized : url.trim();
   } catch {
-    // If normalization fails (shouldn't happen), return trimmed original URL
-    return url.trim();
+    // Reject malformed URLs.
+    return "";
   }
 }
 
 /**
  * Validates and normalizes a URL in one operation
  *
- * Combines validation and normalization for convenience. Returns both the validation
- * result and normalized URL to avoid redundant checks.
+ * Combines strict normalization and validation for convenience. Only HTTPS SharePoint
+ * URLs pass validation.
  *
  * @param url - The URL to validate and normalize
  * @returns Object containing validation result and normalized URL

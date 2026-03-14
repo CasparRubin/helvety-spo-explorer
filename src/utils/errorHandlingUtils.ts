@@ -20,6 +20,29 @@ import { ApiError, PermissionError, ValidationError } from "./errors";
 
 const LOG_SOURCE = "errorHandlingUtils";
 
+function maskUserIdentifier(userId: string): string {
+  const trimmed = userId.trim();
+  const atIndex = trimmed.indexOf("@");
+  if (atIndex > 1) {
+    const local = trimmed.slice(0, atIndex);
+    const domain = trimmed.slice(atIndex + 1);
+    return `${local.slice(0, 2)}***@${domain}`;
+  }
+  if (trimmed.length <= 3) {
+    return "***";
+  }
+  return `${trimmed.slice(0, 3)}***`;
+}
+
+function sanitizeUrlForLogs(url: string): string {
+  try {
+    const parsed = new URL(url);
+    return `${parsed.origin}${parsed.pathname}`;
+  } catch {
+    return url;
+  }
+}
+
 /**
  * Options for error handling behavior
  */
@@ -71,7 +94,7 @@ export function formatErrorContext(
   const parts: string[] = [operation];
 
   if (userId) {
-    parts.push(`for user: ${userId}`);
+    parts.push(`for user: ${maskUserIdentifier(userId)}`);
   }
 
   if (details) {
@@ -79,101 +102,6 @@ export function formatErrorContext(
   }
 
   return parts.join(" ");
-}
-
-/**
- * Formats error messages consistently across the application
- *
- * Creates a standardized error message format that includes the base message
- * and optional details. This ensures consistent error message structure.
- *
- * @param baseMessage - Base error message
- * @param details - Optional additional details
- * @param statusCode - Optional HTTP status code
- * @returns Formatted error message
- *
- * @example
- * ```typescript
- * formatErrorMessage('Failed to fetch sites', 'Network timeout', 408);
- * // Returns: "Failed to fetch sites (408): Network timeout"
- *
- * formatErrorMessage('Operation failed');
- * // Returns: "Operation failed"
- * ```
- */
-export function formatErrorMessage(
-  baseMessage: string,
-  details?: string,
-  statusCode?: number
-): string {
-  const parts: string[] = [baseMessage];
-
-  if (statusCode !== undefined && Number.isFinite(statusCode)) {
-    parts.push(`(${statusCode})`);
-  }
-
-  if (details) {
-    parts.push(`: ${details}`);
-  }
-
-  return parts.join(" ");
-}
-
-/**
- * Safely executes an async function with error handling
- *
- * Wraps an async function to catch and handle errors consistently.
- * Returns a default value on error if rethrow is false, otherwise rethrows.
- *
- * @param fn - The async function to execute
- * @param options - Error handling options
- * @returns The result of the function or default value on error
- * @throws Re-throws the error if rethrow is true and an error occurs
- *
- * @example
- * ```typescript
- * // With default value (never throws)
- * const result = await safeExecuteAsync(
- *   async () => await fetchData(),
- *   { defaultValue: [], logError: true, context: 'Fetching data' }
- * );
- *
- * // With rethrow enabled (may throw)
- * try {
- *   const result = await safeExecuteAsync(
- *     async () => await criticalOperation(),
- *     { rethrow: true, logError: true, context: 'Critical operation' }
- *   );
- * } catch (err) {
- *   // Handle error
- * }
- * ```
- */
-export async function safeExecuteAsync<T>(
-  fn: () => Promise<T>,
-  options: IErrorHandlingOptions = {}
-): Promise<T> {
-  const {
-    logError: shouldLog = true,
-    logSource = LOG_SOURCE,
-    context,
-    rethrow = false,
-    defaultValue,
-  } = options;
-
-  try {
-    return await fn();
-  } catch (error: unknown) {
-    if (shouldLog) {
-      logError(logSource, error, context);
-    }
-
-    if (rethrow) {
-      throw error;
-    }
-
-    return defaultValue as T;
-  }
 }
 
 /**
@@ -328,59 +256,68 @@ export function createStandardizedError(
   }
 }
 
-// Re-export retry utilities for backward compatibility
-export { executeWithRetry, withTimeout } from "./errorRetryUtils";
-
 /**
- * Validates and executes a callback function safely
- *
- * Validates that the callback is a function before executing it.
- * Useful for optional callback props in React components.
- *
- * Edge cases handled:
- * - Undefined/null callbacks return false (no error thrown)
- * - Non-function values return false (no error thrown)
- * - Callback execution errors are caught and logged (never thrown)
- *
- * @param callback - The callback function to execute
- * @param args - Arguments to pass to the callback
- * @returns true if callback was executed successfully, false otherwise
- * @throws Never throws - errors are caught and logged
- *
- * @example
- * ```typescript
- * // Safe execution of optional callback
- * const handleClick = (e: React.MouseEvent) => {
- *   console.log('Clicked');
- * };
- * safeCallback(handleClick, event); // Returns: true, executes callback
- *
- * // Undefined callback (common in optional props)
- * safeCallback(undefined, event); // Returns: false, no error thrown
- *
- * // Callback that throws (error is caught and logged)
- * const errorCallback = () => {
- *   throw new Error('Callback error');
- * };
- * safeCallback(errorCallback); // Returns: false, error logged but not thrown
- * ```
+ * Handles SharePoint API errors and throws category-specific error types.
  */
-export function safeCallback<T extends unknown[]>(
-  callback: ((...args: T) => void) | undefined,
-  ...args: T
-): boolean {
-  if (!isValidFunction(callback)) {
-    return false;
+export function handleSharePointApiError(
+  error: unknown,
+  context: {
+    pageContext: {
+      web: { absoluteUrl: string };
+      site: { absoluteUrl: string };
+    };
+  },
+  logSource: string,
+  apiUrl: string,
+  defaultErrorMessage: string
+): never {
+  const errorMessage: string = extractErrorMessage(error);
+  const errorCategory: ErrorCategory = categorizeError(error);
+  const siteUrl: string = sanitizeUrlForLogs(
+    context.pageContext.site.absoluteUrl
+  );
+  const webUrl: string = sanitizeUrlForLogs(
+    context.pageContext.web.absoluteUrl
+  );
+  const safeApiUrl = sanitizeUrlForLogs(apiUrl);
+  const errorContext: string = formatErrorContext(
+    "getSites - SharePoint API failed",
+    undefined,
+    `Category: ${errorCategory}. Site URL: ${siteUrl}, Web URL: ${webUrl}. SharePoint API URL: ${safeApiUrl}. Error: ${errorMessage}`
+  );
+
+  logError(logSource, error, errorContext);
+
+  const operationContext: string = formatErrorContext(
+    "getSites - SharePoint API failed",
+    undefined,
+    `Site: ${siteUrl}, Web: ${webUrl}`
+  );
+
+  if (errorCategory === ErrorCategory.PERMISSION) {
+    throw new PermissionError(
+      "Unable to fetch sites from SharePoint. Please check your permissions and try again.",
+      error,
+      operationContext
+    );
   }
 
-  try {
-    callback(...args);
-    return true;
-  } catch (error: unknown) {
-    logError(LOG_SOURCE, error, "Error executing callback");
-    return false;
+  if (errorCategory === ErrorCategory.NETWORK) {
+    throw new ApiError(
+      "Unable to fetch sites from SharePoint. Please check your network connection and try again.",
+      undefined,
+      apiUrl,
+      error,
+      operationContext
+    );
   }
+
+  const baseMessage: string = `${defaultErrorMessage}${errorMessage ? ` Details: ${errorMessage}` : ""}`;
+  throw createStandardizedError(error, baseMessage, operationContext);
 }
+
+// Re-export timeout utility for backward compatibility
+export { withTimeout } from "./errorRetryUtils";
 
 /**
  * Creates an error boundary handler for async operations
@@ -426,15 +363,3 @@ export async function withErrorBoundary<T>(
     throw error;
   }
 }
-
-// Re-export error handler factories for backward compatibility
-export {
-  handleApiResponseError,
-  createApiErrorFromResponse,
-  handleSearchApiError,
-  handleWebInfosApiError,
-  handleSharePointApiError,
-  createApiErrorHandler,
-  type IApiErrorOptions,
-  type IApiErrorHandlerOptions,
-} from "./errorHandlerFactories";

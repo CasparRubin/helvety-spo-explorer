@@ -176,36 +176,6 @@ export function siteMatchesSearch(site: ISite, searchText: string): boolean {
 }
 
 /**
- * Creates a safe event handler that prevents default and stops propagation
- *
- * Wraps an event handler to automatically prevent default behavior and stop
- * event propagation. Useful for buttons and interactive elements within
- * clickable containers to prevent unwanted event bubbling.
- *
- * @param handler - The handler function to wrap
- * @returns Wrapped event handler that prevents default and stops propagation
- *
- * @example
- * ```typescript
- * const handleClick = createSafeEventHandler((e) => {
- *   // Handle click event
- *   doSomething();
- * });
- *
- * <div onClick={handleClick}>Click me</div>
- * ```
- */
-export function createSafeEventHandler<
-  T extends React.SyntheticEvent<HTMLElement, Event>,
->(handler: (e: T) => void): (e: T) => void {
-  return (e: T): void => {
-    e.preventDefault();
-    e.stopPropagation();
-    handler(e);
-  };
-}
-
-/**
  * Highlights matching text in search results
  *
  * Uses case-insensitive string matching to find and highlight search terms.

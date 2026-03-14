@@ -14,12 +14,6 @@ export const ERROR_MESSAGES = {
   /** Error when user lacks permissions to fetch sites */
   FETCH_SITES_PERMISSIONS:
     "Unable to fetch sites. Please check your permissions and try again.",
-  /** Error when parsing an error response fails */
-  PARSE_ERROR_RESPONSE: "Failed to parse error response",
-  /** Warning when search API fails and falling back to WebInfos API */
-  SEARCH_API_FAILED: "Search API failed, trying webinfos",
-  /** Error when both API methods fail */
-  BOTH_APIS_FAILED: "Failed to fetch sites from both APIs",
 } as const;
 
 /**
@@ -29,20 +23,20 @@ export const UI_MESSAGES = {
   LOADING_SITES: "Loading sites...",
   NO_SITES_AVAILABLE: "No sites available",
   NO_SITES_AVAILABLE_DESCRIPTION:
-    "No SharePoint sites were found. This could mean you don't have access to any sites, or there was an issue loading them.",
+    "No SharePoint sites were found. This could mean no matching sites are currently available via search, or there was an issue loading them.",
   NO_SITES_AVAILABLE_TROUBLESHOOTING:
     "Try refreshing the list, or check with your administrator if you should have access to sites.",
   NO_SITES_FOUND: "No sites found matching",
   SEARCH_PLACEHOLDER: "Search sites...",
   SEARCH_DESCRIPTION: "Search sites by title, description, or URL",
   REFRESH_SITES: "Refresh sites",
-  SITES_YOU_HAVE_ACCESS_TO: "Sites you have access to",
+  SITES_YOU_HAVE_ACCESS_TO: "Sites available to you",
   FAVORITES: "Favorites",
   FAVORITES_QUICK_ACCESS_MENU: "Favorites quick access menu",
   ADD_TO_FAVORITES_HINT: "Add sites to favorites for quick access",
   OPEN_SITES_PANEL: "Open sites panel",
   OPEN_SITES_PANEL_DESCRIPTION:
-    "Opens a panel showing all SharePoint sites you have access to. Use the dropdown for quick access to main page and favorite sites.",
+    "Opens the Sites panel to browse and search SharePoint sites. Use the split-button menu for quick access to favorite sites.",
   CLOSE_PANEL: "Close sites panel",
   SITES_PANEL: "Sites panel",
   SITES_TAB: "Sites",
@@ -65,29 +59,13 @@ export const UI_MESSAGES = {
   SETTINGS_NAVIGATION_SECTION: "Navigation",
   SETTINGS_NAVIGATION_DESCRIPTION:
     "Configure how site links behave when clicked.",
-  // License messages
-  LICENSE_INVALID: "License not valid",
-  LICENSE_UNLICENSED_MESSAGE:
-    "This tenant is not licensed. Please visit the Helvety Store to purchase a subscription.",
-  LICENSE_EXPIRED_MESSAGE:
-    "Your subscription has expired. Please renew to continue using all features.",
-  LICENSE_GET_STARTED: "Get started",
-  LICENSE_RENEW: "Renew subscription",
-  // New license messages for non-blocking implementation
-  LICENSE_BANNER_UNLICENSED: "Unlicensed Product: Helvety SPO Explorer",
-  LICENSE_BANNER_GET_LICENSE: "Visit the Helvety Store to get a license",
-  LICENSE_SITES_HIDDEN: "Upgrade to view all {count} sites",
-  LICENSE_UPGRADE_BUTTON: "Upgrade Now",
-  LICENSE_REQUIRED_MESSAGE: "A license is required to view sites",
   // About tab
   ABOUT_TAB: "About",
   ABOUT_APP_DESCRIPTION:
-    "Helvety SPO Explorer provides a convenient navigation panel for SharePoint Online. Quick access to all sites you have access to, with search, favorites, and customizable settings.",
+    "Helvety SPO Explorer provides a navigation panel for SharePoint Online with site search, favorites, and customizable settings.",
   ABOUT_CONTACT_LABEL: "Contact",
   ABOUT_CONTACT_EMAIL: "contact@helvety.com",
-  ABOUT_LICENSE_TIER: "License tier",
-  ABOUT_TENANT: "Tenant",
-  ABOUT_SUBSCRIPTION_NOT_AVAILABLE: "—",
+  ABOUT_NOT_AVAILABLE: "—",
   ABOUT_VERSION: "Version",
   ABOUT_BUILT_ON: "Built on",
 } as const;

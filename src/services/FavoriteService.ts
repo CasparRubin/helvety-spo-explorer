@@ -1,4 +1,4 @@
-import { STORAGE_KEYS } from "../utils/constants";
+import { STORAGE_KEYS, STORAGE_SCHEMA, STORAGE_TTL } from "../utils/constants";
 import { validateAndNormalizeUrl } from "../utils/urlUtils";
 import {
   getStorageItem,
@@ -9,8 +9,16 @@ import { isValidStringArray } from "../utils/validationUtils";
 import {
   normalizeUserId,
   generateStorageKey,
+  generateLegacyStorageKey,
   validateAndHandleInvalidInput,
 } from "../utils/serviceUtils";
+import { logWarning } from "../utils/errorUtils";
+
+interface IStoredFavoritesRecord {
+  schemaVersion: number;
+  updatedAt: number;
+  data: string[];
+}
 
 /**
  * Service for managing favorite sites in localStorage
@@ -68,6 +76,7 @@ export class FavoriteService {
    */
   constructor(userId: string) {
     this.userId = normalizeUserId(userId, "FavoriteService");
+    this.migrateLegacyStorageKeyIfPresent();
   }
 
   /**
@@ -103,17 +112,30 @@ export class FavoriteService {
    */
   public getFavorites(): string[] {
     const key = this.getStorageKey();
-    const favorites = getStorageItem<string[]>(key);
+    const storedValue = getStorageItem<unknown>(key);
 
-    // Validate stored data is a valid string array
-    if (!isValidStringArray(favorites)) {
-      return [];
+    if (this.isStoredFavoritesRecord(storedValue)) {
+      if (Date.now() - storedValue.updatedAt > STORAGE_TTL.FAVORITES_MS) {
+        removeStorageItem(key);
+        return [];
+      }
+      if (!isValidStringArray(storedValue.data)) {
+        return [];
+      }
+      return storedValue.data.filter(
+        (url: string): boolean => typeof url === "string" && url.length > 0
+      );
     }
 
-    // Filter out any invalid entries (shouldn't happen, but defensive check)
-    return favorites.filter(
-      (url: string): boolean => typeof url === "string" && url.length > 0
-    );
+    // Legacy shape migration path (plain string[] list).
+    if (isValidStringArray(storedValue)) {
+      this.saveFavorites(storedValue);
+      return storedValue.filter(
+        (url: string): boolean => typeof url === "string" && url.length > 0
+      );
+    }
+
+    return [];
   }
 
   /**
@@ -261,16 +283,6 @@ export class FavoriteService {
   }
 
   /**
-   * Clear all favorites for the current user
-   *
-   * Removes all favorite sites from localStorage for the current user.
-   */
-  public clearFavorites(): void {
-    const key = this.getStorageKey();
-    removeStorageItem(key);
-  }
-
-  /**
    * Save favorites to localStorage
    *
    * Uses the shared storage utility for consistent error handling.
@@ -295,6 +307,71 @@ export class FavoriteService {
     }
 
     const key = this.getStorageKey();
-    setStorageItem(key, favorites);
+    const record: IStoredFavoritesRecord = {
+      schemaVersion: STORAGE_SCHEMA.VERSION,
+      updatedAt: Date.now(),
+      data: favorites,
+    };
+    setStorageItem(key, record);
+  }
+
+  private isStoredFavoritesRecord(
+    value: unknown
+  ): value is IStoredFavoritesRecord {
+    if (!value || typeof value !== "object" || Array.isArray(value)) {
+      return false;
+    }
+    const candidate = value as {
+      schemaVersion?: unknown;
+      updatedAt?: unknown;
+      data?: unknown;
+    };
+    return (
+      candidate.schemaVersion === STORAGE_SCHEMA.VERSION &&
+      typeof candidate.updatedAt === "number" &&
+      Number.isFinite(candidate.updatedAt) &&
+      isValidStringArray(candidate.data)
+    );
+  }
+
+  private migrateLegacyStorageKeyIfPresent(): void {
+    const key = this.getStorageKey();
+    const legacyKey = generateLegacyStorageKey(
+      STORAGE_KEYS.FAVORITES_PREFIX,
+      this.userId
+    );
+
+    if (key === legacyKey) {
+      return;
+    }
+
+    const existing = getStorageItem<unknown>(key);
+    if (existing !== undefined) {
+      return;
+    }
+
+    const legacyValue = getStorageItem<unknown>(legacyKey);
+    if (legacyValue === undefined) {
+      return;
+    }
+
+    if (isValidStringArray(legacyValue)) {
+      this.saveFavorites(legacyValue);
+      removeStorageItem(legacyKey);
+      return;
+    }
+
+    if (this.isStoredFavoritesRecord(legacyValue)) {
+      setStorageItem(key, legacyValue);
+      removeStorageItem(legacyKey);
+      return;
+    }
+
+    removeStorageItem(legacyKey);
+    logWarning(
+      "FavoriteService",
+      "Removed invalid legacy favorites storage record",
+      "migrateLegacyStorageKeyIfPresent"
+    );
   }
 }

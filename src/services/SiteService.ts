@@ -14,7 +14,6 @@ import {
   isApiError,
 } from "../utils/errorUtils";
 import { ValidationError, ApiError, PermissionError } from "../utils/errors";
-import { navigateToSite as navigateToSiteUtil } from "../utils/navigationUtils";
 import {
   isValidSitesArray,
   createSiteId,
@@ -694,14 +693,5 @@ export class SiteService {
   public clearCache(): void {
     this.cache = null;
     this.cacheTimestamp = 0;
-  }
-
-  /**
-   * Navigate to a site URL
-   * @param url - The site URL to navigate to
-   * @param openInNewTab - If true, opens the URL in a new tab; otherwise opens in current tab
-   */
-  public navigateToSite(url: string, openInNewTab?: boolean): void {
-    navigateToSiteUtil(url, openInNewTab);
   }
 }

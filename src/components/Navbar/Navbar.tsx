@@ -1,6 +1,6 @@
 // External dependencies
 import * as React from "react";
-import { DefaultButton, PrimaryButton } from "@fluentui/react/lib/Button";
+import { DefaultButton } from "@fluentui/react/lib/Button";
 import {
   IContextualMenuItem,
   ContextualMenuItemType,
@@ -18,16 +18,11 @@ import { IUserSettings } from "../../services/SettingsService";
 import { useSites } from "../../utils/customHooks/useSites";
 import { useFavorites } from "../../utils/customHooks/useFavorites";
 import { useSettings } from "../../utils/customHooks/useSettings";
-import { useLicense } from "../../utils/customHooks/useLicense";
 import { sortSitesAlphabetically } from "../../utils/siteUtils";
-import { logError, logInfo } from "../../utils/errorUtils";
+import { logError } from "../../utils/errorUtils";
 
 // Constants
-import {
-  DEFAULT_USER_ID,
-  UI_MESSAGES,
-  LICENSE_API,
-} from "../../utils/constants";
+import { DEFAULT_USER_ID, UI_MESSAGES } from "../../utils/constants";
 
 // Styles
 import {
@@ -44,11 +39,11 @@ import {
  * This component serves as the main entry point for the site explorer functionality.
  *
  * Features:
- * - Displays a button to open the sites panel (hidden when unlicensed)
+ * - Displays a button to open the sites panel
  * - Shows a dropdown menu with favorite sites for quick access
  * - Manages site fetching, favorites, and settings
  * - Handles error states and loading indicators
- * - Shows full-width warning banner when unlicensed with link to store
+ * - Provides full site explorer functionality in the current distribution model
  *
  * @component
  * @param props - Component props containing the SharePoint context
@@ -88,8 +83,7 @@ export const Navbar: React.FC<INavbarProps> = React.memo(({ context }) => {
 
   const [isPanelOpen, setIsPanelOpen] = React.useState<boolean>(false);
 
-  // Use custom hooks for sites, favorites, settings, and license
-  // Sites load first (core functionality), license check runs in background
+  // Use custom hooks for sites, favorites, and settings
   const {
     sites,
     selectedSite,
@@ -102,26 +96,6 @@ export const Navbar: React.FC<INavbarProps> = React.memo(({ context }) => {
   const { favoriteSites, toggleFavorite, refreshFavorites } =
     useFavorites(userId);
   const { settings, updateSettings } = useSettings(userId);
-  const { license, tenantId } = useLicense(context);
-
-  // Log license status for debugging (only when check completes)
-  React.useEffect((): void => {
-    if (license.isChecked) {
-      logInfo(
-        "Navbar",
-        `License check complete: ${license.isValid ? "VALID" : "INVALID"}`,
-        `Tenant: ${tenantId || "unknown"}, Tier: ${license.tier || "none"}`
-      );
-    }
-  }, [license.isChecked, license.isValid, license.tier, tenantId]);
-
-  // Determine the store URL for licensing
-  const storeUrl = LICENSE_API.BASE_URL.replace("/api", "");
-
-  // Handle "Get License" button click
-  const handleGetLicense = React.useCallback((): void => {
-    window.open(storeUrl, "_blank", "noopener,noreferrer");
-  }, [storeUrl]);
 
   // Handle refresh - clears cache and re-fetches sites and favorites
   // Optimized: use stable references, avoid unnecessary dependencies
@@ -178,7 +152,8 @@ export const Navbar: React.FC<INavbarProps> = React.memo(({ context }) => {
 
   // Get favorite sites for menu (sorted alphabetically)
   // Optimized: Early return for empty favorites, memoized to avoid recalculation
-  // Use sites.length and favoriteSites.size as dependencies to avoid deep comparison
+  // Depend on favoriteSites identity so favorite composition changes are reflected
+  // even when the set size remains unchanged.
   const favoriteSitesList = React.useMemo((): ISite[] => {
     if (favoriteSites.size === 0 || sites.length === 0) {
       return [];
@@ -194,7 +169,7 @@ export const Navbar: React.FC<INavbarProps> = React.memo(({ context }) => {
 
     // Sort alphabetically by title (case-insensitive)
     return sortSitesAlphabetically(favoriteList);
-  }, [sites, favoriteSites.size]); // Use size instead of Set reference to reduce re-renders
+  }, [sites, favoriteSites]);
 
   // Build menu items for split button dropdown
   const menuItems = React.useMemo((): IContextualMenuItem[] => {
@@ -231,10 +206,6 @@ export const Navbar: React.FC<INavbarProps> = React.memo(({ context }) => {
     return items;
   }, [favoriteSitesList, handleSiteSelect]);
 
-  // Show unlicensed banner only after check completes AND license is invalid
-  // This ensures core functionality is never blocked
-  const showUnlicensedBanner = license.isChecked && !license.isValid;
-
   return (
     <div
       className="helvety-spo-navbar"
@@ -242,57 +213,28 @@ export const Navbar: React.FC<INavbarProps> = React.memo(({ context }) => {
       role="navigation"
       aria-label="Site navigation"
     >
-      {/* Unlicensed Product banner - permanent, non-dismissable, full-width */}
-      {showUnlicensedBanner && (
-        <div
-          style={{
-            backgroundColor: "#FFF4CE",
-            padding: "8px 16px",
-            marginLeft: "-16px",
-            marginRight: "-16px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "flex-start",
-            gap: "12px",
-            width: "calc(100% + 32px)",
-            boxSizing: "border-box",
-          }}
-        >
-          <span style={{ fontWeight: 600 }}>
-            {UI_MESSAGES.LICENSE_BANNER_UNLICENSED}
-          </span>
-          <PrimaryButton
-            text={UI_MESSAGES.LICENSE_BANNER_GET_LICENSE}
-            onClick={handleGetLicense}
-            iconProps={{ iconName: "Shop" }}
+      <div style={navbarInnerStyles}>
+        <div style={navbarContentStyles}>
+          <DefaultButton
+            text={UI_MESSAGES.SITES_YOU_HAVE_ACCESS_TO}
+            iconProps={{ iconName: "SecondaryNav" }}
+            onClick={handleOpenPanel}
+            split={true}
+            menuProps={{
+              items: menuItems,
+              ariaLabel: UI_MESSAGES.FAVORITES_QUICK_ACCESS_MENU,
+            }}
+            ariaLabel={UI_MESSAGES.OPEN_SITES_PANEL}
+            aria-describedby="sites-button-description"
+            aria-expanded={isPanelOpen}
+            aria-controls="helvety-spo-sites-panel"
+            title={UI_MESSAGES.OPEN_SITES_PANEL_DESCRIPTION}
           />
+          <span id="sites-button-description" style={srOnlyStyles}>
+            {UI_MESSAGES.OPEN_SITES_PANEL_DESCRIPTION}
+          </span>
         </div>
-      )}
-      {/* Sites button - hidden when unlicensed */}
-      {!showUnlicensedBanner && (
-        <div style={navbarInnerStyles}>
-          <div style={navbarContentStyles}>
-            <DefaultButton
-              text={UI_MESSAGES.SITES_YOU_HAVE_ACCESS_TO}
-              iconProps={{ iconName: "SecondaryNav" }}
-              onClick={handleOpenPanel}
-              split={true}
-              menuProps={{
-                items: menuItems,
-                ariaLabel: UI_MESSAGES.FAVORITES_QUICK_ACCESS_MENU,
-              }}
-              ariaLabel={UI_MESSAGES.OPEN_SITES_PANEL}
-              aria-describedby="sites-button-description"
-              aria-expanded={isPanelOpen}
-              aria-controls="helvety-spo-sites-panel"
-              title={UI_MESSAGES.OPEN_SITES_PANEL_DESCRIPTION}
-            />
-            <span id="sites-button-description" style={srOnlyStyles}>
-              {UI_MESSAGES.OPEN_SITES_PANEL_DESCRIPTION}
-            </span>
-          </div>
-        </div>
-      )}
+      </div>
       <SitesPanel
         isOpen={isPanelOpen}
         onDismiss={handleClosePanel}
@@ -309,10 +251,6 @@ export const Navbar: React.FC<INavbarProps> = React.memo(({ context }) => {
         showPartialUrl={settings.showPartialUrl}
         showDescription={settings.showDescription}
         onRefresh={handleRefresh}
-        isLicensed={license.isValid}
-        isLicenseChecked={license.isChecked}
-        licenseTier={license.tier}
-        tenantId={tenantId}
       />
     </div>
   );

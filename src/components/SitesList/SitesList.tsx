@@ -3,7 +3,7 @@ import * as React from "react";
 import { TextField } from "@fluentui/react/lib/TextField";
 import { Spinner, SpinnerSize } from "@fluentui/react/lib/Spinner";
 import { MessageBar, MessageBarType } from "@fluentui/react/lib/MessageBar";
-import { IconButton, PrimaryButton } from "@fluentui/react/lib/Button";
+import { IconButton } from "@fluentui/react/lib/Button";
 import { Separator } from "@fluentui/react/lib/Separator";
 
 // Internal components
@@ -28,13 +28,7 @@ import {
   UI_MESSAGES,
   CSS_VARIABLES,
   SPACING,
-  LICENSE_API,
 } from "../../utils/constants";
-
-/**
- * Number of sites to show when tenant is unlicensed
- */
-const UNLICENSED_SITES_LIMIT = 0;
 
 // Styles
 import {
@@ -78,8 +72,6 @@ export const SitesList: React.FC<ISitesListProps> = React.memo(
     showPartialUrl = false,
     showDescription = true,
     onRefresh,
-    isLicensed = true,
-    isLicenseChecked = false,
   }) => {
     // Use displayFavoriteSites for sorting if provided, otherwise fall back to favoriteSites
     // Memoize to prevent recalculation on every render
@@ -140,45 +132,6 @@ export const SitesList: React.FC<ISitesListProps> = React.memo(
         favoriteCount: sortedFavoriteSites.length,
       };
     }, [filteredSites, favoriteSitesForSorting]);
-
-    /**
-     * Calculate visible sites based on license status
-     *
-     * - Until license check completes: show ALL sites (core functionality first)
-     * - After check, if licensed: show ALL sites
-     * - After check, if unlicensed: show NO sites (blocked until licensed)
-     */
-    const { visibleSites, hiddenSitesCount } = React.useMemo((): {
-      visibleSites: ISite[];
-      hiddenSitesCount: number;
-    } => {
-      // Always show all sites until license check completes (core functionality first!)
-      // Also show all sites if licensed
-      if (!isLicenseChecked || isLicensed) {
-        return {
-          visibleSites: sortedSites,
-          hiddenSitesCount: 0,
-        };
-      }
-
-      // After check: if unlicensed, show only first N sites
-      const limitedSites = sortedSites.slice(0, UNLICENSED_SITES_LIMIT);
-      return {
-        visibleSites: limitedSites,
-        hiddenSitesCount: Math.max(
-          0,
-          sortedSites.length - UNLICENSED_SITES_LIMIT
-        ),
-      };
-    }, [sortedSites, isLicensed, isLicenseChecked]);
-
-    // Store URL for upgrade link
-    const storeUrl = LICENSE_API.BASE_URL.replace("/api", "");
-
-    // Handle upgrade button click
-    const handleUpgradeClick = React.useCallback((): void => {
-      window.open(storeUrl, "_blank", "noopener,noreferrer");
-    }, [storeUrl]);
 
     /**
      * Highlights matching text in search results using the utility function
@@ -392,7 +345,6 @@ export const SitesList: React.FC<ISitesListProps> = React.memo(
               placeholder={UI_MESSAGES.SEARCH_PLACEHOLDER}
               value={searchText}
               onChange={handleSearchChange}
-              disabled={isLicenseChecked && !isLicensed}
               styles={{
                 root: {
                   marginTop: 0,
@@ -427,35 +379,7 @@ export const SitesList: React.FC<ISitesListProps> = React.memo(
           {UI_MESSAGES.SEARCH_DESCRIPTION}
         </span>
 
-        {/* License required message when unlicensed */}
-        {isLicenseChecked && !isLicensed ? (
-          <div
-            style={{
-              ...emptyStateStyles,
-              padding: `${SPACING.LG} ${SPACING.MD}`,
-              textAlign: "center",
-            }}
-            role="status"
-            aria-live="polite"
-            aria-atomic="true"
-          >
-            <div
-              style={{
-                fontSize: "16px",
-                fontWeight: 500,
-                color: CSS_VARIABLES.NEUTRAL_PRIMARY,
-                marginBottom: SPACING.MD,
-              }}
-            >
-              {UI_MESSAGES.LICENSE_REQUIRED_MESSAGE}
-            </div>
-            <PrimaryButton
-              text={UI_MESSAGES.LICENSE_BANNER_GET_LICENSE}
-              onClick={handleUpgradeClick}
-              iconProps={{ iconName: "Shop" }}
-            />
-          </div>
-        ) : sortedSites.length === 0 && searchText.trim() ? (
+        {sortedSites.length === 0 && searchText.trim() ? (
           <div
             style={emptyStateStyles}
             role="status"
@@ -471,7 +395,7 @@ export const SitesList: React.FC<ISitesListProps> = React.memo(
               className="helvety-spo-sites-list-container"
               style={scrollableContainerStyles}
               role="listbox"
-              aria-label={`Sites list with ${visibleSites.length} site${visibleSites.length !== 1 ? "s" : ""}${hiddenSitesCount > 0 ? ` (${hiddenSitesCount} more with license)` : ""}. Use arrow keys to navigate, Enter to select, Space to toggle favorite.`}
+              aria-label={`Sites list with ${sortedSites.length} site${sortedSites.length !== 1 ? "s" : ""}. Use arrow keys to navigate, Enter to select, Space to toggle favorite.`}
               aria-busy={isLoading}
               aria-live="polite"
               aria-atomic="false"
@@ -479,7 +403,7 @@ export const SitesList: React.FC<ISitesListProps> = React.memo(
               aria-activedescendant={selectedSite?.id}
               tabIndex={0}
             >
-              {visibleSites.map((site: ISite, index: number): JSX.Element => {
+              {sortedSites.map((site: ISite, index: number): JSX.Element => {
                 // Defensive check: validate site and index
                 if (
                   !site ||
@@ -499,7 +423,7 @@ export const SitesList: React.FC<ISitesListProps> = React.memo(
                   favoriteCount > 0 &&
                   Number.isInteger(index) &&
                   index === favoriteCount &&
-                  index < visibleSites.length; // Only if separator would be visible
+                  index < sortedSites.length; // Only if separator would be visible
 
                 return (
                   <React.Fragment key={site.id}>
@@ -524,43 +448,11 @@ export const SitesList: React.FC<ISitesListProps> = React.memo(
                       showPartialUrl={showPartialUrl}
                       showDescription={showDescription}
                       index={index}
-                      totalCount={visibleSites.length}
+                      totalCount={sortedSites.length}
                     />
                   </React.Fragment>
                 );
               })}
-
-              {/* Upgrade message when sites are hidden due to licensing */}
-              {hiddenSitesCount > 0 && (
-                <div
-                  style={{
-                    padding: `${SPACING.LG} ${SPACING.MD}`,
-                    textAlign: "center",
-                    backgroundColor: CSS_VARIABLES.NEUTRAL_LIGHTER,
-                    borderRadius: "4px",
-                    marginTop: SPACING.MD,
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: "14px",
-                      color: CSS_VARIABLES.NEUTRAL_PRIMARY,
-                      marginBottom: SPACING.SM,
-                      fontWeight: 500,
-                    }}
-                  >
-                    {UI_MESSAGES.LICENSE_SITES_HIDDEN.replace(
-                      "{count}",
-                      String(sortedSites.length)
-                    )}
-                  </div>
-                  <PrimaryButton
-                    text={UI_MESSAGES.LICENSE_UPGRADE_BUTTON}
-                    onClick={handleUpgradeClick}
-                    iconProps={{ iconName: "Shop" }}
-                  />
-                </div>
-              )}
             </div>
             {showBottomFade && (
               <div style={bottomFadeOverlayStyles} aria-hidden="true" />

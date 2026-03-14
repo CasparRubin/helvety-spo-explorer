@@ -47,37 +47,3 @@ export const navbarContentStyles: React.CSSProperties = {
   minWidth: 0, // Allow flex item to shrink below content size
   overflow: "hidden", // Prevent overflow
 } as const;
-
-/**
- * Settings button container styles
- */
-export const settingsButtonContainerStyles: React.CSSProperties = {
-  display: "flex",
-  alignItems: "center",
-} as const;
-
-/**
- * Settings button styles
- */
-export const settingsButtonStyles = {
-  root: {
-    color: CSS_VARIABLES.NEUTRAL_PRIMARY,
-  },
-  rootHovered: {
-    backgroundColor: CSS_VARIABLES.BACKGROUND_HOVER,
-  },
-} as const;
-
-/**
- * ComboBox styles
- */
-export const comboBoxStyles = {
-  root: {
-    width: "100%",
-    minWidth: 0, // Allow combobox to shrink, will be constrained by parent
-    maxWidth: "100%", // Prevent overflow
-  },
-  callout: {
-    maxHeight: LAYOUT.DROPDOWN_MAX_HEIGHT,
-  },
-} as const;

@@ -44,14 +44,6 @@ export interface ISitesPanelProps {
   showDescription?: boolean;
   /** Callback to refresh the sites list */
   onRefresh?: () => void;
-  /** Whether the tenant has a valid license (default: true until checked) */
-  isLicensed?: boolean;
-  /** Whether the license check has completed */
-  isLicenseChecked?: boolean;
-  /** License tier for About tab (e.g. helvety-spo-explorer-basic-monthly) */
-  licenseTier?: string;
-  /** SharePoint tenant ID for About tab */
-  tenantId?: string;
 }
 
 /**
@@ -80,20 +72,8 @@ export interface ISitesListProps {
   showPartialUrl?: boolean;
   /** Show/hide site description in list */
   showDescription?: boolean;
-  /** Measured height of panel header */
-  headerHeight?: number;
-  /** Ref to pivot container for measuring height */
-  pivotRef?: React.RefObject<HTMLDivElement>;
-  /** Ref to description element for measuring height */
-  descriptionRef?: React.RefObject<HTMLDivElement>;
-  /** Whether the Sites tab is currently active */
-  isActiveTab?: boolean;
   /** Callback to refresh the sites list */
   onRefresh?: () => void;
-  /** Whether the tenant has a valid license (default: true until checked) */
-  isLicensed?: boolean;
-  /** Whether the license check has completed */
-  isLicenseChecked?: boolean;
 }
 
 /**

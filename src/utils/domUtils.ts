@@ -145,7 +145,7 @@ export function queryNavbarButton(): HTMLElement | null {
 
   const selectors: string[] = [
     '[aria-label*="Open sites panel"]',
-    '[aria-label*="Sites you have access to"]',
+    '[aria-label*="Sites available to you"]',
     'button[aria-expanded="true"]',
   ];
 

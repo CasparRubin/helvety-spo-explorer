@@ -5,7 +5,7 @@
  * reducing code duplication and ensuring consistency.
  */
 
-import { DEFAULT_USER_ID } from "./constants";
+import { DEFAULT_USER_ID, STORAGE_SCHEMA } from "./constants";
 import { isValidUserId } from "./validationUtils";
 import { logWarning } from "./errorUtils";
 
@@ -58,7 +58,36 @@ export function normalizeUserId(userId: string, logSource?: string): string {
  * ```
  */
 export function generateStorageKey(prefix: string, userId: string): string {
+  const host =
+    typeof window !== "undefined" && window.location?.hostname
+      ? window.location.hostname.toLowerCase()
+      : "unknown-host";
+  const userHash = hashUserIdentifier(userId);
+  return `${STORAGE_SCHEMA.NAMESPACE}:${host}:v${STORAGE_SCHEMA.VERSION}:${prefix}:${userHash}`;
+}
+
+/**
+ * Legacy key format used before namespacing/versioning hardening.
+ */
+export function generateLegacyStorageKey(
+  prefix: string,
+  userId: string
+): string {
   return `${prefix}-${userId}`;
+}
+
+/**
+ * Fast deterministic identifier hash used only for local storage key obfuscation.
+ * Not cryptographic; intended to avoid embedding raw user IDs in key names.
+ */
+function hashUserIdentifier(value: string): string {
+  let hash = 0x811c9dc5; // FNV-1a 32-bit offset basis
+  for (let i = 0; i < value.length; i += 1) {
+    hash ^= value.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  const hex = (hash >>> 0).toString(16);
+  return hex.length >= 8 ? hex : `${"00000000".slice(hex.length)}${hex}`;
 }
 
 /**
@@ -84,53 +113,6 @@ export function formatValidationErrorMessage(
 ): string {
   const valueStr: string = value !== undefined ? `: ${String(value)}` : "";
   return `Invalid ${valueName} provided to ${operationName}${valueStr}`;
-}
-
-/**
- * Validates input before service operations
- *
- * Common pattern for validating inputs before performing service operations.
- * Logs warnings for invalid inputs and returns validation result.
- *
- * @param value - The value to validate
- * @param validator - Validation function
- * @param logSource - Source identifier for logging
- * @param operationName - Name of the operation (for error messages)
- * @param valueName - Name of the value (for error messages)
- * @returns Object with validation result and normalized value (if applicable)
- *
- * @example
- * ```typescript
- * const result = validateServiceInput(
- *   url,
- *   isNonEmptyString,
- *   'FavoriteService',
- *   'addFavorite',
- *   'URL'
- * );
- * if (!result.isValid) {
- *   return; // Early return on invalid input
- * }
- * ```
- */
-export function validateServiceInput<T>(
-  value: unknown,
-  validator: (val: unknown) => val is T,
-  logSource: string,
-  operationName: string,
-  valueName: string
-): { isValid: boolean; value?: T } {
-  if (validator(value)) {
-    return { isValid: true, value };
-  }
-
-  const errorMessage: string = formatValidationErrorMessage(
-    valueName,
-    operationName,
-    value
-  );
-  logWarning(logSource, errorMessage, operationName);
-  return { isValid: false };
 }
 
 /**

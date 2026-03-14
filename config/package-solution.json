@@ -3,7 +3,7 @@
   "solution": {
     "name": "helvety-spo-explorer-client-side-solution",
     "id": "9193252e-cd60-4616-bab5-9f98b29d2b0c",
-    "version": "1.0.2.0",
+    "version": "1.0.4.0",
     "title": "Helvety SPO Explorer",
     "iconPath": "assets/appicon-96.png",
     "includeClientSideAssets": true,
@@ -18,10 +18,10 @@
     },
     "metadata": {
       "shortDescription": {
-        "default": "Quick access to all SharePoint sites with search, favorites, and navigation"
+        "default": "Quick access to SharePoint sites via search, favorites, and navigation"
       },
       "longDescription": {
-        "default": "Helvety SPO Explorer provides a convenient navigation panel for SharePoint Online. Features include quick site access, favorites management, site search, and customizable settings. Appears as a floating button in the top navigation bar."
+        "default": "Helvety SPO Explorer provides a navigation panel for SharePoint Online. Features include site search, favorites management, quick site access, and customizable settings. It appears in the top placeholder as a navigation bar with a Sites button and favorites menu."
       },
       "screenshotPaths": [],
       "categories": ["Content management", "Productivity"]
@@ -31,7 +31,7 @@
         "title": "Application Extension - Deployment of custom action",
         "description": "Deploys a custom action with ClientSideComponentId association",
         "id": "c71f6d98-165b-4aab-9bf1-246cf9445950",
-        "version": "1.0.2.0",
+        "version": "1.0.4.0",
         "assets": {
           "elementManifests": [
             "elements.xml",

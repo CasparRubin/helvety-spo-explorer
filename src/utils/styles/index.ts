@@ -9,16 +9,12 @@ import * as React from "react";
 
 // Common styles
 export {
-  optionContainerStyles,
   siteInfoStyles,
   siteTitleStyles,
   siteDescriptionStyles,
   siteUrlStyles,
-  followingHeaderStyles,
-  dividerStyles,
   emptyStateStyles,
   loadingContainerStyles,
-  emptySitesStyles,
   srOnlyStyles,
 } from "./commonStyles";
 
@@ -27,9 +23,6 @@ export {
   navbarStyles,
   navbarInnerStyles,
   navbarContentStyles,
-  settingsButtonContainerStyles,
-  settingsButtonStyles,
-  comboBoxStyles,
 } from "./navbarStyles";
 
 // Panel styles
@@ -46,8 +39,6 @@ export {
 // Sites list styles
 export {
   sitesListContainerStyles,
-  searchInputStyles,
-  sitesListStyles,
   scrollableContainerStyles,
   siteItemStyles,
   bottomFadeOverlayStyles,

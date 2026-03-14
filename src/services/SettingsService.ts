@@ -1,4 +1,9 @@
-import { STORAGE_KEYS, DEFAULT_SETTINGS } from "../utils/constants";
+import {
+  STORAGE_KEYS,
+  DEFAULT_SETTINGS,
+  STORAGE_SCHEMA,
+  STORAGE_TTL,
+} from "../utils/constants";
 import {
   getStorageItem,
   setStorageItem,
@@ -8,22 +13,30 @@ import { isValidUserSettings, isPlainObject } from "../utils/validationUtils";
 import {
   normalizeUserId,
   generateStorageKey,
+  generateLegacyStorageKey,
   validateAndHandleInvalidInput,
 } from "../utils/serviceUtils";
+import { logWarning } from "../utils/errorUtils";
 
 /**
  * User settings interface
  * Defines all available settings for the site explorer
  */
 export interface IUserSettings {
-  /** Show/hide full URL in combobox dropdown */
+  /** Show/hide full URL in the sites list */
   showFullUrl: boolean;
-  /** Show/hide partial URL (path only) in combobox dropdown */
+  /** Show/hide partial URL (path only) in the sites list */
   showPartialUrl: boolean;
-  /** Show/hide site description in combobox dropdown */
+  /** Show/hide site description in the sites list */
   showDescription: boolean;
   /** Open links in new tab vs current tab */
   openInNewTab: boolean;
+}
+
+interface IStoredSettingsRecord {
+  schemaVersion: number;
+  updatedAt: number;
+  data: IUserSettings;
 }
 
 /**
@@ -65,16 +78,12 @@ export interface IUserSettings {
  *   openInNewTab: true
  * });
  *
- * // Get specific setting
- * const openInNewTab = settingsService.getSetting('openInNewTab');
- *
- * // Reset to defaults
- * settingsService.resetSettings();
- * // All custom settings removed, getSettings() will return defaults
+ * // Read a specific setting
+ * const openInNewTab = settingsService.getSettings().openInNewTab;
  *
  * // Edge case: Partial settings in storage (merged with defaults)
  * // If storage has: { showFullUrl: true }
- * // getSettings() returns: { showFullUrl: true, showPartialUrl: false, showDescription: true, openInNewTab: false }
+ * // getSettings() returns: { showFullUrl: true, showPartialUrl: false, showDescription: false, openInNewTab: false }
  * // Missing properties are filled from defaults
  *
  * // Edge case: Invalid settings object (logged but ignored)
@@ -90,6 +99,7 @@ export class SettingsService {
    */
   constructor(userId: string) {
     this.userId = normalizeUserId(userId, "SettingsService");
+    this.migrateLegacyStorageKeyIfPresent();
   }
 
   /**
@@ -125,30 +135,26 @@ export class SettingsService {
    */
   public getSettings(): IUserSettings {
     const key = this.getStorageKey();
-    const settings = getStorageItem<IUserSettings>(key);
+    const storedValue = getStorageItem<unknown>(key);
 
-    // Validate stored settings is a valid user settings object
-    if (settings && isValidUserSettings(settings)) {
-      // Merge with defaults to ensure all properties exist (handles partial data)
-      return { ...DEFAULT_SETTINGS, ...settings };
+    if (this.isStoredSettingsRecord(storedValue)) {
+      if (Date.now() - storedValue.updatedAt > STORAGE_TTL.SETTINGS_MS) {
+        removeStorageItem(key);
+        return { ...DEFAULT_SETTINGS };
+      }
+      if (isValidUserSettings(storedValue.data)) {
+        return { ...DEFAULT_SETTINGS, ...storedValue.data };
+      }
+      return { ...DEFAULT_SETTINGS };
     }
 
-    // Return defaults if no valid settings found
-    return { ...DEFAULT_SETTINGS };
-  }
+    if (storedValue && isValidUserSettings(storedValue)) {
+      // Legacy shape migration path (plain settings object).
+      this.saveSettings(storedValue);
+      return { ...DEFAULT_SETTINGS, ...storedValue };
+    }
 
-  /**
-   * Get a specific setting value
-   *
-   * Retrieves a single setting value by key. Returns the default value if the setting
-   * hasn't been customized by the user.
-   *
-   * @param key - The setting key to retrieve
-   * @returns The value of the specified setting
-   */
-  public getSetting<K extends keyof IUserSettings>(key: K): IUserSettings[K] {
-    const settings: IUserSettings = this.getSettings();
-    return settings[key];
+    return { ...DEFAULT_SETTINGS };
   }
 
   /**
@@ -228,16 +234,71 @@ export class SettingsService {
     }
 
     const key = this.getStorageKey();
-    setStorageItem(key, settings);
+    const record: IStoredSettingsRecord = {
+      schemaVersion: STORAGE_SCHEMA.VERSION,
+      updatedAt: Date.now(),
+      data: settings,
+    };
+    setStorageItem(key, record);
   }
 
-  /**
-   * Reset settings to defaults
-   *
-   * Removes all custom settings from localStorage, effectively resetting to default values.
-   */
-  public resetSettings(): void {
+  private isStoredSettingsRecord(
+    value: unknown
+  ): value is IStoredSettingsRecord {
+    if (!isPlainObject(value)) {
+      return false;
+    }
+    const candidate = value as {
+      schemaVersion?: unknown;
+      updatedAt?: unknown;
+      data?: unknown;
+    };
+    return (
+      candidate.schemaVersion === STORAGE_SCHEMA.VERSION &&
+      typeof candidate.updatedAt === "number" &&
+      Number.isFinite(candidate.updatedAt) &&
+      isValidUserSettings(candidate.data)
+    );
+  }
+
+  private migrateLegacyStorageKeyIfPresent(): void {
     const key = this.getStorageKey();
-    removeStorageItem(key);
+    const legacyKey = generateLegacyStorageKey(
+      STORAGE_KEYS.SETTINGS_PREFIX,
+      this.userId
+    );
+
+    if (key === legacyKey) {
+      return;
+    }
+
+    const existing = getStorageItem<unknown>(key);
+    if (existing !== undefined) {
+      return;
+    }
+
+    const legacyValue = getStorageItem<unknown>(legacyKey);
+    if (legacyValue === undefined) {
+      return;
+    }
+
+    if (isValidUserSettings(legacyValue)) {
+      this.saveSettings(legacyValue);
+      removeStorageItem(legacyKey);
+      return;
+    }
+
+    if (this.isStoredSettingsRecord(legacyValue)) {
+      setStorageItem(key, legacyValue);
+      removeStorageItem(legacyKey);
+      return;
+    }
+
+    removeStorageItem(legacyKey);
+    logWarning(
+      "SettingsService",
+      "Removed invalid legacy settings storage record",
+      "migrateLegacyStorageKeyIfPresent"
+    );
   }
 }

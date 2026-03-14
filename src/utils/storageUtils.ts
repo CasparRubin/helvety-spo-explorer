@@ -13,7 +13,7 @@ const LOG_SOURCE = "storageUtils";
 /**
  * Safely get an item from localStorage
  *
- * Retrieves a value from localStorage and parses it as JSON. Returns null if the
+ * Retrieves a value from localStorage and parses it as JSON. Returns undefined if the
  * item doesn't exist or if an error occurs during retrieval or parsing.
  *
  * @param key - The localStorage key to retrieve
@@ -116,34 +116,6 @@ export function removeStorageItem(key: string): boolean {
     return true;
   } catch (error: unknown) {
     logError(LOG_SOURCE, error, `Error removing storage item: ${key}`);
-    return false;
-  }
-}
-
-/**
- * Check if localStorage is available
- *
- * Tests whether localStorage is accessible and functional. Some browsers or
- * privacy modes may disable localStorage.
- *
- * @returns true if localStorage is available, false otherwise
- *
- * @example
- * ```typescript
- * if (isStorageAvailable()) {
- *   setStorageItem('key', value);
- * } else {
- *   // Fallback to memory storage
- * }
- * ```
- */
-export function isStorageAvailable(): boolean {
-  try {
-    const testKey = "__storage_test__";
-    localStorage.setItem(testKey, "test");
-    localStorage.removeItem(testKey);
-    return true;
-  } catch {
     return false;
   }
 }

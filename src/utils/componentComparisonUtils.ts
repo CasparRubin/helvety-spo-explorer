@@ -2,18 +2,19 @@
  * Component comparison utilities
  *
  * Provides optimized comparison functions for React.memo to prevent unnecessary re-renders.
- * Uses O(1) sampling strategy instead of O(n) full iteration, checking strategic positions
- * (first, middle, last) to catch ~99% of changes.
+ * Uses safe reference/primitive checks to avoid stale UI caused by heuristic
+ * sampling comparators that can miss in-array updates.
  */
 
 import { ISitesListProps } from "../types/ComponentProps";
 import { ISite } from "../types/Site";
 
 /**
- * Compares two sites arrays using strategic sampling
+ * Compares two sites arrays safely
  *
- * Uses O(1) sampling strategy: checks first, middle, and last items.
- * Catches ~99% of changes while maintaining constant time performance.
+ * We intentionally avoid heuristic sampling (first/middle/last) because it can
+ * miss valid updates and leave the UI stale. If the array reference changes,
+ * we re-render.
  *
  * @param prevSites - Previous sites array
  * @param nextSites - Next sites array
@@ -23,37 +24,7 @@ function compareSitesArrays(
   prevSites: readonly ISite[],
   nextSites: readonly ISite[]
 ): boolean {
-  const prevLength = prevSites.length;
-  const nextLength = nextSites.length;
-
-  if (prevLength !== nextLength) {
-    return false;
-  }
-
-  if (prevSites === nextSites || prevLength === 0) {
-    return true;
-  }
-
-  // Strategic sampling: check first, middle, and last items
-  if (prevSites[0]?.id !== nextSites[0]?.id) {
-    return false;
-  }
-
-  if (
-    prevLength > 1 &&
-    prevSites[prevLength - 1]?.id !== nextSites[nextLength - 1]?.id
-  ) {
-    return false;
-  }
-
-  if (prevLength > 2) {
-    const middleIndex = Math.floor(prevLength / 2);
-    if (prevSites[middleIndex]?.id !== nextSites[middleIndex]?.id) {
-      return false;
-    }
-  }
-
-  return true;
+  return prevSites === nextSites;
 }
 
 /**
@@ -132,7 +103,7 @@ function compareSets(
 /**
  * Compares SitesList component props for React.memo optimization
  *
- * Multi-stage comparison: callbacks/Sets (reference), primitives (value), arrays (sampling).
+ * Multi-stage comparison: callbacks/Sets (reference), primitives (value), arrays (reference).
  *
  * @param prevProps - Previous component props
  * @param nextProps - Next component props

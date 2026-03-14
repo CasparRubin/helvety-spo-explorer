@@ -23,26 +23,6 @@ export const sitesListContainerStyles: React.CSSProperties = {
 } as const;
 
 /**
- * Search input styles
- */
-export const searchInputStyles = {
-  root: {
-    marginTop: SPACING.XL,
-    marginBottom: SPACING.XL,
-  },
-} as const;
-
-/**
- * Sites list styles
- */
-export const sitesListStyles: React.CSSProperties = {
-  flex: 1,
-  overflowY: "auto",
-  overflowX: "hidden",
-  padding: `${SPACING.XS} 0`,
-} as const;
-
-/**
  * Scrollable container styles for sites list
  * Provides native scrolling with visible scrollbar
  * Height is set to viewport height minus 250px

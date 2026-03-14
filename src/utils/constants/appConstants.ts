@@ -11,6 +11,25 @@ export const STORAGE_KEYS = {
 } as const;
 
 /**
+ * Storage namespace/version metadata
+ *
+ * Keys are prefixed with namespace + host + schema version so data is isolated
+ * per environment and can be safely migrated in future releases.
+ */
+export const STORAGE_SCHEMA = {
+  NAMESPACE: "helvety-spo-explorer",
+  VERSION: 2,
+} as const;
+
+/**
+ * Optional TTL policy for client-side storage records
+ */
+export const STORAGE_TTL = {
+  SETTINGS_MS: 180 * 24 * 60 * 60 * 1000, // 180 days
+  FAVORITES_MS: 180 * 24 * 60 * 60 * 1000, // 180 days
+} as const;
+
+/**
  * Cache configuration
  */
 export const CACHE_CONFIG = {
@@ -31,13 +50,6 @@ export const DEFAULT_SETTINGS = {
  * Default user ID fallback
  */
 export const DEFAULT_USER_ID = "default";
-
-/**
- * Keyboard shortcuts
- */
-export const KEYBOARD_SHORTCUTS = {
-  OPEN_COMBOBOX: "k",
-} as const;
 
 /**
  * Timeout values for async operations

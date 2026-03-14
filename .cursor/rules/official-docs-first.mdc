@@ -1,21 +1,22 @@
 ---
-description: Consult official vendor docs for frameworks and libraries; avoid deprecated APIs and blog posts
+description: Verify dependency versions and prefer official vendor docs; use Cursor skills only when current
 alwaysApply: true
 ---
 
-# Official Documentation First
+# Official Docs And Version Alignment
 
-When implementing or altering code that touches a framework, library, or service:
+Before implementing or changing code that uses a framework, library, SDK, or service:
 
-1. Consult **official vendor documentation** first.
-2. Prefer current, vendor-recommended APIs and patterns.
-3. Avoid deprecated APIs.
-4. Do **not** rely on third-party blog posts or tutorials as the primary source.
+1. Identify the exact installed version from `package.json` and lockfiles.
+2. Consult official vendor docs for that version first.
+3. Prefer vendor-recommended APIs and patterns; avoid deprecated APIs.
+4. Use Cursor skills as secondary guidance, not primary authority.
+5. If a skill or cached guidance conflicts with official docs, follow official docs.
+6. If a skill appears stale for the current dependency version, treat it as outdated and do not apply it directly.
 
-## This repo (SPFx)
+## Reliable sources (priority order)
 
-Use official docs for:
-
-- [SharePoint Framework (SPFx)](https://learn.microsoft.com/en-us/sharepoint/dev/spfx/sharepoint-framework-overview)
-- [Fluent UI React](https://react.fluentui.dev)
-- Build tooling (e.g. Heft, Rushstack) as applicable
+- Official vendor/framework documentation
+- Official migration guides and changelogs
+- Repository source/docs for the exact version in use
+- Cursor skills only after version-checking against the above

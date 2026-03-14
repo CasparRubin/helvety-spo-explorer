@@ -48,38 +48,6 @@ export interface ISiteSearchResultRow {
 }
 
 /**
- * SharePoint REST API response for web infos
- *
- * Represents web information returned by the SharePoint WebInfos API endpoint.
- */
-export interface IWebInfo {
-  /** Web ID */
-  Id: string;
-  /** Web title */
-  Title: string;
-  /** Web absolute URL */
-  Url: string;
-  /** Web description */
-  Description: string;
-  /** Web server-relative URL */
-  ServerRelativeUrl: string;
-  /** Web template name */
-  WebTemplate: string;
-  /** Web template ID */
-  WebTemplateId: number;
-}
-
-/**
- * SharePoint REST API response wrapper
- *
- * Standard response format for SharePoint REST API endpoints that return collections.
- */
-export interface ISPRestResponse<T> {
-  /** Array of items returned by the API */
-  value: readonly T[];
-}
-
-/**
  * Error response from SharePoint API
  */
 export interface ISPApiError {
