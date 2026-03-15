@@ -39,7 +39,9 @@
 
 A SharePoint Framework (SPFx) application customizer that provides a navigation bar for exploring and accessing SharePoint sites. The extension displays a "Sites you have access to" button in the top placeholder, which opens a panel with a searchable list of all SharePoint sites the current user can access.
 
-**Privacy First** - All data processing happens client-side. User preferences (favorites and settings) are stored locally in the browser's localStorage. The extension makes two types of external calls: (1) SharePoint Search API for site discovery, and (2) helvety.com/store API for license validation (your tenant ID and product identifier are transmitted, no personal data). See our [Privacy Policy](https://helvety.com/privacy) for details.
+**100% Free** - Helvety SPO Explorer is now fully free for all users, with no paid tiers and no tenant-based limits.
+
+**Privacy First** - All data processing happens client-side. User preferences (favorites and settings) are stored locally in the browser's localStorage. The extension only calls the SharePoint Search API for site discovery (no additional tracking services). See our [Privacy Policy](https://helvety.com/privacy) for details.
 
 ## Features
 
@@ -52,7 +54,7 @@ A SharePoint Framework (SPFx) application customizer that provides a navigation 
   - Show/hide partial URLs (path only)
   - Show/hide site descriptions
   - Open sites in new tab vs current tab
-- **About Tab** - App description, contact (contact@helvety.com), license tier and tenant info, version and build date
+- **About Tab** - App description, contact (contact@helvety.com), version and build date
 - **SharePoint Search API** - Uses SharePoint Search API to fetch sites the user has access to (no additional permissions required)
 - **Performance Optimized** - 5-minute caching, React.memo optimizations, and efficient rendering
 - **Accessibility** - Full keyboard navigation support, ARIA labels, and screen reader support
@@ -65,7 +67,7 @@ A SharePoint Framework (SPFx) application customizer that provides a navigation 
 2. **Add to all sites** - When prompted, select **"Enable this app and add it to all sites"** so the extension appears on every site in your tenant automatically (no per-site installation needed)
 3. **Usage** - On any SharePoint site, click the "Sites you have access to" button in the top navigation bar
 4. **Explore** - Browse, search, and favorite sites from the panel
-5. **Customize** - Adjust display preferences in the Settings tab, or view app info and license details in the About tab
+5. **Customize** - Adjust display preferences in the Settings tab, or view app info in the About tab
 
 **Note:** When deployed tenant-wide, the extension does **not** appear in "Add an app" / Site contents—it is activated on all sites by the Tenant Wide Extensions list. Allow up to ~20 minutes after first deployment for it to appear everywhere.
 
@@ -92,57 +94,6 @@ If the extension does not show on some sites:
 - **Page type:** The extension only runs on modern pages that provide the Top placeholder (e.g. site home). It does not run on classic pages or modern list/library views—see "Where the extension appears" under How It Works.
 - **Script loading:** On a site where the extension is missing, open **F12 → Network**, reload the page, and check that the extension’s script requests succeed (e.g. 200). Check **Console** for CSP or script errors. If you host assets on an external CDN, ensure that CDN is allowed in **SharePoint Admin Center → Advanced → Script sources** (or equivalent).
 - **Extension not loading / Script error for componentId / "spfx:" or "relative-path.invalid" in console:** If you are running `heft start`, open the site only via the URL provided by the dev server (with debug manifest). If you are testing the deployed app, upload the latest .sppkg to the App Catalog, update the app, wait a few minutes, and hard-refresh the site so the tenant uses the new version instead of an old one (e.g. 1.0.0.7).
-
-## Pricing
-
-Helvety SPO Explorer is available via subscription at [helvety.com/store](https://helvety.com/store/products/helvety-spo-explorer):
-
-| Feature | Solo (CHF 450/month) | Supported (CHF 650/month) |
-|---------|----------------------|---------------------------|
-| Full extension features | Yes | Yes |
-| All sites navigation | Yes | Yes |
-| Favorites and quick access | Yes | Yes |
-| Settings customization | Yes | Yes |
-| Updates included | Yes | Yes |
-| Tenants per subscription | Unlimited | Unlimited |
-| Priority support | - | Yes |
-| Dedicated setup assistance | - | Yes |
-
-**[Subscribe Now](https://helvety.com/store/products/helvety-spo-explorer)** | Contact us at [contact@helvety.com](mailto:contact@helvety.com) for inquiries.
-
-## Licensing
-
-Helvety SPO Explorer uses a **tenant-based licensing model**. After purchasing a subscription at [helvety.com/store](https://helvety.com/store), you register your SharePoint tenant ID(s) on the **Tenants** page at the store.
-
-### How It Works
-
-1. **Purchase** - Subscribe to Solo or Supported at [helvety.com/store](https://helvety.com/store/products/helvety-spo-explorer)
-2. **Register Tenant** - Add your SharePoint tenant ID (e.g., "contoso" from contoso.sharepoint.com) on the store’s Tenants page
-3. **Deploy** - Upload the package to your tenant App Catalog and enable with "Add to all sites" as described in the Deployment section above
-4. **Automatic Validation** - The extension validates your license in the background without blocking functionality
-
-### License Validation
-
-The extension is designed for **enterprise reliability**:
-
-- **Non-blocking** - Core functionality (site navigation, favorites, search) loads immediately while license validation happens in the background
-- **Fail-open** - If the license server is temporarily unreachable, the extension continues working normally
-- **Grace period** - If your subscription lapses, you have a 7-day grace period before features are restricted
-- **Caching** - Valid licenses are cached for 24 hours to minimize API calls and ensure offline resilience
-
-### Unlicensed Behavior
-
-Without a valid license, the extension displays a clear licensing prompt:
-
-- A full-width warning banner with "Unlicensed Product" text replaces the navigation button
-- A "Visit the Helvety Store to get a license" button links directly to the store
-- The "Sites you have access to" button is hidden until licensed
-- If the panel is accessed, no sites are displayed and search is disabled
-
-### Tenant Limits
-
-- **Solo** - Unlimited tenants per subscription
-- **Supported** - Unlimited tenants per subscription
 
 ## Tech Stack
 
@@ -192,7 +143,7 @@ You may NOT:
 - Use this code in your own projects
 - Deploy this code to your own SharePoint environment
 
-**Purchasing a subscription grants access to download and use the official `.sppkg` package from [helvety.com/store](https://helvety.com/store/products/helvety-spo-explorer) only.** Subscriptions do not grant any rights to the source code.
+**Helvety SPO Explorer is 100% free to use as distributed by Helvety.** This does not grant any rights to the source code itself.
 
 See [LICENSE](./LICENSE) for full legal terms.
 
@@ -205,18 +156,15 @@ See [LICENSE](./LICENSE) for full legal terms.
 | 1.0.0.3 | January 28, 2026 | Version bump to 1.0.0.3 - build verification and code quality improvements |
 | 1.0.0.3 | January 28, 2026 | Added screenshots section to README showcasing application features in both light and dark themes |
 | 1.0.0.3 | January 28, 2026 | Comprehensive code quality improvements: enhanced type safety with improved type guards and narrowing, optimized React.memo with custom comparison functions, improved error recovery logic, enhanced documentation with examples and edge cases, and updated UI text for clarity |
-| 1.0.0.4 | January 31, 2026 | Added subscription-based licensing: tenant registration via helvety.com/store, non-blocking license validation with fail-open behavior, 7-day grace period, 24-hour license caching for enterprise reliability |
-| 1.0.0.4 | January 31, 2026 | Improved unlicensed UX: full-width warning banner replaces navigation button, "Visit the Helvety Store to get a license" button with shop icon, sites and search completely blocked when unlicensed |
-| 1.0.0.4 | February 1, 2026 | Added multi-product license support: license validation now includes product identifier for per-product licensing |
 | 1.0.0.5 | February 3, 2026 | Tenant-wide deployment: added ClientSideInstance.xml to package so "Enable this app and add it to all sites" registers the extension on all sites automatically; extension no longer requires per-site installation |
 | 1.0.0.6 | February 3, 2026 | Version bump; documentation updated for tenant-wide deployment (README How It Works, Deployment section, version history) |
 | 1.0.0.6 | February 3, 2026 | Documentation: clarified where extension appears (modern pages with Top placeholder only; not classic or list/library views); added Troubleshooting section (propagation, Tenant Wide Extensions, page type, script loading) |
 | 1.0.0.7 | February 3, 2026 | Version bump to 1.0.0.7 |
 | 1.0.0.8 | February 3, 2026 | App Catalog metadata: title, icon (96×96), screenshots, categories in package-solution.json; assets in sharepoint/assets |
 | 1.0.1.0 | February 3, 2026 | Version bump to 1.0.1.0; app icon from Helvety branding (96×96 PNG in sharepoint/assets); removed prepare-app-catalog-assets script; docs updated |
-| 1.0.1.1 | February 3, 2026 | About tab: app description, contact (contact@helvety.com), license tier and tenant, version and build date; build-info injection script (prebuild/prestart) |
+| 1.0.1.1 | February 3, 2026 | About tab: app description, contact (contact@helvety.com), version and build date; build-info injection script (prebuild/prestart) |
 | 1.0.1.2 | February 3, 2026 | Version bump; app icon renamed to appicon-96.png (cache bust); screenshots removed from package |
-| 1.0.1.3 | February 3, 2026 | About tab simplified: license section shows tier and tenant only; removed subscription ID and refresh license button; docs and comments updated |
+| 1.0.1.3 | February 3, 2026 | About tab simplified; docs and comments updated |
 | 1.0.1.4 | February 4, 2026 | Code cleanup: removed unused dependencies (@tanstack/react-table, react-window, @types/react-window) |
 | 1.0.1.5 | February 4, 2026 | Pre-deployment maintenance release |
 
