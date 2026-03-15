@@ -1,6 +1,6 @@
 {
   "name": "helvety-spo-explorer",
-  "version": "1.0.4.0",
+  "version": "1.0.5.0",
   "private": true,
   "license": "MIT",
   "engines": {
@@ -20,6 +20,8 @@
     "test": "npm run type-check",
     "type-check": "tsc --noEmit",
     "deps:audit": "npm audit --omit=dev",
+    "deps:audit:prod": "npm audit --omit=dev",
+    "deps:audit:full": "npm audit --all",
     "deps:outdated": "npm outdated",
     "quality:check": "npm run format:check && npm run type-check && npm run lint",
     "predeploy": "npm run quality:check && npm run build"
@@ -49,7 +51,7 @@
     "eslint": "8.57.1",
     "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.8.1",
-    "typescript": "~5.9.3"
+    "typescript": "~5.8.3"
   },
   "overrides": {
     "@rushstack/heft": "1.2.7"
