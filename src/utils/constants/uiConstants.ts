@@ -62,9 +62,14 @@ export const UI_MESSAGES = {
   // About tab
   ABOUT_TAB: "About",
   ABOUT_APP_DESCRIPTION:
-    "Helvety SPO Explorer provides a navigation panel for SharePoint Online with site search, favorites, and customizable settings.",
+    "Helvety SPO Explorer runs in your current signed-in user context. You only see SharePoint sites you already have access to, so the displayed sites depend on your permissions. The app itself does not grant or elevate access.",
   ABOUT_CONTACT_LABEL: "Contact",
   ABOUT_CONTACT_EMAIL: "contact@helvety.com",
+  ABOUT_LINKS_LABEL: "Links",
+  ABOUT_HELVETY_LINK_LABEL: "Helvety Website",
+  ABOUT_HELVETY_LINK_URL: "https://helvety.com",
+  ABOUT_GITHUB_LINK_LABEL: "Open Source on GitHub",
+  ABOUT_GITHUB_LINK_URL: "https://github.com/CasparRubin/helvety-spo-explorer",
   ABOUT_NOT_AVAILABLE: "—",
   ABOUT_VERSION: "Version",
   ABOUT_BUILT_ON: "Built on",

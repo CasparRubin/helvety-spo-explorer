@@ -14,7 +14,7 @@ import {
 } from "../../utils/styles";
 
 /**
- * AboutContent component - displays app description, contact, version and build date
+ * AboutContent component - displays app description, contact, links, version and build date
  */
 export const AboutContent: React.FC = React.memo(() => {
   const builtOnDisplay = BUILD_DATE
@@ -50,6 +50,32 @@ export const AboutContent: React.FC = React.memo(() => {
         <p style={settingsSectionDescriptionStyles}>
           <a href={`mailto:${UI_MESSAGES.ABOUT_CONTACT_EMAIL}`}>
             {UI_MESSAGES.ABOUT_CONTACT_EMAIL}
+          </a>
+        </p>
+      </section>
+
+      <section
+        style={settingsSectionStyles}
+        aria-labelledby="about-links-header"
+      >
+        <h3 id="about-links-header" style={settingsSectionHeaderStyles}>
+          {UI_MESSAGES.ABOUT_LINKS_LABEL}
+        </h3>
+        <p style={settingsSectionDescriptionStyles}>
+          <a
+            href={UI_MESSAGES.ABOUT_HELVETY_LINK_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {UI_MESSAGES.ABOUT_HELVETY_LINK_LABEL}
+          </a>
+          <br />
+          <a
+            href={UI_MESSAGES.ABOUT_GITHUB_LINK_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {UI_MESSAGES.ABOUT_GITHUB_LINK_LABEL}
           </a>
         </p>
       </section>

@@ -34,7 +34,7 @@ import {
  * This component renders a side panel that slides in from the left, containing three tabs:
  * - Sites: Displays the searchable sites list with favorites, search, and refresh functionality
  * - Settings: Displays user preference settings for customizing the site explorer
- * - About: Displays app description, contact, version and build date
+ * - About: Displays app description, contact, links, version and build date
  *
  * The panel manages favorite sites snapshots to ensure consistent sorting when switching
  * between tabs. The snapshot is updated when the panel opens or when switching to the Sites tab.

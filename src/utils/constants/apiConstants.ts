@@ -24,16 +24,9 @@ export const SEARCH_QUERY_PARAMS = {
     "SiteId",
     "WebId",
     "SiteCollectionUrl",
-    "DocId",
   ],
-  /** Maximum number of results per request page (total results can exceed this via paging) */
+  /** Maximum number of results returned per request and per fetch operation */
   ROW_LIMIT: 500,
-  /** Maximum supported StartRow value before switching to IndexDocId paging */
-  START_ROW_MAX: 50000,
-  /** Sort property used for IndexDocId paging */
-  DOC_ID_SORT_PROPERTY: "[docid]",
-  /** Sort direction used for IndexDocId paging */
-  DOC_ID_SORT_DIRECTION: "Ascending",
   /** Whether to trim duplicate results */
   TRIM_DUPLICATES: false,
 } as const;

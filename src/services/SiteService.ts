@@ -35,18 +35,11 @@ import {
 
 const LOG_SOURCE = "SiteService";
 
-interface ISearchSort {
-  Property: string;
-  Direction: "Ascending" | "Descending";
-}
-
 interface ISearchRequest {
   Querytext: string;
   SelectProperties: readonly string[];
   RowLimit: number;
   TrimDuplicates: boolean;
-  StartRow?: number;
-  SortList?: readonly ISearchSort[];
 }
 
 interface ISearchApiResponse {
@@ -64,11 +57,11 @@ interface ISearchApiResponse {
  * Service for fetching SharePoint sites using SharePoint Search API
  *
  * This service provides methods to retrieve SharePoint sites that the current user has access to.
- * It uses paged SharePoint Search API requests (StartRow with automatic IndexDocId fallback) to fetch sites.
+ * It uses a single SharePoint Search API request capped at 500 rows to fetch sites.
  * Results are cached for 5 minutes to improve performance.
  *
  * Features:
- * - Adaptive paging to fetch result sets beyond a single 500-row page
+ * - Single-request fetch capped to 500 results for reliability
  * - 5-minute in-memory cache to reduce API calls
  * - Automatic error recovery with stale cache fallback for network errors
  * - Comprehensive validation of API responses
@@ -163,8 +156,8 @@ export class SiteService {
   }
 
   /**
-   * Get all sites the current user has access to
-   * Uses SharePoint Search API to fetch sites
+   * Get up to 500 sites the current user has access to
+   * Uses SharePoint Search API to fetch sites in a single request
    * Results are cached for 5 minutes to improve performance
    *
    * Caching strategy:
@@ -470,23 +463,15 @@ export class SiteService {
   /**
    * Builds request payload for SharePoint Search API
    */
-  private createSearchRequestPayload(
-    queryText: string,
-    startRow: number
-  ): { request: ISearchRequest } {
+  private createSearchRequestPayload(queryText: string): {
+    request: ISearchRequest;
+  } {
     return {
       request: {
         Querytext: queryText,
         SelectProperties: SEARCH_QUERY_PARAMS.SELECT_PROPERTIES,
         RowLimit: SEARCH_QUERY_PARAMS.ROW_LIMIT,
         TrimDuplicates: SEARCH_QUERY_PARAMS.TRIM_DUPLICATES,
-        StartRow: startRow,
-        SortList: [
-          {
-            Property: SEARCH_QUERY_PARAMS.DOC_ID_SORT_PROPERTY,
-            Direction: SEARCH_QUERY_PARAMS.DOC_ID_SORT_DIRECTION,
-          },
-        ],
       },
     };
   }
@@ -508,7 +493,10 @@ export class SiteService {
       return false;
     }
 
-    const primaryResult = response.PrimaryQueryResult as Record<string, unknown>;
+    const primaryResult = response.PrimaryQueryResult as Record<
+      string,
+      unknown
+    >;
     if (
       !("RelevantResults" in primaryResult) ||
       typeof primaryResult.RelevantResults !== "object" ||
@@ -619,37 +607,10 @@ export class SiteService {
   }
 
   /**
-   * Extracts DocId from a Search API result row
-   */
-  private getDocIdFromRow(row: ISiteSearchResultRow): number | null {
-    const docIdCell = row.Cells.find(
-      (cell) => cell.Key.toLowerCase() === "docid"
-    );
-    if (!docIdCell || !docIdCell.Value) {
-      return null;
-    }
-
-    const parsedDocId: number = Number(docIdCell.Value);
-    return Number.isFinite(parsedDocId) ? parsedDocId : null;
-  }
-
-  /**
-   * Returns the last valid DocId from a page of rows
-   */
-  private getLastDocId(rows: readonly ISiteSearchResultRow[]): number | null {
-    for (let i = rows.length - 1; i >= 0; i -= 1) {
-      const docId: number | null = this.getDocIdFromRow(rows[i]);
-      if (docId !== null) {
-        return docId;
-      }
-    }
-    return null;
-  }
-
-  /**
    * Fetch sites using SharePoint Search API
    *
-   * Uses the SharePoint Search API /_api/search/postquery endpoint to retrieve all sites the current user has access to.
+   * Uses the SharePoint Search API /_api/search/postquery endpoint to retrieve
+   * up to SEARCH_QUERY_PARAMS.ROW_LIMIT sites the current user has access to.
    * Search API returns results in a table format with cells containing key-value pairs.
    *
    * @returns A promise that resolves to an array of ISite objects from Search API
@@ -660,116 +621,38 @@ export class SiteService {
   private async getSitesFromSearch(): Promise<ISite[]> {
     // Build Search API URL
     const searchUrl: string = `${this.context.pageContext.web.absoluteUrl}${API_ENDPOINTS.SEARCH_POSTQUERY}`;
-    const allRows: ISiteSearchResultRow[] = [];
-    let startRow: number = 0;
-    let useIndexDocIdPaging: boolean = false;
-    let currentDocIdCursor: number | null = null;
-    let totalRowsFromApi: number | undefined;
-    let hasMorePages: boolean = true;
-
-    while (hasMorePages) {
-      const queryText: string =
-        useIndexDocIdPaging && currentDocIdCursor !== null
-          ? `IndexDocId>${currentDocIdCursor} AND (${SEARCH_QUERY_PARAMS.QUERY_TEXT})`
-          : SEARCH_QUERY_PARAMS.QUERY_TEXT;
-      const requestBody = this.createSearchRequestPayload(queryText, startRow);
-      const data: ISearchApiResponse = await this.executeSearchRequest(
-        searchUrl,
-        requestBody
-      );
-
-      const relevantResults = data.PrimaryQueryResult?.RelevantResults;
-      const rows: readonly ISiteSearchResultRow[] =
-        relevantResults?.Table?.Rows || [];
-      const totalRows: number | undefined = relevantResults?.TotalRows;
-      if (typeof totalRows === "number") {
-        totalRowsFromApi = totalRows;
-      }
-
-      logInfo(
-        LOG_SOURCE,
-        `SharePoint Search API page returned ${rows.length} sites`,
-        `mode=${useIndexDocIdPaging ? "IndexDocId" : "StartRow"}, startRow=${startRow}`
-      );
-
-      if (rows.length === 0) {
-        hasMorePages = false;
-        continue;
-      }
-
-      allRows.push(...rows);
-
-      if (rows.length < SEARCH_QUERY_PARAMS.ROW_LIMIT) {
-        hasMorePages = false;
-        continue;
-      }
-
-      if (!useIndexDocIdPaging) {
-        startRow += rows.length;
-
-        if (startRow < SEARCH_QUERY_PARAMS.START_ROW_MAX) {
-          continue;
-        }
-
-        const switchDocIdCursor: number | null = this.getLastDocId(rows);
-        if (switchDocIdCursor === null) {
-          logWarning(
-            LOG_SOURCE,
-            "Reached StartRow limit but could not determine DocId cursor. Stopping pagination to avoid an infinite loop.",
-            "getSitesFromSearch - missing DocId cursor"
-          );
-          hasMorePages = false;
-          continue;
-        }
-
-        useIndexDocIdPaging = true;
-        currentDocIdCursor = switchDocIdCursor;
-        startRow = 0;
-        logWarning(
-          LOG_SOURCE,
-          `Reached StartRow=${SEARCH_QUERY_PARAMS.START_ROW_MAX}. Switching to IndexDocId pagination from DocId>${switchDocIdCursor}.`,
-          "getSitesFromSearch - switch to IndexDocId paging"
-        );
-        continue;
-      }
-
-      const nextDocIdCursor: number | null = this.getLastDocId(rows);
-      if (nextDocIdCursor === null) {
-        logWarning(
-          LOG_SOURCE,
-          "IndexDocId pagination page did not include DocId values. Stopping pagination to avoid an infinite loop.",
-          "getSitesFromSearch - missing IndexDocId cursor"
-        );
-        hasMorePages = false;
-        continue;
-      }
-
-      if (
-        currentDocIdCursor !== null &&
-        nextDocIdCursor <= currentDocIdCursor
-      ) {
-        logWarning(
-          LOG_SOURCE,
-          `IndexDocId cursor did not advance (${currentDocIdCursor} -> ${nextDocIdCursor}). Stopping pagination to avoid an infinite loop.`,
-          "getSitesFromSearch - non-advancing IndexDocId cursor"
-        );
-        hasMorePages = false;
-        continue;
-      }
-
-      currentDocIdCursor = nextDocIdCursor;
-      startRow = 0;
-    }
+    const requestBody = this.createSearchRequestPayload(
+      SEARCH_QUERY_PARAMS.QUERY_TEXT
+    );
+    const data: ISearchApiResponse = await this.executeSearchRequest(
+      searchUrl,
+      requestBody
+    );
+    const relevantResults = data.PrimaryQueryResult?.RelevantResults;
+    const rows: readonly ISiteSearchResultRow[] =
+      relevantResults?.Table?.Rows || [];
+    const totalRows: number | undefined = relevantResults?.TotalRows;
 
     logInfo(
       LOG_SOURCE,
-      `SharePoint Search API returned ${allRows.length} raw rows across all pages`,
-      totalRowsFromApi !== undefined
-        ? `reported total rows: ${totalRowsFromApi}`
-        : "reported total rows: unavailable"
+      `SharePoint Search API returned ${rows.length} raw rows`,
+      totalRows !== undefined
+        ? `reported total rows: ${totalRows}, fetch cap: ${SEARCH_QUERY_PARAMS.ROW_LIMIT}`
+        : `reported total rows: unavailable, fetch cap: ${SEARCH_QUERY_PARAMS.ROW_LIMIT}`
     );
 
-    return this.processSearchResults(allRows);
+    if (
+      typeof totalRows === "number" &&
+      totalRows > SEARCH_QUERY_PARAMS.ROW_LIMIT
+    ) {
+      logWarning(
+        LOG_SOURCE,
+        `Search returned more than ${SEARCH_QUERY_PARAMS.ROW_LIMIT} total rows (${totalRows}). Only the first ${SEARCH_QUERY_PARAMS.ROW_LIMIT} rows are fetched.`,
+        "getSitesFromSearch - capped result set"
+      );
+    }
+
+    return this.processSearchResults(rows);
   }
 
   /**

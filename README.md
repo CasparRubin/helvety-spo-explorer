@@ -37,7 +37,7 @@
 
 ---
 
-A SharePoint Framework (SPFx) application customizer that provides a navigation bar for exploring and accessing SharePoint sites. The extension displays a "Sites you have access to" button in the top placeholder, which opens a panel with a searchable list of all SharePoint sites the current user can access.
+A SharePoint Framework (SPFx) application customizer that provides a navigation bar for exploring and accessing SharePoint sites. The extension displays a "Sites you have access to" button in the top placeholder, which opens a panel with a searchable list of up to 500 SharePoint sites the current user can access.
 
 **100% Free** - Helvety SPO Explorer is now fully free for all users, with no paid tiers and no tenant-based limits.
 
@@ -45,7 +45,7 @@ A SharePoint Framework (SPFx) application customizer that provides a navigation 
 
 ## Features
 
-- **Site Discovery** - Automatically fetches and displays all SharePoint sites the current user has access to
+- **Site Discovery** - Automatically fetches and displays up to 500 SharePoint sites the current user has access to
 - **Real-time Search** - Search across site titles, descriptions, and URLs with highlighted matches
 - **Favorites Management** - Mark frequently used sites as favorites for quick access
 - **Quick Access Menu** - Dropdown menu from the navbar button showing favorite sites
@@ -54,8 +54,8 @@ A SharePoint Framework (SPFx) application customizer that provides a navigation 
   - Show/hide partial URLs (path only)
   - Show/hide site descriptions
   - Open sites in new tab vs current tab
-- **About Tab** - App description, contact (contact@helvety.com), version and build date
-- **SharePoint Search API** - Uses SharePoint Search API to fetch sites the user has access to (no additional permissions required)
+- **About Tab** - App description (including permission-context note), contact (contact@helvety.com), links, version and build date
+- **SharePoint Search API** - Uses SharePoint Search API to fetch up to 500 sites the user has access to (no additional permissions required)
 - **Performance Optimized** - 5-minute caching, React.memo optimizations, and efficient rendering
 - **Accessibility** - Full keyboard navigation support, ARIA labels, and screen reader support
 - **Theme Aware** - Automatically adapts to SharePoint light/dark themes
