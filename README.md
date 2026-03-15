@@ -6,7 +6,7 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.8.3-blue)
 ![Fluent UI](https://img.shields.io/badge/Fluent%20UI-8.125.5-purple)
 ![Heft](https://img.shields.io/badge/Heft-1.2.7-orange)
-![License](https://img.shields.io/badge/License-All%20Rights%20Reserved-red)
+![License](https://img.shields.io/badge/License-MIT-green)
 
 ## Screenshots
 
@@ -129,23 +129,13 @@ For questions or inquiries, please contact us at [contact@helvety.com](mailto:co
 
 ## License & Usage
 
-> **This is NOT open source software.**
+Helvety SPO Explorer is open source and released under the MIT License.
 
-This repository is public **for transparency purposes only** so users can verify the application's behavior and security.
+You are free to use, copy, modify, merge, publish, distribute, sublicense, and sell this software under the terms of the MIT License.
 
-**All Rights Reserved.** No license is granted for any use of this code. You may:
-- View and inspect the code
+This software is provided **AS IS**, without warranty of any kind, express or implied. By using this software, you accept that the authors and copyright holders are not liable for claims, damages, or other liability.
 
-You may NOT:
-- Clone, copy, or download this code for any purpose
-- Modify, adapt, or create derivative works
-- Redistribute or share this code
-- Use this code in your own projects
-- Deploy this code to your own SharePoint environment
-
-**Helvety SPO Explorer is 100% free to use as distributed by Helvety.** This does not grant any rights to the source code itself.
-
-See [LICENSE](./LICENSE) for full legal terms.
+See [LICENSE](./LICENSE) for the full legal text.
 
 ## Version History
 

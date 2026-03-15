@@ -3,7 +3,7 @@
   "solution": {
     "name": "helvety-spo-explorer-client-side-solution",
     "id": "9193252e-cd60-4616-bab5-9f98b29d2b0c",
-    "version": "1.0.5.0",
+    "version": "2.0.0.0",
     "title": "Helvety SPO Explorer",
     "iconPath": "assets/appicon-96.png",
     "includeClientSideAssets": true,
@@ -13,7 +13,7 @@
       "name": "Helvety",
       "websiteUrl": "https://helvety.com",
       "privacyUrl": "https://helvety.com/privacy",
-      "termsOfUseUrl": "https://helvety.com/terms",
+      "termsOfUseUrl": "https://github.com/CasparRubin/helvety-spo-explorer/blob/main/LICENSE",
       "mpnId": "Undefined-1.22.2"
     },
     "metadata": {
@@ -31,7 +31,7 @@
         "title": "Application Extension - Deployment of custom action",
         "description": "Deploys a custom action with ClientSideComponentId association",
         "id": "c71f6d98-165b-4aab-9bf1-246cf9445950",
-        "version": "1.0.5.0",
+        "version": "2.0.0.0",
         "assets": {
           "elementManifests": [
             "elements.xml",

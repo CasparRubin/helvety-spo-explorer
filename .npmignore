@@ -4,9 +4,7 @@
 # Use negative patterns to bring back the specific things we want to publish
 !/bin/**
 !/dist/**
-!/EULA/**
 !/lib/**
-!ThirdPartyNotice.txt
 
 # Ignore certain files in the above folders
 /dist/*.stats.*
