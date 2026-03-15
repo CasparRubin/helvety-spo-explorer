@@ -301,7 +301,7 @@ export const SitesPanel: React.FC<ISitesPanelProps> = React.memo(
         }}
       >
         <span id="sites-panel-description" style={srOnlyStyles}>
-          Panel containing tabs for browsing sites, settings, and about
+          {UI_MESSAGES.ARIA_SITES_PANEL_DESCRIPTION}
         </span>
         <div
           style={{
@@ -317,7 +317,7 @@ export const SitesPanel: React.FC<ISitesPanelProps> = React.memo(
               styles={pivotStyles}
               onLinkClick={handleLinkClick}
               selectedKey={selectedKey}
-              aria-label="Sites panel navigation"
+              aria-label={UI_MESSAGES.ARIA_SITES_PANEL_NAVIGATION}
             >
               <PivotItem
                 headerText={UI_MESSAGES.SITES_TAB}

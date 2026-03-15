@@ -1,6 +1,7 @@
 /**
  * UI messages and labels
  */
+import * as strings from "HelvetySpoExplorerApplicationCustomizerStrings";
 
 /**
  * Error messages
@@ -10,67 +11,67 @@
  */
 export const ERROR_MESSAGES = {
   /** Generic error when fetching sites fails */
-  FETCH_SITES_FAILED: "Failed to fetch sites",
+  FETCH_SITES_FAILED: strings.ErrorFetchSitesFailed,
   /** Error when user lacks permissions to fetch sites */
-  FETCH_SITES_PERMISSIONS:
-    "Unable to fetch sites. Please check your permissions and try again.",
+  FETCH_SITES_PERMISSIONS: strings.ErrorFetchSitesPermissions,
 } as const;
 
 /**
  * UI messages and labels
  */
 export const UI_MESSAGES = {
-  LOADING_SITES: "Loading sites...",
-  NO_SITES_AVAILABLE: "No sites available",
-  NO_SITES_AVAILABLE_DESCRIPTION:
-    "No SharePoint sites were found. This could mean no matching sites are currently available via search, or there was an issue loading them.",
-  NO_SITES_AVAILABLE_TROUBLESHOOTING:
-    "Try refreshing the list, or check with your administrator if you should have access to sites.",
-  NO_SITES_FOUND: "No sites found matching",
-  SEARCH_PLACEHOLDER: "Search sites...",
-  SEARCH_DESCRIPTION: "Search sites by title, description, or URL",
-  REFRESH_SITES: "Refresh sites",
-  SITES_YOU_HAVE_ACCESS_TO: "Sites available to you",
-  FAVORITES: "Favorites",
-  FAVORITES_QUICK_ACCESS_MENU: "Favorites quick access menu",
-  ADD_TO_FAVORITES_HINT: "Add sites to favorites for quick access",
-  OPEN_SITES_PANEL: "Open sites panel",
-  OPEN_SITES_PANEL_DESCRIPTION:
-    "Opens the Sites panel to browse and search SharePoint sites. Use the split-button menu for quick access to favorite sites.",
-  CLOSE_PANEL: "Close sites panel",
-  SITES_PANEL: "Sites panel",
-  SITES_TAB: "Sites",
-  SETTINGS_TAB: "Settings",
-  SHOW_FULL_URL: "Show Full URL",
-  SHOW_PARTIAL_URL: "Show Partial URL",
-  SHOW_DESCRIPTION: "Show Description",
-  ALWAYS_OPEN_NEW_TAB: "Always open in new tab",
-  SITE_EXPLORER_SETTINGS: "Site explorer settings",
-  REMOVE_FROM_FAVORITES: "Remove from favorites",
-  ADD_TO_FAVORITES: "Add to favorites",
-  OPEN_IN_NEW_TAB: "Open in new tab",
+  LOADING_SITES: strings.LoadingSites,
+  NO_SITES_AVAILABLE: strings.NoSitesAvailable,
+  NO_SITES_AVAILABLE_DESCRIPTION: strings.NoSitesAvailableDescription,
+  NO_SITES_AVAILABLE_TROUBLESHOOTING: strings.NoSitesAvailableTroubleshooting,
+  NO_SITES_FOUND: strings.NoSitesFound,
+  SEARCH_PLACEHOLDER: strings.SearchPlaceholder,
+  SEARCH_DESCRIPTION: strings.SearchDescription,
+  REFRESH_SITES: strings.RefreshSites,
+  SITES_YOU_HAVE_ACCESS_TO: strings.SitesYouHaveAccessTo,
+  FAVORITES: strings.Favorites,
+  FAVORITES_QUICK_ACCESS_MENU: strings.FavoritesQuickAccessMenu,
+  ADD_TO_FAVORITES_HINT: strings.AddToFavoritesHint,
+  OPEN_SITES_PANEL: strings.OpenSitesPanel,
+  OPEN_SITES_PANEL_DESCRIPTION: strings.OpenSitesPanelDescription,
+  CLOSE_PANEL: strings.ClosePanel,
+  SITES_PANEL: strings.SitesPanel,
+  SITES_TAB: strings.SitesTab,
+  SETTINGS_TAB: strings.SettingsTab,
+  SHOW_FULL_URL: strings.ShowFullUrl,
+  SHOW_PARTIAL_URL: strings.ShowPartialUrl,
+  SHOW_DESCRIPTION: strings.ShowDescription,
+  ALWAYS_OPEN_NEW_TAB: strings.AlwaysOpenNewTab,
+  SITE_EXPLORER_SETTINGS: strings.SiteExplorerSettings,
+  REMOVE_FROM_FAVORITES: strings.RemoveFromFavorites,
+  ADD_TO_FAVORITES: strings.AddToFavorites,
+  OPEN_IN_NEW_TAB: strings.OpenInNewTab,
   // Settings sections
-  SETTINGS_URL_DISPLAY_SECTION: "URL Display",
-  SETTINGS_URL_DISPLAY_DESCRIPTION:
-    "Choose how site URLs are displayed in the sites list. Full URL shows the complete address, while Partial URL shows only the path.",
-  SETTINGS_SITE_INFO_SECTION: "Site Information",
-  SETTINGS_SITE_INFO_DESCRIPTION:
-    "Control which additional information is shown for each site in the list.",
-  SETTINGS_NAVIGATION_SECTION: "Navigation",
-  SETTINGS_NAVIGATION_DESCRIPTION:
-    "Configure how site links behave when clicked.",
+  SETTINGS_URL_DISPLAY_SECTION: strings.SettingsUrlDisplaySection,
+  SETTINGS_URL_DISPLAY_DESCRIPTION: strings.SettingsUrlDisplayDescription,
+  SETTINGS_SITE_INFO_SECTION: strings.SettingsSiteInfoSection,
+  SETTINGS_SITE_INFO_DESCRIPTION: strings.SettingsSiteInfoDescription,
+  SETTINGS_NAVIGATION_SECTION: strings.SettingsNavigationSection,
+  SETTINGS_NAVIGATION_DESCRIPTION: strings.SettingsNavigationDescription,
   // About tab
-  ABOUT_TAB: "About",
-  ABOUT_APP_DESCRIPTION:
-    "Helvety SPO Explorer runs in your current signed-in user context. You only see SharePoint sites you already have access to, so the displayed sites depend on your permissions. The app itself does not grant or elevate access.",
-  ABOUT_CONTACT_LABEL: "Contact",
-  ABOUT_CONTACT_EMAIL: "contact@helvety.com",
-  ABOUT_LINKS_LABEL: "Links",
-  ABOUT_HELVETY_LINK_LABEL: "Helvety Website",
-  ABOUT_HELVETY_LINK_URL: "https://helvety.com",
-  ABOUT_GITHUB_LINK_LABEL: "Open Source on GitHub",
-  ABOUT_GITHUB_LINK_URL: "https://github.com/CasparRubin/helvety-spo-explorer",
-  ABOUT_NOT_AVAILABLE: "—",
-  ABOUT_VERSION: "Version",
-  ABOUT_BUILT_ON: "Built on",
+  ABOUT_TAB: strings.AboutTab,
+  ABOUT_APP_DESCRIPTION: strings.AboutAppDescription,
+  ABOUT_CONTACT_LABEL: strings.AboutContactLabel,
+  ABOUT_CONTACT_EMAIL: strings.AboutContactEmail,
+  ABOUT_LINKS_LABEL: strings.AboutLinksLabel,
+  ABOUT_HELVETY_LINK_LABEL: strings.AboutHelvetyLinkLabel,
+  ABOUT_HELVETY_LINK_URL: strings.AboutHelvetyLinkUrl,
+  ABOUT_GITHUB_LINK_LABEL: strings.AboutGithubLinkLabel,
+  ABOUT_GITHUB_LINK_URL: strings.AboutGithubLinkUrl,
+  ABOUT_NOT_AVAILABLE: strings.AboutNotAvailable,
+  ABOUT_VERSION: strings.AboutVersion,
+  ABOUT_BUILT_ON: strings.AboutBuiltOn,
+  TOGGLE_ON: strings.ToggleOn,
+  TOGGLE_OFF: strings.ToggleOff,
+  APP_NAME: strings.AppName,
+  ARIA_SETTINGS_DESCRIPTION: strings.AriaSettingsDescription,
+  ARIA_ABOUT_REGION: strings.AriaAboutRegion,
+  ARIA_SITE_NAVIGATION: strings.AriaSiteNavigation,
+  ARIA_SITES_PANEL_DESCRIPTION: strings.AriaSitesPanelDescription,
+  ARIA_SITES_PANEL_NAVIGATION: strings.AriaSitesPanelNavigation,
 } as const;

@@ -211,7 +211,7 @@ export const Navbar: React.FC<INavbarProps> = React.memo(({ context }) => {
       className="helvety-spo-navbar"
       style={navbarStyles}
       role="navigation"
-      aria-label="Site navigation"
+      aria-label={UI_MESSAGES.ARIA_SITE_NAVIGATION}
     >
       <div style={navbarInnerStyles}>
         <div style={navbarContentStyles}>

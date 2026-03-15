@@ -97,12 +97,11 @@ export const SettingsContent: React.FC<ISettingsContentProps> = React.memo(
       <div
         style={settingsPanelContentStyles}
         role="region"
-        aria-label="Site explorer settings"
+        aria-label={UI_MESSAGES.SITE_EXPLORER_SETTINGS}
         aria-describedby="settings-description"
       >
         <span id="settings-description" style={srOnlyStyles}>
-          Customize display options for the site explorer, including URL
-          visibility and link behavior
+          {UI_MESSAGES.ARIA_SETTINGS_DESCRIPTION}
         </span>
 
         {/* URL Display Section */}
@@ -127,16 +126,16 @@ export const SettingsContent: React.FC<ISettingsContentProps> = React.memo(
             label={UI_MESSAGES.SHOW_FULL_URL}
             checked={settings.showFullUrl}
             onChange={handleToggleChange("showFullUrl")}
-            onText="On"
-            offText="Off"
+            onText={UI_MESSAGES.TOGGLE_ON}
+            offText={UI_MESSAGES.TOGGLE_OFF}
             styles={settingsToggleStyles}
           />
           <Toggle
             label={UI_MESSAGES.SHOW_PARTIAL_URL}
             checked={settings.showPartialUrl}
             onChange={handleToggleChange("showPartialUrl")}
-            onText="On"
-            offText="Off"
+            onText={UI_MESSAGES.TOGGLE_ON}
+            offText={UI_MESSAGES.TOGGLE_OFF}
             styles={settingsToggleStyles}
           />
         </section>
@@ -162,8 +161,8 @@ export const SettingsContent: React.FC<ISettingsContentProps> = React.memo(
             label={UI_MESSAGES.SHOW_DESCRIPTION}
             checked={settings.showDescription}
             onChange={handleToggleChange("showDescription")}
-            onText="On"
-            offText="Off"
+            onText={UI_MESSAGES.TOGGLE_ON}
+            offText={UI_MESSAGES.TOGGLE_OFF}
             styles={settingsToggleStyles}
           />
         </section>
@@ -192,8 +191,8 @@ export const SettingsContent: React.FC<ISettingsContentProps> = React.memo(
             label={UI_MESSAGES.ALWAYS_OPEN_NEW_TAB}
             checked={settings.openInNewTab}
             onChange={handleToggleChange("openInNewTab")}
-            onText="On"
-            offText="Off"
+            onText={UI_MESSAGES.TOGGLE_ON}
+            offText={UI_MESSAGES.TOGGLE_OFF}
             styles={settingsToggleStyles}
           />
         </section>

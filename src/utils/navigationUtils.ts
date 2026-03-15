@@ -5,7 +5,8 @@
  */
 
 import { logWarning, logError } from "./errorUtils";
-import { isValidUrl, isNonEmptyString } from "./validationUtils";
+import { isNonEmptyString } from "./validationUtils";
+import { validateAndNormalizeUrl } from "./urlUtils";
 
 const LOG_SOURCE = "navigationUtils";
 
@@ -36,23 +37,25 @@ export function navigateToSite(url: string, openInNewTab?: boolean): void {
   }
 
   const trimmedUrl: string = url.trim();
+  const normalizedResult = validateAndNormalizeUrl(trimmedUrl);
 
-  // Validate URL before navigation
-  if (!isValidUrl(trimmedUrl)) {
+  // Validate URL before navigation with strict SharePoint allowlist rules.
+  if (!normalizedResult.isValid) {
     // Log warning but don't throw - fail silently to prevent breaking the UI
     logWarning(
       LOG_SOURCE,
-      `Invalid URL provided to navigateToSite: ${trimmedUrl}`,
+      `Blocked navigation attempt for disallowed URL host/scheme`,
       "navigateToSite"
     );
     return;
   }
 
   try {
+    const targetUrl = normalizedResult.normalizedUrl;
     if (openInNewTab) {
-      window.open(trimmedUrl, "_blank", "noopener,noreferrer");
+      window.open(targetUrl, "_blank", "noopener,noreferrer");
     } else {
-      window.location.href = trimmedUrl;
+      window.location.href = targetUrl;
     }
   } catch (error: unknown) {
     // Handle navigation errors gracefully

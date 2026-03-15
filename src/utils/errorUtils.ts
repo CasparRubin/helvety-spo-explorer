@@ -402,6 +402,16 @@ export function extractErrorMessage(error: unknown): string {
 }
 
 /**
+ * Redacts likely sensitive values from log messages.
+ */
+function sanitizeLogMessage(message: string): string {
+  return message
+    .replace(/https?:\/\/[^\s)]+/gi, "[redacted-url]")
+    .replace(/sig=[^&\s]+/gi, "sig=[redacted]")
+    .replace(/accesskey[^,\s]*/gi, "accessKey=[redacted]");
+}
+
+/**
  * Logs an error using SPFx Log utility with consistent formatting
  *
  * Formats and logs errors consistently across the application. Handles various
@@ -427,9 +437,20 @@ export function logError(
   error: unknown,
   context?: string
 ): void {
-  const errorMessage = extractErrorMessage(error);
-  const contextMessage = context ? `${context}: ${errorMessage}` : errorMessage;
-  const errorObj = error instanceof Error ? error : new Error(contextMessage);
+  const errorMessage = sanitizeLogMessage(extractErrorMessage(error));
+  const contextMessage = context
+    ? sanitizeLogMessage(`${context}: ${errorMessage}`)
+    : errorMessage;
+  let errorObj: Error;
+
+  if (error instanceof Error) {
+    errorObj = new Error(contextMessage);
+    errorObj.name = error.name;
+    errorObj.stack = error.stack;
+  } else {
+    errorObj = new Error(contextMessage);
+  }
+
   // Log.error signature: Log.error(source, error)
   Log.error(source, errorObj);
 }
@@ -457,7 +478,9 @@ export function logWarning(
   message: string,
   context?: string
 ): void {
-  const contextMessage = context ? `${context}: ${message}` : message;
+  const contextMessage = sanitizeLogMessage(
+    context ? `${context}: ${message}` : message
+  );
   // Log.warn requires ServiceScope which we don't have in utility functions
   // Using Log.info with [WARNING] prefix as alternative
   Log.info(source, `[WARNING] ${contextMessage}`);
@@ -484,7 +507,9 @@ export function logInfo(
   message: string,
   context?: string
 ): void {
-  const contextMessage: string = context ? `${context}: ${message}` : message;
+  const contextMessage: string = sanitizeLogMessage(
+    context ? `${context}: ${message}` : message
+  );
   Log.info(source, contextMessage);
 }
 

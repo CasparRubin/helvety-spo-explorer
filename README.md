@@ -141,6 +141,8 @@ See [LICENSE](./LICENSE) for the full legal text.
 
 | Version | Date             | Comments                    |
 | ------- | ---------------- | --------------------------- |
+| 2.2.0.0 | March 15, 2026   | Minor version bump and fresh package rebuild |
+| 2.1.0.0 | March 15, 2026   | Security and lifecycle hardening: strict SharePoint HTTPS URL allowlist for navigation/data, Application Customizer placeholder lifecycle improvements for modern navigation, ThemeProvider-based theme updates, expanded localization coverage, and logging redaction/context improvements |
 | 0.0.1   | January 27, 2026 | Initial release with comprehensive code quality improvements: reduced duplication, simplified complex functions, improved type safety, unified error handling, and optimized performance |
 | 0.0.1   | January 28, 2026 | Fixed SharePoint packaging issues: removed invalid JSON comments from manifest; ClientSideInstance.xml was temporarily removed from packaging (re-added in 1.0.0.5 for tenant-wide deployment) |
 | 1.0.0.3 | January 28, 2026 | Version bump to 1.0.0.3 - build verification and code quality improvements |

@@ -70,22 +70,22 @@ export function getApplicationCustomizerStyles(): string {
     .helvety-spo-sites-panel.ms-Panel .ms-Panel-content {
       overflow: hidden !important;
     }
-    /* Ensure react-window list container has pointer events enabled */
+    /* Ensure sites list container has pointer events enabled */
     .helvety-spo-sites-panel .helvety-spo-sites-list-container {
       pointer-events: auto !important;
     }
-    /* Ensure react-window list shows scrollbars */
-    /* react-window creates an outer div and inner scrolling div - target both reliably */
+    /* Ensure sites list shows scrollbars */
+    /* List markup creates an outer and inner scrolling container - target both reliably */
     .helvety-spo-sites-panel .helvety-spo-sites-list-container [role="list"] {
       pointer-events: auto !important;
     }
-    /* Target react-window's outer container (has height) */
+    /* Target outer scrolling container (has height) */
     .helvety-spo-sites-panel .helvety-spo-sites-list-container [role="list"] > div {
       pointer-events: auto !important;
       overflow-y: auto !important;
       overflow-x: hidden !important;
     }
-    /* Ensure all virtualized rows have pointer events */
+    /* Ensure all rows have pointer events */
     .helvety-spo-sites-panel .helvety-spo-sites-list-container [role="row"] {
       pointer-events: auto !important;
     }
@@ -95,19 +95,20 @@ export function getApplicationCustomizerStyles(): string {
       display: block;
     }
     .helvety-spo-sites-panel .helvety-spo-sites-list-container [role="list"] > div::-webkit-scrollbar-track {
-      background: rgba(0, 0, 0, 0.05);
+      background: var(--helvety-scrollbar-track, rgba(0, 0, 0, 0.05));
     }
     .helvety-spo-sites-panel .helvety-spo-sites-list-container [role="list"] > div::-webkit-scrollbar-thumb {
-      background: rgba(0, 0, 0, 0.2);
+      background: var(--helvety-scrollbar-thumb, rgba(0, 0, 0, 0.2));
       border-radius: 6px;
     }
     .helvety-spo-sites-panel .helvety-spo-sites-list-container [role="list"] > div::-webkit-scrollbar-thumb:hover {
-      background: rgba(0, 0, 0, 0.3);
+      background: var(--helvety-scrollbar-thumb-hover, rgba(0, 0, 0, 0.3));
     }
     /* For Firefox */
     .helvety-spo-sites-panel .helvety-spo-sites-list-container [role="list"] > div {
       scrollbar-width: thin;
-      scrollbar-color: rgba(0, 0, 0, 0.2) rgba(0, 0, 0, 0.05);
+      scrollbar-color: var(--helvety-scrollbar-thumb, rgba(0, 0, 0, 0.2))
+        var(--helvety-scrollbar-track, rgba(0, 0, 0, 0.05));
     }
     /* Refresh button spinning animation */
     @keyframes helvety-spo-refresh-spin {

@@ -23,6 +23,8 @@ import {
   handleSharePointApiError,
   withTimeout,
 } from "../utils/errorHandlingUtils";
+import { validateAndNormalizeUrl } from "../utils/urlUtils";
+import { normalizeAndFilterNavigableSites } from "../utils/siteFilteringUtils";
 
 // Constants
 import {
@@ -360,17 +362,15 @@ export class SiteService {
    * @returns Array of fully valid sites
    */
   private filterValidSites(sites: readonly ISite[]): ISite[] {
-    return sites.filter((site: ISite): boolean => {
-      const isValid: boolean = Boolean(site.url && site.id);
-      if (!isValid) {
-        logWarning(
-          LOG_SOURCE,
-          `Site filtered out at final validation stage`,
-          `ID: ${site.id || "missing"}, URL: ${site.url || "missing"}, Title: ${site.title || "missing"}`
-        );
-      }
-      return isValid;
-    });
+    const filteredSites = normalizeAndFilterNavigableSites(sites);
+    if (filteredSites.length < sites.length) {
+      logWarning(
+        LOG_SOURCE,
+        "One or more sites were removed by URL/id trust boundary filtering",
+        `from ${sites.length} input sites to ${filteredSites.length} trusted sites`
+      );
+    }
+    return filteredSites;
   }
 
   /**
@@ -706,6 +706,9 @@ export class SiteService {
     const siteId: string = getCellValue("SiteId");
     const webId: string = getCellValue("WebId");
     const siteCollectionUrl: string = getCellValue("SiteCollectionUrl");
+    const normalizedSiteUrlResult = validateAndNormalizeUrl(path);
+    const normalizedSiteCollectionResult =
+      validateAndNormalizeUrl(siteCollectionUrl);
 
     // Validate and create branded types safely using helper functions
     const validatedSiteId: SiteId = createSiteId(siteId);
@@ -714,10 +717,12 @@ export class SiteService {
     return {
       id: validatedSiteId,
       title,
-      url: path,
+      url: normalizedSiteUrlResult.normalizedUrl,
       description: description || undefined,
       webId: validatedWebId,
-      siteCollectionUrl: siteCollectionUrl || undefined,
+      siteCollectionUrl: normalizedSiteCollectionResult.isValid
+        ? normalizedSiteCollectionResult.normalizedUrl
+        : undefined,
     };
   }
 

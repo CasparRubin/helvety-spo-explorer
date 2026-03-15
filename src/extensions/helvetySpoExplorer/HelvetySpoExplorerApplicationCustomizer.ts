@@ -4,6 +4,11 @@ import {
   PlaceholderContent,
   PlaceholderName,
 } from "@microsoft/sp-application-base";
+import {
+  ThemeProvider,
+  ThemeChangedEventArgs,
+  IReadonlyTheme,
+} from "@microsoft/sp-component-base";
 
 import * as strings from "HelvetySpoExplorerApplicationCustomizerStrings";
 
@@ -40,6 +45,9 @@ export interface IHelvetySpoExplorerApplicationCustomizerProperties {
 export default class HelvetySpoExplorerApplicationCustomizer extends BaseApplicationCustomizer<IHelvetySpoExplorerApplicationCustomizerProperties> {
   private _topPlaceholder: PlaceholderContent | undefined;
   private _isReactMounted: boolean = false;
+  private _themeProvider: ThemeProvider | undefined;
+  private _themeVariant: IReadonlyTheme | undefined;
+  private _hasBeenDisposed: boolean = false;
 
   public onInit(): Promise<void> {
     const webUrl = this.context.pageContext?.web?.absoluteUrl;
@@ -63,7 +71,19 @@ export default class HelvetySpoExplorerApplicationCustomizer extends BaseApplica
         return Promise.resolve();
       }
 
-      // Render immediately - SPFx handles timing
+      this._themeProvider = this.context.serviceScope.consume(
+        ThemeProvider.serviceKey
+      );
+      this._themeVariant = this._themeProvider.tryGetTheme();
+      this._applyThemeCssVariables(this._themeVariant);
+      this._themeProvider.themeChangedEvent.add(this, this._handleThemeChanged);
+
+      this.context.placeholderProvider.changedEvent.add(
+        this,
+        this._renderPlaceHolders
+      );
+
+      // Render immediately and also re-render when placeholders change
       this._renderPlaceHolders();
     } catch (error: unknown) {
       logError(
@@ -76,50 +96,13 @@ export default class HelvetySpoExplorerApplicationCustomizer extends BaseApplica
     return Promise.resolve();
   }
 
-  /**
-   * Checks if React is already mounted to the placeholder
-   * @returns true if React is already mounted, false otherwise
-   */
-  private _isReactAlreadyMounted(): boolean {
-    if (!this._topPlaceholder || !this._topPlaceholder.domElement) {
-      return false;
+  private _renderPlaceHolders = (): void => {
+    if (this._hasBeenDisposed) {
+      return;
     }
 
-    const domElement = this._topPlaceholder.domElement;
-
-    // Check if element has React content by looking for React internal markers
-    // React 17 stores fiber on the element
-    // Note: We access React internals which are not part of the public API
-    // but are necessary to detect if React is already mounted
-    interface ReactInternalElement extends Element {
-      _reactInternalFiber?: unknown;
-    }
-    interface ReactInternalContainer extends HTMLElement {
-      _reactRootContainer?: unknown;
-    }
-    if (domElement.hasChildNodes()) {
-      // Check for React root container or fiber
-      const firstChild = domElement.firstChild as ReactInternalElement | null;
-      if (firstChild && firstChild._reactInternalFiber) {
-        return true;
-      }
-      // Check for React root container (React 17+)
-      const container = domElement as ReactInternalContainer;
-      if (container._reactRootContainer) {
-        return true;
-      }
-      // Check if we've already mounted (our flag)
-      if (this._isReactMounted) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  private _renderPlaceHolders(): void {
-    // Check if React is already mounted - prevent multiple renders
-    if (this._isReactAlreadyMounted()) {
+    // Prevent duplicate renders while mounted.
+    if (this._isReactMounted) {
       Log.verbose(LOG_SOURCE, "React already mounted, skipping render");
       return;
     }
@@ -138,7 +121,7 @@ export default class HelvetySpoExplorerApplicationCustomizer extends BaseApplica
         this._topPlaceholder =
           this.context.placeholderProvider.tryCreateContent(
             PlaceholderName.Top,
-            { onDispose: this._onDispose }
+            { onDispose: this._onPlaceholderDispose }
           );
         Log.verbose(
           LOG_SOURCE,
@@ -210,24 +193,6 @@ export default class HelvetySpoExplorerApplicationCustomizer extends BaseApplica
 
     // Render React immediately
     try {
-      // Unmount any existing content before mounting (safety check)
-      if (this._topPlaceholder.domElement && this._isReactMounted) {
-        try {
-          // eslint-disable-next-line @rushstack/pair-react-dom-render-unmount -- Unmounting before re-mounting, lifecycle handled in _onDispose
-          ReactDom.unmountComponentAtNode(this._topPlaceholder.domElement);
-        } catch (unmountError: unknown) {
-          // Ignore unmount errors - element might not have React content
-          const unmountErrorMsg =
-            unmountError instanceof Error
-              ? unmountError.message
-              : String(unmountError);
-          Log.verbose(
-            LOG_SOURCE,
-            `Unmount error (expected if not mounted): ${unmountErrorMsg}`
-          );
-        }
-      }
-
       // Create React element with proper typing, wrapped in ErrorBoundary
       const navbarElement: React.ReactElement<INavbarProps> =
         React.createElement<INavbarProps>(Navbar, { context: this.context });
@@ -236,7 +201,7 @@ export default class HelvetySpoExplorerApplicationCustomizer extends BaseApplica
         children: navbarElement,
       });
 
-      // eslint-disable-next-line @rushstack/pair-react-dom-render-unmount -- Unmount handled in _onDispose method
+      // eslint-disable-next-line @rushstack/pair-react-dom-render-unmount -- Unmount handled in _onPlaceholderDispose method
       ReactDom.render(element, this._topPlaceholder.domElement);
       this._isReactMounted = true;
       Log.info(
@@ -256,9 +221,42 @@ export default class HelvetySpoExplorerApplicationCustomizer extends BaseApplica
         `Error rendering React component - page may freeze if this error persists (${errorDetails})`
       );
     }
+  };
+
+  private _handleThemeChanged = (args: ThemeChangedEventArgs): void => {
+    this._themeVariant = args.theme;
+    this._applyThemeCssVariables(this._themeVariant);
+  };
+
+  private _applyThemeCssVariables(theme: IReadonlyTheme | undefined): void {
+    const semanticColors = theme?.semanticColors as
+      | Record<string, string>
+      | undefined;
+
+    const rootStyle = document.documentElement.style;
+    rootStyle.setProperty(
+      "--helvety-sites-row-alt",
+      semanticColors?.bodyBackgroundHovered ?? "rgba(128, 128, 128, 0.04)"
+    );
+    rootStyle.setProperty(
+      "--helvety-sites-row-hover",
+      semanticColors?.bodyBackgroundChecked ?? "rgba(128, 128, 128, 0.12)"
+    );
+    rootStyle.setProperty(
+      "--helvety-scrollbar-track",
+      semanticColors?.bodyBackground ?? "rgba(0, 0, 0, 0.05)"
+    );
+    rootStyle.setProperty(
+      "--helvety-scrollbar-thumb",
+      semanticColors?.inputBorder ?? "rgba(0, 0, 0, 0.2)"
+    );
+    rootStyle.setProperty(
+      "--helvety-scrollbar-thumb-hover",
+      semanticColors?.inputBorderHovered ?? "rgba(0, 0, 0, 0.3)"
+    );
   }
 
-  private _onDispose(): void {
+  private _onPlaceholderDispose = (): void => {
     // Clean up React component when placeholder is disposed
     if (
       this._topPlaceholder &&
@@ -275,10 +273,26 @@ export default class HelvetySpoExplorerApplicationCustomizer extends BaseApplica
         this._isReactMounted = false;
       }
     }
-  }
+  };
 
   public onDispose(): void {
+    this._hasBeenDisposed = true;
+
+    if (this.context.placeholderProvider) {
+      this.context.placeholderProvider.changedEvent.remove(
+        this,
+        this._renderPlaceHolders
+      );
+    }
+    if (this._themeProvider) {
+      this._themeProvider.themeChangedEvent.remove(
+        this,
+        this._handleThemeChanged
+      );
+    }
+
     Log.info(LOG_SOURCE, `Disposed ${strings.Title}`);
-    this._onDispose();
+    this._onPlaceholderDispose();
+    this._topPlaceholder = undefined;
   }
 }

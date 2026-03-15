@@ -25,7 +25,7 @@ export const AboutContent: React.FC = React.memo(() => {
     <div
       style={settingsPanelContentStyles}
       role="region"
-      aria-label="About Helvety SPO Explorer"
+      aria-label={UI_MESSAGES.ARIA_ABOUT_REGION}
     >
       <section
         style={settingsSectionStyles}
@@ -33,7 +33,7 @@ export const AboutContent: React.FC = React.memo(() => {
         aria-describedby="about-app-description"
       >
         <h3 id="about-app-header" style={settingsSectionHeaderStyles}>
-          Helvety SPO Explorer
+          {UI_MESSAGES.APP_NAME}
         </h3>
         <p id="about-app-description" style={settingsSectionDescriptionStyles}>
           {UI_MESSAGES.ABOUT_APP_DESCRIPTION}

@@ -74,7 +74,7 @@ export function getSiteItemBackgroundStyles(
   return {
     backgroundColor: isEven
       ? CSS_VARIABLES.BACKGROUND
-      : "rgba(128, 128, 128, 0.04)",
+      : "var(--helvety-sites-row-alt, var(--sp-color-neutralBackground2))",
   };
 }
 
@@ -113,7 +113,10 @@ export function getSiteItemHoverStyles(
   isHovered: boolean
 ): React.CSSProperties {
   return {
-    ...(isHovered && { backgroundColor: "rgba(128, 128, 128, 0.12)" }),
+    ...(isHovered && {
+      backgroundColor:
+        "var(--helvety-sites-row-hover, var(--sp-color-neutralBackground3))",
+    }),
     borderColor: isHovered ? CSS_VARIABLES.NEUTRAL_10 : CSS_VARIABLES.NEUTRAL_6,
     boxShadow: isHovered ? EFFECTS.BOX_SHADOW_HOVER : "none",
     transform: isHovered
